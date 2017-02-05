@@ -83,7 +83,8 @@ function pageloadCalls (){
                 delay: 800,
                 speed: 'fast',
                 animation: {opacity:'show', height:'show'},
-                autoArrows: false
+                autoArrows: false,
+                dropShadows: false /* Needed for IE */
             });
         }
         
