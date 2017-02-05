@@ -1,6 +1,6 @@
 {
-  "name": "bluemixnode",
-  "version": "0.0.2",
+  "name": "hukam-web",
+  "version": "0.0.1",
   "dependencies": {
     "angular": "~1.6.x",
     "angular-mocks": "latest",

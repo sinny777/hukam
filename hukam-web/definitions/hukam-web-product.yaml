@@ -1,13 +1,13 @@
 product: '1.0.0'
 
 info:
-  name: granslive-web
-  title: granslive-web
+  name: hukam-web
+  title: hukam-web
   version: 1.0.0
 
 apis:
-  'granslive-web':
-    $ref: granslive-web.yaml
+  'hukam-web':
+    $ref: hukam-web.yaml
 
 visibility:
   view:
