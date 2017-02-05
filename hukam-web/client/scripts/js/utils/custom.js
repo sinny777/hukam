@@ -81,7 +81,7 @@ function pageloadCalls (){
         
             $("#primary-menu ul, .sticky-menu-wrap ul, #top-menu ul").superfish({ 
                 delay: 800,
-                speed: 'fast',
+                speed: 300,
                 animation: {opacity:'show', height:'show'},
                 autoArrows: false,
                 dropShadows: false /* Needed for IE */
