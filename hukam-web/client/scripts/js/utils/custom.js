@@ -80,8 +80,8 @@ function pageloadCalls (){
         if ( $().superfish ) {
         
             $("#primary-menu ul, .sticky-menu-wrap ul, #top-menu ul").superfish({ 
-                delay: 250,
-                speed: 300,
+                delay: 800,
+                speed: 'fast',
                 animation: {opacity:'show', height:'show'},
                 autoArrows: false
             });
@@ -175,8 +175,6 @@ function pageloadCalls (){
         
         if ($(window).width() < 980) {
             $("#primary-menu > ul, #primary-menu > div > ul").hide();
-        }else{
-        	$("#primary-menu > ul, #primary-menu > div > ul").hide();
         }
         
         $(window).resize(function () {
@@ -187,8 +185,6 @@ function pageloadCalls (){
                  $('#primary-menu > ul, #primary-menu > div > ul').show();
              }
         });
-        
-        
         
         
         // Top Socials
