@@ -1071,6 +1071,7 @@ a.brand-logo {
 	top: 37px;
 	left: 0;
 	border-radius: 6px;
+	display: none
 }
 
 #primary-menu ul ul li,

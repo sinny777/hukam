@@ -187,6 +187,8 @@ function pageloadCalls (){
              }
         });
         
+        $("#primary-menu > ul > ul").hide();
+        
         
         // Top Socials
         
