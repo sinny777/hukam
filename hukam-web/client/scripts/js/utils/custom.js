@@ -80,11 +80,12 @@ function pageloadCalls (){
         if ( $().superfish ) {
         
             $("#primary-menu ul, .sticky-menu-wrap ul, #top-menu ul").superfish({ 
-                delay: 100,
-                speed: 400,
+                delay: 250,
+                speed: 300,
                 animation: {opacity:'show', height:'show'},
                 autoArrows: false
             });
+            console.log("PRIMARY MENU DONE >>>>>>>>> ");
         }
         
         

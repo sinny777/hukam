@@ -5,19 +5,19 @@ module.exports.get = function() {
 		return {
 			"gatewayId": "GG-000-000-001",
 			"CLOUD_CONFIG": {
-		      "org": "o6oosq",
-		      "id": "a-o6oosq-v9xbyockrk",
-		      "auth-key": "a-o6oosq-ugylh9r4ug",
-		      "auth-token": "Tun&)vjKlf6sJ_9BdK",
+		      "org": "rqeofj",
+		      "id": "a-rqeofj-i7nm1fdo5d",
+		      "auth-key": "a-rqeofj-i7nm1fdo5d",
+		      "auth-token": "3X0bTD*8tf4Q1rq12n",
 		      "type": "shared"
 		    },
 		    "SERVICES_CONFIG":{
 		    	"IOT_CONFIG":{
-		    		"org": "o6oosq",
-		    	     "id": "a-o6oosq-v9xbyockrk",
-		    	     "authkey": "a-o6oosq-ugylh9r4ug",
-		    	     "authtoken": "Tun&)vjKlf6sJ_9BdK",
-		    	     "type": "shared"
+		    		"org": "rqeofj",
+				    "id": "a-rqeofj-i7nm1fdo5d",
+				    "auth-key": "a-rqeofj-i7nm1fdo5d",
+				    "auth-token": "3X0bTD*8tf4Q1rq12n",
+				    "type": "shared"
 		    	},
 				"cloudantNOSQLDB":{
 					 "username": "acb0bba8-0370-47c4-8e49-5ad1b1050873-bluemix",
