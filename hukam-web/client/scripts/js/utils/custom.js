@@ -85,7 +85,6 @@ function pageloadCalls (){
                 animation: {opacity:'show', height:'show'},
                 autoArrows: false
             });
-            console.log("PRIMARY MENU DONE >>>>>>>>> ");
         }
         
         
@@ -176,6 +175,8 @@ function pageloadCalls (){
         
         if ($(window).width() < 980) {
             $("#primary-menu > ul, #primary-menu > div > ul").hide();
+        }else{
+        	$("#primary-menu > ul, #primary-menu > div > ul").hide();
         }
         
         $(window).resize(function () {
