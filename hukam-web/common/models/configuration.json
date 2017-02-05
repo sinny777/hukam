@@ -1,0 +1,22 @@
+{
+  "name": "Configuration",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "configurationType": {
+      "type": "string",
+      "required": false
+    },
+    "configuration": {
+      "type": "object",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

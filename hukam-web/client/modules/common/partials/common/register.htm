@@ -1,0 +1,33 @@
+
+<div id="content">
+
+	<div class="content-wrap">
+	
+	<br />
+	<div class="container clearfix">
+
+		<a href="#!/">Home</a> 
+		
+		<h2 class="center">
+			Register on Grans<span>LIVE</span>
+		</h2>
+
+	</div>
+
+		<div class="container clearfix">
+			<div id="contact-form-container">
+				<form id="registerForm" name="registerForm" method="post" class="quick-register-form nobottommargin">
+					<input type="text" class="required email input-block-level" data-ng-model="currentUser.emailId" placeholder="Email Address" /> 
+					<input type="password" class="required input-block-level"
+						 data-ng-model="currentUser.password" placeholder="Password" required />
+	                   <button class="btn btn-small btn-inverse nomargin" data-ng-click="register()" data-ng-disabled="!registerForm.$valid"  >Register</button>
+					
+					<span style="float:right;">Already have an account ? <a href="#loginModal" class="btn btn-success btn-small"> Click Here </a></span>
+				</form>	
+			</div>		
+		</div>
+
+	</div>
+
+</div>
+

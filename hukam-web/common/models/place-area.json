@@ -1,0 +1,90 @@
+{
+  "name": "PlaceArea",
+  "base": "PersistedModel",
+  "strict": false,
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "audit": {
+      "type": "object"
+    },
+    "description": {
+      "type": "string"
+    },
+    "devices": {
+      "type": "object",
+      "required": false
+    },
+    "floor": {
+      "type": "string",
+      "required": true,
+      "index": false
+    },
+    "placeId": {
+      "type": "string",
+      "required": true,
+      "index": false
+    },
+    "title": {
+      "type": "string",
+      "required": true,
+      "index": false
+    },
+    "type": {
+      "type": "string"
+    },
+    "sensors": {
+      "type": "any",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "upsert"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "addBoard"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    }
+  ],
+  "methods": {}
+}

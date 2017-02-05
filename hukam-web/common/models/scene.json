@@ -1,0 +1,52 @@
+{
+  "name": "Scene",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "areas": {
+      "type": "any",
+      "required": false
+    },
+    "audit": {
+      "type": "object",
+      "required": false
+    },
+    "description": {
+      "type": "string",
+      "required": false
+    },
+    "lastExecutedTime": {
+      "type": "date",
+      "required": false
+    },
+    "placeId": {
+      "type": "string",
+      "required": true
+    },
+    "settings": {
+      "type": "object",
+      "required": false
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "string",
+      "required": false,
+      "description": "TIME, TEMP, HUM, WATERLEVEL"
+    },
+    "status": {
+      "type": "string",
+      "required": false,
+      "description": "ACTIVE | INACTIVE | RUNNING"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

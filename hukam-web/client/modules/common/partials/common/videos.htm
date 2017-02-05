@@ -1,0 +1,336 @@
+<script type="text/javascript" src="//apis.google.com/js/plusone.js"></script>
+<!-- <script type="text/javascript" src="//apis.google.com/js/platform.js"></script> -->
+
+<div id="content" data-ng-if="endpointsReady" data-ng-init="setContent();">
+	
+	<div class="container clearfix">
+	
+		<div class="postcontent landing-offer-media nobottommargin" data-ng-if="videoData" itemscope itemtype="http://schema.org/Event">
+		
+<view-title>{{pageContent.title}}</view-title>
+<META view-head NAME="title"
+  CONTENT="videoData.title">
+<META view-head NAME="description"
+  CONTENT="videoData.description">  
+<meta view-head property="og:title" content="videoData.title" />
+<meta view-head property="og:description"
+  content="videoData.description" />
+<meta view-head property="og:site_name" content="http://www.granslive.com" />
+			
+			<div data-ng-if="videoData.status == 'upcoming'">
+				<h2>Start Time:  &nbsp;&nbsp; <time itemprop="startDate" datetime="{{videoData.startTime}}">{{videoData.startTime | date:'dd-MMM-yyyy hh:mm Z'}}</time></h2>
+				<meta itemprop="startDate" content="{{videoData.startTime | date:'yyyy-mm-ddThh:mm'}}" >
+			</div>
+			<div data-ng-if="videoData.sources != null && playerConfig">
+				<granslive-player id="granslivePlayer" video-data="videoData" player-config="playerConfig" player-sources="videoData.sources" ></granslive-player>
+			</div>
+			<br />
+			<ul class="entry_meta clearfix" >
+				<li>
+					<div data-addthis-toolbox class="addthis_sharing_toolbox" data-url="{{getLocation()}}" data-title="{{videoData.title}}" data-description="{{videoData.description}}" ></div>
+		      	</li>
+		      	<div class="fb-like" data-href="{{getLocation()}}" data-layout="standard" data-action="like" data-show-faces="false" data-share="false"></div>
+			</ul>
+			 
+			
+			<div class="clear clearfix"></div>
+		
+				<br />
+				<div id="eventInfoDiv">
+					<h2 itemprop="name" view-title ng-bind-html="videoData.title | unsafe"></h2>
+					<div style="margin-left: 0px; width: 400px" class="entry_c clearfix" data-ng-if="channelData">
+						<div class="entry_date">
+							<img alt="{{channelData.snippet.title}}" ng-src="{{channelData.snippet.thumbnails.default.url}}" width="50px">
+						</div>
+						
+						<div class="entry_title" style="padding-left: 75px;">
+							<h2 >{{channelData.snippet.title | truncate:200}}</h2>
+						</div>
+						
+						<ul class="entry_meta clearfix">
+							<li><a href="" data-ng-click="subscribeChannel()" >Subscribe </a>[{{channelData.statistics.subscriberCount}}]</li>
+						</ul>
+						
+						<div class="clear"></div>
+					</div>
+				</div>
+		
+				<ul id="ViewerTabs" class="nav nav-tabs">
+					<li class="active"><a href="javascript:void(0);" data-target="#gransliveComments" data-toggle="tab">Comments</a></li>
+					<li ><a href="javascript:void(0);" data-target="#searchTab" data-toggle="tab">Search</a></li>
+					<li><a href="javascript:void(0);" data-target="#aboutTab" data-toggle="tab">About</a></li>
+					
+					<li class="dropdown">
+                      <a href="" class="dropdown-toggle" data-toggle="dropdown">LIVE Services<b class="caret"></b></a>
+                      <ul class="dropdown-menu">
+                          <li data-ng-show="currentUser && currentUser.emailId == 'sinny777@gmail.com'"><a href="javascirpt:void(0);" data-target="#giftsTab" data-toggle="tab">Send Gifts</a></li>
+					       <li data-ng-show="videoData.status && videoData.status == 'live'"><a href="javascirpt:void(0);" data-target="#liveRequestTab" data-toggle="tab">LIVE Request</a></li>
+					       <li><a href="javascirpt:void(0);" data-target="#videoCallTab" data-toggle="tab">Video Call</a></li>
+					       <li><a href="javascirpt:void(0);" data-target="#albumsTab" data-ng-click="showAlbumPics()"  data-toggle="tab">Event Albums</a></li>
+					       <li class="divider"></li>
+					       <li><a href="javascirpt:void(0);" data-target="#feedbackTab" data-toggle="tab">Provide Feedback</a></li>
+                      </ul>
+                    </li>
+					
+				</ul>
+				<div id="myTabContent" class="tab-content">
+				
+					<div class="tab-pane fade in active" id="gransliveComments">
+						<dir-disqus disqus-shortname="GransLive"
+					         disqus-identifier="{{videoData.id}}"
+					         disqus-url="{{getLocation()}}"
+					         disqus-title="{{videoData.title}}">
+						</dir-disqus>
+                    </div>
+				
+					<div class="tab-pane fade" id="searchTab">
+							<br />
+							<div data-ng-if="endpointsReady" >
+								<display-media widget-id="searchWithVideo" current-user="currentUser" visible="true"
+								show-type="list" title="Latest Videos" media-search="searchParams" search-box="true" >
+								</display-media>
+							</div> 
+					</div>
+					
+					<div class="tab-pane fade" id="aboutTab">
+						
+						<br />
+						<div data-ng-if="videoData.statistics">
+							<div data-ng-if="videoData.statistics.viewCount > 0">
+								<strong>Total Views:</strong> {{videoData.statistics.viewCount}}<br />
+							</div>
+							
+							<div data-ng-if="videoData.statistics.viewCount == 0">
+								<strong>No Views</strong><br />
+							</div>
+							
+							<strong>Publish Date:</strong> {{videoData.publishedAt | date:'dd-MMM-yyyy hh:mm Z'}}
+						</div>
+						
+						<div data-ng-if="!videoData.statistics">
+							<strong>Publish Date:</strong> {{videoData.createdAt | date:'dd-MMM-yyyy hh:mm Z'}}
+						</div>
+						
+						<br />
+						
+						<p itemprop="description" ng-bind-html="videoData.description | unsafe"></p>
+					
+					</div>
+					
+					<div class="tab-pane fade" id="giftsTab" >
+						<!-- <iframe src="http://astore.amazon.com/gran00-20" width="100%" height="4000" frameborder="0" scrolling="no"></iframe> -->
+						<!--  <iframe src="http://www.amazon.in?_encoding=UTF8&tag=gran09-21" width="100%" height="4000" frameborder="0" scrolling="no"></iframe> -->
+						<!-- <gifts-widget id="amazonProducts"></gifts-widget> -->
+						
+					</div>
+					
+					<div class="tab-pane fade" id="liveRequestTab" >
+						<br />
+						<h2>Let us know your request, we'll try to complete. (Coming Soon)</h2>
+					</div>
+					
+					<div class="tab-pane fade" id="videoCallTab" >
+						<br />
+						<!-- <a href="" data-ng-click="makeVideoCall();" >Call Now (Coming Soon)</a> -->
+						<div class="g-hangout" data-render="createhangout"></div>
+					</div>
+					
+					<div class="tab-pane fade" id="albumsTab" data-ng-if="videoData" >
+                        
+                			<div class="postcontent nobottommargin clearfix">
+								<br />
+								<h2>Event Album</h2>
+								
+								<div data-ng-if="currentUser.id == videoData.userId || currentUser.emailId == 'sinny777@gmail.com'">
+									 <button class="btn btn-primary" pl-upload pl-prefix="channels/{{videoData.channelId}}/{{videoData.id}}/" pl-url="http://glcontents.s3.amazonaws.com:80" pl-max-file-size="10mb"
+									  	pl-progress-model="percent" pl-auto-upload="true" pl-files-model="files" on-file-uploaded="eventPhotosUploaded()">Upload Photos</button>
+									
+									<div class="progress progress-success progress-striped active" data-ng-hide="percent == 0 || percent == 100" >
+						               	<div class="bar" style="width: {{percent}}%"></div>
+						            </div>
+						            <table ng-show="files.length" class="table">
+										<th>#</th>
+										<th>Name</th>
+										<th>Size</th>
+										<th>Loaded</th>
+										<th>Percent Uploaded</th>
+										<th>Status</th>
+										<tr data-ng-repeat="file in files">
+											<td>{{file.id}}</td>
+											<td>{{file.name}}</td>
+											<td>{{file.size}}</td>
+											<td>{{file.loaded}}</td>
+											<td>{{file.percent}}</td>
+											<td>{{file.status}}</td>
+										</tr>
+									</table>
+								</div>
+								
+								<br />
+								
+								<div class="nobottommargin clearfix" data-ng-if="albumPics" >
+								
+									<!-- <ul id="portfolio-filter" class="clearfix">
+								
+										<li class="activeFilter"><a href="#" data-filter="*">All</a></li>
+										<li><a href="#" data-filter=".pf-icons">Photos</a></li>
+										<li><a href="#" data-filter=".pf-illustrations">Audio</a></li>
+										<li><a href="#" data-filter=".pf-uielements">Video</a></li>
+								
+									</ul> -->
+									
+									<ul class="pager nobottommargin">
+		                                <li class="previous">
+		                                    <a href="" data-ng-click="loadAlbumPhotos('previous')">&larr; Previous</a>
+		                                </li>
+		                                <li class="next">
+		                                    <a href="" data-ng-click="loadAlbumPhotos('next')">Next &rarr;</a>
+		                                </li>
+		                            </ul>
+		                            <br />
+								
+									<div id="portfolio" class="clearfix">
+									
+										<div class="portfolio-item pf-uielements"  data-ng-repeat="pic in albumPics.Contents">
+											<div class="portfolio-image">
+												<a data-toggle="modal" href="#photo{{pic.$$hashKey}}" rel="popover" data-placement="top" data-content="photo{{pic.$$hashKey}}" title="photo{{pic.$$hashKey}}"><img ng-src="http://glcontents.s3.amazonaws.com/{{pic.Key}}"
+													alt="" title="" /></a>
+												<div style="width: 85%; top: 20px; left: 20px; right: 20px; margin-left: 20px;"  id="photo{{pic.$$hashKey}}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="informationLabel" aria-hidden="true">
+								                    <div class="modal-header">
+								                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+								                      <h3 id="informationLabel">Event Photos</h3>
+								                    </div>
+								                    <div class="modal-body" style="width: 100%; height: 100%;">
+								                    	<img ng-src="http://glcontents.s3.amazonaws.com/{{pic.Key}}" width="700px"
+																alt="" title=" " />
+								                    </div>
+								                     	<div class="modal-footer">
+									                      <button class="btn" data-dismiss="modal">Close</button>
+									                    </div>
+								                 </div>
+								
+												<div class="portfolio-overlay">
+													<div class="portfolio-overlay-wrap">
+														<p></p>
+                                       					 <span><span></span></span>
+                                       					 <a data-toggle="modal" href="#photo{{pic.$$hashKey}}" rel="popover" data-placement="top" data-content="photo{{pic.$$hashKey}}"></a>
+													</div>
+								
+													<div class="p-overlay-icons clearfix">
+														<a data-toggle="modal" href="#photo{{pic.$$hashKey}}" rel="popover" data-placement="top" data-content="photo{{pic.$$hashKey}}" class="p-o-image"
+															data-lightbox="image"></a> <a href="http://glcontents.s3.amazonaws.com/{{pic.Key}}"
+															class="p-o-link"></a>
+													</div>
+												</div>
+								
+											</div>
+								
+											<div class="portfolio-title">
+								
+												<h3 title="">
+													<a href="http://glcontents.s3.amazonaws.com/{{pic.Key}}"></a>
+												</h3>
+								
+											</div>
+								
+										</div>
+						
+									</div>
+									
+								</div>
+								
+								<div class="nobottommargin clearfix" data-ng-hide="albumPics.Contents" >
+									<h3> There are no pics for this Event !</h3>
+								</div>
+						
+							</div>
+					</div>
+					
+					<div class="tab-pane fade" id="feedbackTab" >
+						<br />
+						
+						<h2>Provide Your Feedback</h2><br />
+						
+						<form class="nobottommargin" name="feedbackform" data-ng-controller="accountController">
+                              
+                              <div class="col_one_third nobottommargin col_last">
+                                  <label>Reason</label>
+                                  <select data-ng-model="feedback.reason" class="input-block-level">
+                                      <option value="feedback">Feedback</option>
+                                      <option value="enquiry">Enquiry</option>
+                                      <option value="complaint">Complaint</option>
+                                      <option value="information">Information</option>
+                                  </select>
+                              </div>
+                              
+                              <div class="clear"></div>
+                              
+                              <div class="col_full nobottommargin">
+                                  <label>Message <small>*</small></label>
+                                  <textarea class="required input-block-level" data-ng-model="feedback.text" required rows="10" cols="30"></textarea>
+                              </div>
+                              
+                              <div class="col_full nobottommargin">
+                                  <button class="btn" data-ng-click="sendFeedback()" data-ng-disabled="!feedbackform.$valid">Send Message</button>
+                              </div>
+                              
+                          </form>
+					</div>
+		
+				</div>
+		
+				<div class="dotted-divider"></div>
+		</div>
+		
+		<div class="sidebar nobottommargin clearfix" data-ng-if="videoData">
+                <div class="sidebar-widgets-wrap clearfix">
+					<div class="widget flickr-widget clearfix"  >
+						<span data-ng-if="videoData.status == 'upcoming'"><br /><br /></span>
+						<div class="clear clearfix"></div>
+						<div data-ng-include="'/../page/ads/eventAds.htm'"></div>
+						<div class="clear clearfix"></div>
+						
+						<!-- <div data-google-ad-sense></div><br /> -->
+						<div class="widget widget_links clearfix">
+							<h4 class="widget-title"><span>Are You Interested In</span></h4>
+							<ul class='xoxo blogroll'>
+						        <li><a href="/#!/services/internetOfThings">Home Automation (IoT)</a></li>
+								<li><a href="/#!/services/eventmanagement">Event Management</a></li>
+						        <li><a href="/#!/services/livestreaming">Live Streaming</a></li>
+						       	<li><a href="/#!/services/radio">Radio Outsourcing</a></li>
+								<li><a href="/#!/services/applicationdevelopment">Application Development</a></li>
+							</ul>
+
+						</div>
+						
+						<div class="clear clearfix" ></div>
+							
+							<br /><br /><br /><br />
+							
+							<!-- <iframe src='http://www.flipkart.com/affiliate/displayWidget?affrid=WRID-143418723478725814' frameborder=0 	width="100%" height="270px"></iframe> -->
+							
+							<div data-ng-if="fbReady" >
+								<fb-like-box></fb-like-box>
+							</div>
+					</div>
+				</div>
+		</div>
+		
+		<div class="postcontent nobottommargin">
+		
+			<div data-ng-hide="videoData">
+				<view-title>Search results {{searchTerm}}</view-title>
+				
+				<div data-ng-if="endpointsReady" >
+					<display-media widget-id="topsearchEventsWidget" current-user="currentUser" visible="false"
+					show-type="list" title="" media-search="searchParams" search-box="false" >
+					</display-media>
+				</div>
+				
+			</div>
+	
+		</div>
+		
+	</div>
+
+</div>

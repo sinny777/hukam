@@ -1,0 +1,7 @@
+applications:
+- services:
+  - granslive-cloudantDB
+  name: granslive-web
+  command: node .
+  path: .
+  memory: 512M

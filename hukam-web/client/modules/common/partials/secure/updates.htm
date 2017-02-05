@@ -1,0 +1,20 @@
+<div id="content" data-ng-init="setContent()">
+
+	<div class="container clearfix">
+		<div class="clear"></div>
+		<br />
+
+		<h2 class="center">
+			{{currentUser.nickname}} Updates
+		</h2>
+		
+		<dir-disqus disqus-shortname="GransLive"
+	         disqus-identifier="{{currentUser.id}}"
+	         disqus-url="{{getLocation()}}"
+	         disqus-title="{{currentUser.nickname}}">
+		</dir-disqus>
+
+	</div>
+
+</div>
+

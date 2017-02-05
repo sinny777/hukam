@@ -1,0 +1,110 @@
+{
+  "name": "Board",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "audit": {
+      "type": "object"
+    },
+    "description": {
+      "type": "string",
+      "required": false
+    },
+    "devices": {
+      "type": "object",
+      "required": false
+    },
+    "gatewayId": {
+      "type": "string",
+      "required": false
+    },
+    "mfgDate": {
+      "type": "date",
+      "required": false
+    },
+    "owner": {
+      "type": "object",
+      "required": false
+    },
+    "status": {
+      "type": "string",
+      "required": false,
+      "index": false
+    },
+    "subType": {
+      "type": "string",
+      "required": false
+    },
+    "title": {
+      "type": "string",
+      "required": false
+    },
+    "type": {
+      "type": "string",
+      "required": false
+    },
+    "uniqueIdentifier": {
+      "type": "string",
+      "required": true,
+      "index": false
+    },
+    "connectedToType": {
+      "type": "string",
+      "required": false
+    },
+    "connectedToId": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "upsert"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "deviceChangeTrigger"
+    }
+  ],
+  "methods": {}
+}

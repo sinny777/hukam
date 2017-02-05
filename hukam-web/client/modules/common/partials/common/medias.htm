@@ -1,0 +1,135 @@
+<div data-ng-show="media.visible">
+
+	<div class="col_full nobottommargin" data-ng-if="media.showType=='overlay' && media.videos.length > 0">
+
+		<h3 data-ng-show="media.videos.length > 0">{{media.title}}</h3>
+		<h2 data-ng-hide="media.videos.length > 0">There are no {{media.title}}</h2>
+		
+		<div id="{{widgetId}}" class="scroll-portfolio clearfix">
+
+			<div class="portfolio-item pf-media pf-illustrations"
+				data-ng-repeat="video in media.videos">
+				
+					<div class="portfolio-image">
+	
+						<a data-ng-if="video.id != '3f3e96e1-6dd4-4c25-b766-528ee5e499fb'" href="/#!/videos/{{video.id}}">
+							<img ng-src="{{video.imagePath}}"
+							err-src="/../images/granslive-logo.png"
+							loading-src="/../images/granslive-logo.png"
+							alt="{{video.description | truncate:150}}"
+							title="{{video.title | truncate:50}}" /> </a>
+						<a data-ng-if="video.id == '3f3e96e1-6dd4-4c25-b766-528ee5e499fb'" href="/#!/live/india_vision_foundation">
+							<img ng-src="{{video.imagePath}}"
+							err-src="/../images/granslive-logo.png"
+							loading-src="/../images/granslive-logo.png"
+							alt="{{video.description | truncate:150}}"
+							title="{{video.title | truncate:50}}" /> </a>
+	
+						<div class="portfolio-overlay">
+	
+							<div class="portfolio-overlay-wrap">
+	
+								<p ng-bind-html="video.description | truncate:150"></p>
+	
+								<span><span></span></span> <a href="javascript:void(0);">{{video.createdAt
+									| date:'dd, MMM'}}</a>
+	
+							</div>
+	
+							<div class="p-overlay-icons clearfix">
+								<a data-ng-if="video.id != '3f3e96e1-6dd4-4c25-b766-528ee5e499fb'" href="/#!/videos/{{video.id}}" class="p-o-video"
+									rel="#!/prettyPhoto"></a>
+								<a data-ng-if="video.id == '3f3e96e1-6dd4-4c25-b766-528ee5e499fb'" href="/#!/live/india_vision_foundation" class="p-o-video"
+									rel="#!/prettyPhoto"></a>
+							</div>
+	
+						</div>
+	
+					</div>
+	
+					<div class="portfolio-title">
+						<a data-ng-if="video.id != '3f3e96e1-6dd4-4c25-b766-528ee5e499fb'" href="/#!/videos/{{video.id}}" >{{video.title | truncate:50}}</a>
+						<a data-ng-if="video.id == '3f3e96e1-6dd4-4c25-b766-528ee5e499fb'" href="/#!/live/india_vision_foundation" >{{video.title | truncate:50}}</a>
+					</div>
+			</div>
+			
+		</div>
+		
+		<div id="{{widgetId}}-prev" class="widget-scroll-prev"></div>
+		<div id="{{widgetId}}-next" class="widget-scroll-next"></div>
+			
+		<div class="dotted-divider"></div>
+
+	</div>
+
+	<div id="{{widgetId}}" data-ng-show="media.showType=='list'">
+	
+		<div class="box" data-ng-if="media.searchBox">
+		    <input type="text" id="searchBoxText" data-ng-keydown="searchEntered($event);" placeholder="{{'INTERESTED_IN'|i18n}}">
+		</div>
+
+		<h3 data-ng-show="media.videos.length > 0">{{media.title}}</h3>
+		<h2 data-ng-hide="media.videos.length > 0">There are no {{media.title}}</h2>
+
+	<div class="nobottommargin clearfix">
+		<div id="posts" class="small-posts">
+
+					<div class="entry clearfix" data-ng-repeat="videoResult in media.videos">
+
+						<div class="entry_image">
+
+							<a href="/#!/videos/{{videoResult.id}}"	class="image_fade"><img
+								ng-src="{{videoResult.imagePath || 'http://www.granslive.com/images/granslive-logo.png'}}"
+								err-src="http://www.granslive.com/images/granslive-logo.png"
+								title="{{videoResult.title}}" alt="{{videoResult.title}}" /></a>
+							<div class="post-overlay fa fa-camera"></div>
+
+						</div>
+
+						<div class="entry_c">
+							<div id="{{videoResult.id}}_videoDetailsDiv">
+								<div class="entry_date">
+									<div class="day">{{videoResult.createdAt | date:'dd'}}</div>
+									<div class="month">{{videoResult.createdAt |
+										date:'MMM'}}</div>
+								</div>
+
+								<div class="entry_title">
+									<h2>
+										<a href="/#!/videos/{{videoResult.id}}" >{{videoResult.title
+											| truncate:100}}</a>
+									</h2>
+								</div>
+								<ul class="entry_meta clearfix" data-ng-if="videoResult.createdBy">
+									<li data-ng-show="videoResult.createdBy == currentUser.id"><a href="/#!/event/modify/{{videoResult.id}}">
+									<i class="icon-pencil"></i>Modify</a></li>
+								</ul>
+
+								<div class="clear"></div>
+								<span class="page-divider"><span></span></span>
+								<div class="entry_content">
+									<p ng-bind-html="videoResult.description | truncate:150"></p>
+								</div>
+							</div>
+
+							<div id="{{videoResult.id}}_playListDiv" style="display: none;">
+								<a href="javascript:void(0);"
+									data-ng-click="hideListDiv($event.target, videoResult.id)">Back</a>
+								<span>Video added to current playlist</span>
+							</div>
+						</div>
+					</div>
+			</div>
+			
+			<ul class="pager nobottommargin" data-ng-show="media.videos.length > 25">
+				<li class="previous disabled"><a href="javascript:void(0);">&larr;
+						Previous</a></li>
+				<li class="next"><a href="javascript:void(0);">Next &rarr;</a>
+				</li>
+			</ul>
+
+		</div>
+
+	</div>
+
+</div>

@@ -1,0 +1,54 @@
+<div >
+
+	<div class="col_full" data-ng-show="events"  >
+
+		<h3>
+			{{heading}}
+		</h3>
+
+		<div id="{{widgetId}}" class="scroll-portfolio clearfix">
+
+			<div class="portfolio-item pf-media pf-illustrations"
+				data-ng-repeat="event in events | filter ">
+
+				<div class="portfolio-image">
+
+					<a href="/#!/event/{{event.id}}"><img
+						data-ng-src="{{event.imagePath}}" alt="{{event.title | truncate:30}}"
+						title="{{event.title | truncate:30}}" /> </a>
+
+					<div class="portfolio-overlay">
+
+						<div class="portfolio-overlay-wrap">
+
+							<p ng-bind-html-unsafe="event.description"></p>
+
+							<span><span></span></span> <a href="/#!/event/{{event.id}}">{{event.title | truncate:30}}</a>
+
+						</div>
+
+						<div class="p-overlay-icons clearfix">
+							<a href="/#!/event/{{event.id}}" class="p-o-video"
+								rel="/#!/prettyPhoto"></a>
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="portfolio-title">
+
+						<a href="/#!/event/{{event.id}}">{{event.title | truncate:30}}</a>
+
+				</div>
+
+			</div>
+
+		</div>
+
+		<div id="{{widgetId}}-prev" class="widget-scroll-prev"></div>
+		<div id="{{widgetId}}-next" class="widget-scroll-next"></div>
+
+	</div>
+
+</div>
