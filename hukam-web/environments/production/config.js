@@ -10,17 +10,12 @@ define(['angular'], function (angular) {
 		.constant('CONFIG', {
 			VERSION: '0.1',
 			ENVIRONMENT: 'PRODUCTION',
-			API_URL: '//granslive-web.mybluemix.net/api',
+			API_URL: '//hukam-dev.mybluemix.net/api',
 			IOT_CONFIG:{
 				"org": "o6oosq",
 			     "id": "a-o6oosq-v9xbyockrk",
 			     "auth_key": "a-o6oosq-ugylh9r4ug",
 			     "auth_token": "Tun&)vjKlf6sJ_9BdK"
-			},
-			MQTT: {
-				MQTT_BROKER: '52.76.33.2',
-				PORT: 9001,
-				TOPIC_PREFIX: 'granslive/iot/'
 			}
 		});
     

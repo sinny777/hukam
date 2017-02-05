@@ -16,11 +16,6 @@ define(['angular'], function (angular) {
 			     "id": "a-o6oosq-v9xbyockrk",
 			     "auth_key": "a-o6oosq-ugylh9r4ug",
 			     "auth_token": "Tun&)vjKlf6sJ_9BdK"
-			},
-			MQTT: {
-				MQTT_BROKER: '52.76.33.2',
-				PORT: 9001,
-				TOPIC_PREFIX: 'granslive/iot/'
 			}
 		});
     

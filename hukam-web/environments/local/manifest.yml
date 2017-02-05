@@ -1,7 +1,8 @@
 applications:
 - services:
-  - granslive-cloudantDB
-  name: granslive-web
+  - hukam-cloudant-dev
+  - hukam-iot-dev
+  name: hukam-dev
   command: node .
   path: .
   memory: 512M
