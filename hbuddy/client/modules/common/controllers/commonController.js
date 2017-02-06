@@ -11,7 +11,7 @@ define(function () {
 	  	$rootScope.loginCredentials = {};
 	  	$rootScope.googleAPILoaded = false;
 		$rootScope.showRadio = false;
-		$rootScope.showNavBar = true;
+		$rootScope.showNavBar = false;
 		$rootScope.messages = [];
 //		$rootScope.videoData = null;
 //		$rootScope.videoId = null;

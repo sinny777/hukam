@@ -30,6 +30,7 @@ define([
 	'../modules/common/googleAPIsModule',
 	'../modules/common/socialModule',
 	'../modules/common/gransLiveAPIs',
+	'../modules/common/directives/commonDirectives',
 	'../modules/common/commonModule',
 	'../modules/iot/iotModule',
 	'../modules/watson/watsonModule'
@@ -54,6 +55,7 @@ define([
         'googleAPIModule',
         'socialModule',
         'gransLiveAPIs',
+        'commonDirectives',
         'commonModule',
         'iotModule',
         'watsonModule'

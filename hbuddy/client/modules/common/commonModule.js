@@ -55,8 +55,8 @@ define(function (require) {
 		*/
     	
 		$routeProvider.
-		  when('/', {templateUrl: 'modules/common/partials/common/home.htm', controller: 'commonController'}).
-		  when('/home', {templateUrl: 'modules/common/partials/common/home.htm', controller: 'commonController'}).
+		  when('/', {templateUrl: 'modules/common/partials/common/hbuddy.htm', controller: 'commonController'}).
+		  when('/home', {templateUrl: 'modules/common/partials/common/hbuddy.htm', controller: 'commonController'}).
 		  when('/contact', {templateUrl: 'modules/common/partials/common/contactUs.htm'}).
 		  when('/services/internetOfThings', {templateUrl: 'modules/common/partials/services/internetOfThings.htm', controller: 'servicesController'}).
 		  when('/services/applicationdevelopment', {templateUrl: 'modules/common/partials/services/applicationdevelopment.htm'}).

@@ -144,7 +144,6 @@ define(['angular'], function (angular) {
 		        
 		        $(activeTab).fadeIn(600,function(){
 		            if( $selectTab.parent().parent().hasClass("side-tabs") ) {
-		            	console.log("Tab Clicked 2: >>> ", tabid, ", activeTab: ", activeTab);
 		                if( $(window).width() < 768 ) { 
 		                	if( $().scrollTo ) { 
 		                		jQuery.scrollTo( activeTab , 400, {offset:-20} ); 

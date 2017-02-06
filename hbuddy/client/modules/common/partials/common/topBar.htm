@@ -9,17 +9,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 
 <div id="fb-root"></div>
-<!-- <script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.3&appId=676775262334675";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script> -->
 
 <div id="top-bar" class="top-bar2" >
 
 	    <div id="top-menus">
+	    
 	        <ul class="nav">
 	        
 	          <!-- <li>
@@ -35,6 +29,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		        	  <i></i>Login
 		          </a>
 	           </li> -->
+	           
+	           <li>
+	           		<div style="float:right;margin-top:15px">
+					      <div data-addthis-toolbox data-url="http://hbuddy.hukam.in" id="hbuddy" 
+					            class="addthis_toolbox addthis_default_style addthis_16x16_style">
+					        <a class="addthis_button_facebook"></a>
+					        <a class="addthis_button_twitter"></a>
+					        <a class="addthis_button_linkedin"></a>
+					        <a class="addthis_button_google_plusone_share"></a>
+					        <a class="addthis_button_email"></a>
+					      </div>
+				      </div> 
+	           </li>
 	           
 	           <li class="dropdown top-menu-em" data-ng-if="!currentUser.id">
 		          <a href="#" data-toggle="modal" data-target="#loginModal" ><b>Login</b></a>
@@ -74,7 +81,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		        <input type="text" class="search-query span2" data-ng-model="searchTerm"  placeholder="Search Here ... " />
 		      </form>
 		    </div> 
-		    
 		    
 		    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
 	           <div class="modal-dialog">
