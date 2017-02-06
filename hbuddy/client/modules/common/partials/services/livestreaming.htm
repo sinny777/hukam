@@ -1,0 +1,152 @@
+
+<br />
+
+<div id="content" data-ng-init="setLiveStreamingPage()">
+
+<view-title>{{pageContent.title}}</view-title>
+<META view-head NAME="description"
+  CONTENT="{{pageContent.pageDescription}}">
+<meta view-head property="og:title" content="{{pageContent.pageTitle}}" />
+<meta view-head property="og:description"
+  content="{{pageContent.pageDescription}}" />
+<meta view-head property="og:site_name" content="http://www.granslive.com" />
+
+	<div class="container clearfix">
+				
+        <h2 class="center" view-title >
+			4D Live Streaming
+		</h2>
+		
+		<div class="clear"></div>
+		<br />
+		
+			<div class="col_two_fifth">
+            	<img data-ng-src="//glcontents.s3.amazonaws.com/static/images/public/services/photography.jpg" width="400px" alt="Catering Service"  />
+            </div>
+            <div class="col_three_fifth col_last">
+				<p >		
+					Live streaming allows you to listen to music or watch videos live and online. 
+					 Streaming means listening to music or watching video in real time.  
+					 But in <strong>Hukam</strong> we have added some marvelous services which
+					  are not only new to the world but also Discovered by <strong>Hukam</strong>,
+					 which can fill your life with enthusiasm with new zeal and zest.<br><br>
+				
+					The future of online experiences is here today with the ability to stream 
+					webcast your live events to viewers anywhere in the world. You can take your 
+					business to new heights and dimensions by instantly connecting with millions 
+					of people across the world in Live and real time environment. More and more broadcasters, 
+					sports organizations, movie studios, educational institutions, and corporations
+					 are reaping the rich rewards by offering live event webcast on the Internet. 
+					 A huge market is exploding on the Internet. Be ready to reap its enormous benefits. 
+					 Live Webcast your product launches, conferences, seminars and events on the web
+					 and also on leading mobile devices and reach a wide base of audience world-wide. <br><br>
+				</p>
+			</div>
+                          
+		<br />
+		
+		<div class="clear"></div>
+		<br />
+		
+			<div class="col_one_third">
+				<div class="product-feature">
+					<span class="fa fa-video-camera"></span> <a href="#!/services/livestreaming"><h3>4D
+							LIVE Streaming / Webcasting</h3></a>
+					<p>The future of online experiences is here today with the
+						ability to stream / webcast your live events to viewers anywhere
+						in the world.</p>
+				</div>
+			</div>
+
+			<div class="col_one_third">
+				<div class="product-feature">
+					<span class="fa fa-cogs"></span> <a href="#!/services/livestreaming"><h3>Ample
+							Customizations</h3></a>
+					<p>Customize your LIVE events as per your need. Broadcast on
+						Hukam or on your website and control your visibility.</p>
+				</div>
+			</div>
+
+			<div class="col_one_third col_last">
+				<div class="product-feature">
+					<span class="fa fa-copy"></span> <a href="#!/services/livestreaming"><h3>Multi-Device
+							Support</h3></a>
+					<p>We built the Hukam platform to deliver beyond the
+						desktop to smartphones, tablets and connected TVs.</p>
+				</div>
+			</div>
+
+			<div class="clear"></div>
+
+			<div class="col_one_third">
+				<div class="product-feature">
+					<span class="fa fa-briefcase"></span> <a href="#!/liveServices"><h3>LIVE
+							Services</h3></a>
+					<p>LIVE services like LIVE DJ Request, Send or receive gifts
+						while LIVE event, Video call or Video conferencing, online photo
+						and video albums and much more.</p>
+				</div>
+			</div>
+
+			<div class="col_one_third">
+				<div class="product-feature">
+					<span class="fa fa-group"></span> <a href="#!/services/livestreaming"><h3>Sharing
+							Capabilities</h3></a>
+					<p>You can share your memorable LIVE events to your friends and
+						family anywhere in the world. Sharing is possible on social
+						networking sites like Facebook and Google Plus.</p>
+				</div>
+			</div>
+
+			<div class="col_one_third col_last">
+				<div class="product-feature">
+					<span class="fa fa-phone"></span> <a href="#!/contact"><h3>Dedicated
+							Support</h3></a>
+					<p>If you have any queries, you can call us or send an email.
+						We are there for you 24 X 7 to resolve your queries or to listen
+						to your feedbacks.</p>
+				</div>
+			</div>
+			
+        <div class="clear"></div>
+        
+        <div class="clear"></div>
+
+		<div data-ng-controller="accountController" data-ng-init="showAllEvents()">
+			
+				<div data-ng-if="endpointsReady">
+					<display-media widget-id="popularEventsWidget"
+						current-user="currentUser" visible="false" show-type="overlay"
+						title="Popular Videos" media-search="popularEventsSearch"
+						search-box="false"> </display-media>
+				</div>
+				
+				<div data-ng-if="endpointsReady">
+					<display-media widget-id="myLiveEventsWidget"
+						current-user="currentUser" visible="false" show-type="overlay"
+						title="LIVE Events" media-search="liveEventsSearch"
+						search-box="false"> </display-media>
+				</div>
+				
+				<!-- <div data-ng-if="endpointsReady">
+					<display-media widget-id="myCompletedEventsWidget"
+						current-user="currentUser" visible="false" show-type="overlay"
+						title="Completed Events" media-search="completedEventsSearch"
+						search-box="false"> </display-media>
+				</div> -->
+			
+				<div data-ng-if="endpointsReady">
+					<display-media widget-id="myUpcomingEventsWidget"
+						current-user="currentUser" visible="false" show-type="overlay"
+						title="Upcomming Live Events"
+						media-search="upcomingEventsSearch" search-box="false">
+					</display-media>
+				</div>
+				
+			
+			</div> 
+		
+	</div>
+
+</div>
+

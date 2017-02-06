@@ -1,0 +1,13 @@
+<div class="container clearfix">
+
+<view-title>Live Events </view-title>
+
+	<div class="clear"></div>
+	<br />
+
+	<div data-ng-if="googleAPILoaded">
+		<show-media widget-id="liveEventsPage" user-id="{{currentUser.id}}"
+			region="IN" media-type="video" show-type="list" event-type="live"
+			title="Live Events" search-box="false" search-str=""> </show-media>
+	</div>
+</div>

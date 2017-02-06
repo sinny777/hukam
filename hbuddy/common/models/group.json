@@ -1,0 +1,52 @@
+{
+  "name": "Group",
+  "plural": "Groups",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "audit": {
+      "type": "object"
+    },
+    "description": {
+      "type": "string",
+      "required": false,
+      "description": "Group Description"
+    },
+    "members": {
+      "type": "object",
+      "required": false
+    },
+    "ownerId": {
+      "type": "string",
+      "required": true
+    },
+    "placeId": {
+      "type": "string",
+      "required": true,
+      "index": false
+    },
+    "title": {
+      "type": "string",
+      "required": false,
+      "description": "Group Title"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "owner": {
+      "type": "belongsTo",
+      "model": "MyUser",
+      "foreignKey": "ownerId"
+    },
+    "place": {
+      "type": "belongsTo",
+      "model": "Place",
+      "foreignKey": "placeId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

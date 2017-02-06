@@ -1,0 +1,96 @@
+{
+  "_meta": {
+    "sources": [
+      "loopback/common/models",
+      "loopback-component-passport/lib/models",
+      "../common/models",
+      "./models"
+    ],
+    "mixins": [
+      "loopback/common/mixins",
+      "loopback/server/mixins",
+      "../common/mixins",
+      "./mixins"
+    ]
+  },
+  "User": {
+    "dataSource": "db",
+    "public": false
+  },
+  "userCredential": {
+    "dataSource": "db",
+    "public": true
+  },
+  "userIdentity": {
+    "dataSource": "db",
+    "public": true
+  },
+  "ApplicationCredential": {
+    "dataSource": "db",
+    "public": false
+  },
+  "AccessToken": {
+    "dataSource": "db",
+    "public": true
+  },
+  "ACL": {
+    "dataSource": "access",
+    "public": true
+  },
+  "RoleMapping": {
+    "dataSource": "roles",
+    "public": true
+  },
+  "Role": {
+    "dataSource": "roles",
+    "public": true
+  },
+  "MyUser": {
+    "dataSource": "accounts",
+    "public": true
+  },
+  "Place": {
+    "dataSource": "places",
+    "public": true,
+    "$promise": {},
+    "$resolved": true
+  },
+  "PlaceArea": {
+    "dataSource": "placeareas",
+    "public": true,
+    "$promise": {},
+    "$resolved": true
+  },
+  "Board": {
+    "dataSource": "boards",
+    "public": true
+  },
+  "Group": {
+    "dataSource": "groups",
+    "public": true
+  },
+  "Configuration": {
+    "dataSource": "configurations",
+    "public": true
+  },
+  "Scene": {
+    "dataSource": "scenes",
+    "public": true
+  },
+  "UserSetting": {
+    "dataSource": "usersettings",
+    "public": true
+  },
+  "Notification": {
+    "dataSource": "notifications",
+    "public": true
+  },
+  "Conversation": {
+    "dataSource": "db",
+    "public": true
+  },
+  "Device": {
+    "dataSource": "devices",
+    "public": true
+  }
+}

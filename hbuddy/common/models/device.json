@@ -1,0 +1,50 @@
+{
+  "name": "Device",
+  "plural": "Devices",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "deviceId": {
+      "type": "string",
+      "required": true,
+      "index": true,
+      "description": "Unique Identification for IoT platform"
+    },
+    "deviceInfo": {
+      "type": "object",
+      "required": false
+    },
+    "location": {
+      "type": "object",
+      "required": false
+    },
+    "metadata": {
+      "type": "object",
+      "required": false
+    },
+    "registration": {
+      "type": "object",
+      "required": false
+    },
+    "status": {
+      "type": "object",
+      "required": false
+    },
+    "clientId": {
+      "type": "string",
+      "required": false
+    },
+    "typeId": {
+      "type": "string",
+      "required": true,
+      "index": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

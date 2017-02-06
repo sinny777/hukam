@@ -1,0 +1,22 @@
+{
+  "initial:before": {
+	  "loopback#favicon": {
+	    	"params": "$!../client/favicon.ico"
+	    }
+  },
+  "files": {
+    "loopback#static": {
+      "params": "$!../client"
+    }
+  },
+  "final": {
+    "loopback#urlNotFound": {}
+  },
+  "final:after": {
+    "loopback#errorHandler": {
+    	"params": {
+            "includeStack": false
+          }
+    }
+  }
+}

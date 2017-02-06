@@ -1,0 +1,63 @@
+<div id="playlistDiv" data-ng-show="showPlaylists">
+	<div class="container clearfix" data-ng-show="currentUser.playlists" >
+
+		<h3 style="background: #eee;">
+			My Playlists
+			<a href="javascript:void(0);" data-ng-click="toggleMyPlaylists();" style="float:right;margin-right:55px;"><i class="icon-remove"></i></a>
+		</h3>
+
+		<div id="myPlaylists" class="scroll-portfolio clearfix" >
+
+			<div class="portfolio-item pf-media pf-illustrations"
+				data-ng-repeat="playlist in currentUser.playlists">
+
+				<div class="portfolio-image">
+
+					<a href="/#!/playlists/{{playlist.id}}" ><img
+						data-ng-src="{{playlist.thumbnailUrl}}" alt="{{playlist.title | truncate:50}}"
+						title="{{playlist.title | truncate:50}}" /> </a>
+
+					<div class="portfolio-overlay">
+
+						<div class="portfolio-overlay-wrap">
+
+							<p ng-bind-html-unsafe="playlist.description | truncate:150"></p>
+
+							<span><span></span></span> <a href="javascript:void(0);" data-ng-click="removeFromList($index, playlist.type);">remove</a>
+
+						</div>
+
+						<div class="p-overlay-icons clearfix">
+							<a href="/#!/playlists/{{playlist.id}}" class="p-o-video"
+								rel="#!/prettyPhoto"></a>
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="portfolio-title">
+					 <a href="/#!/playlists/{{playlist.id}}" >{{playlist.title | truncate:50}}</a>
+				</div>
+
+			</div>
+
+		</div>
+
+		<div id="myPlaylists-prev" class="widget-scroll-prev"></div>
+		<div id="myPlaylists-next" class="widget-scroll-next"></div>
+
+	<div class="dotted-divider"></div>
+
+	</div>
+	
+	<div class="container clearfix" data-ng-hide="currentUser.playlists">
+		
+		<h2> 
+			No Playlists Found
+			<a href="javascript:void(0);" data-ng-click="toggleMyPlaylists();" style="float:right;margin-right:55px;"><i class="icon-remove"></i></a>		
+		</h2>
+	
+	</div>
+	
+</div>

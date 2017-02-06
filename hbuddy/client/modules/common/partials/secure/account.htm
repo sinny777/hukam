@@ -1,0 +1,258 @@
+<div id="content" data-ng-if="endpointsReady && currentUser.id">
+
+		<div class="container clearfix" data-ng-init="accountPage()">
+		
+			 <div class="clear"></div>
+          
+          <div class="topmargin nobottommargin">
+                    
+                  <div class="tab_widget side-tabs clearfix nobottommargin" id="accountSettingsTabs" data-ng-init="handleTabWidgets('accountSettingsTabs')">
+                  
+                      <ul class="tabs">
+                          <li><a href="#profileSettingsTab" data-href="#profileSettingsTab"><i class="fa fa-gears"></i> Profile Settings</a></li>
+                          <li><a href="#channelEventsTab" data-href="#channelEventsTab"><i class="fa fa-pencil"></i> Channel &amp; Events</a></li>
+                          <li><a href="#albumsTab" data-href="#albumsTab"><i class="fa fa-picture-o"></i> Albums</a></li>
+                      </ul>
+                      
+                      <div class="tab_container">
+                      	
+                      	<div id="profileSettingsTab" class="tab_content clearfix">
+                      		<ul id="profileTabs" class="nav nav-tabs">
+					          <li class="active"><a href="javascirpt:void(0);" data-target="#basicDetails" data-toggle="tab">Basic Details</a></li>
+					          <li><a href="javascirpt:void(0);" data-target="#contactDetails" data-ng-click="getContactDetails()" data-toggle="tab">Contact Details</a></li>
+					        </ul>
+                      		<div id="profileTabsContent" class="tab-content">
+						    	<div class="tab-pane fade in active" id="basicDetails">
+						    	<br />
+									<form class="nobottommargin" id="profileform" name="profileform" novalidate>
+									
+										<div class="col_full nobottommargin">
+										
+											<input type="hidden" data-ng-model="currentUser.imagePath" />
+											<div class="avatar">
+												<a href="#"><img data-ng-src="{{currentUser.imagePath}}" width="85px" /></a>
+											 	<br />
+											 	<button class="btn btn-primary" pl-upload pl-prefix="users/{{currentUser.id}}/profile/" pl-url="http://glcontents.s3.amazonaws.com:80" pl-max-file-size="10mb"
+											  	pl-progress-model="percent" pl-auto-upload="true" pl-files-model="files" on-file-uploaded="photoUploaded()">Update Photo</button>
+											</div>
+											
+											<div class="progress progress-success progress-striped active" data-ng-hide="percent == 0 || percent == 100" >
+								               	<div class="bar" style="width: {{percent}}%"></div>
+								             </div>
+											
+										</div>
+										
+										<br />
+										
+										<div class="col_one_third nobottommargin col_last" data-ng-if="roles">
+											<label>Role <small>*</small></label> 
+											<select data-ng-model="selectedRole" class="required input-block-level" required data-ng-options="role as role.title for role in roles">
+												<option value="">-- Select Role --</option>
+											</select>
+										</div>
+			
+										<div class="clearfix"></div>
+										<div class="clear"></div>
+										
+										<div class="col_one_third nobottommargin">
+											<label>First Name<small>*</small></label> <input type="text" data-ng-model="currentUser.firstName" class="required input-block-level" required />
+										</div>
+										<div class="col_one_third nobottommargin">
+											<label>Middle Name</label> <input type="text" data-ng-model="currentUser.middleName" class="input-block-level" />
+										</div>
+										<div class="col_one_third nobottommargin col_last">
+											<label>Last Name</label> <input type="text" data-ng-model="currentUser.lastName" class="input-block-level" />
+										</div>
+										<div class="clear"></div>
+										
+										<div class="col_one_third nobottommargin">
+											<label>Email Id</label> <input type="email" data-ng-model="currentUser.emailId" class="email input-block-level" required />
+										</div>
+										
+										<div class="col_one_third nobottommargin">
+									         <label for="endTime" class="control-label">Date Of Birth <small>*</small></label>
+										  	 <div class="form-horizontal">
+									          	<date-picker ng-model="currentUser.dateOfBirth" ></date-picker>
+									         </div>
+									      </div>
+										
+										<div class="col_one_third nobottommargin col_last">
+											<label for="gender">Gender <small>*</small></label> <select data-ng-model="currentUser.gender" class="required input-block-level" required>
+												<option value="male">Male</option>
+												<option value="female">female</option>
+												<option value="other">Other</option>
+											</select>
+										</div>
+										
+										<div class="col_full nobottommargin">
+											<label for="description">Description <small>*</small></label>
+											<textarea class="required input-block-level" data-ng-model="currentUser.description" rows="10" cols="30" required></textarea>
+										</div>
+										
+										<div class="clearfix"></div>
+										<div class="clear"></div>
+			
+										<div class="col_full nobottommargin" data-ng-show="currentUser.id">
+											<button class="btn" data-ng-click="updateProfile()" data-ng-disabled="!profileform.$valid">Update Profile</button>
+										</div>
+			
+									</form>
+						        </div>
+						        <div class="tab-pane fade" id="contactDetails" >
+						        	<br />
+						        	<div class="col_one_third nobottommargin">
+										<label for="addressId">Address Title<small>*</small></label> 
+										<select data-ng-model="selectedAddress" class="required input-block-level" required data-ng-options="address as address.label for address in addresses">
+											<option value="">-- Select Address --</option>
+										</select>
+									</div>
+						        
+								        <form class="nobottommargin" id="addressForm" name="addressForm" novalidate>
+				
+											<div class="col_full nobottommargin">
+												<label>Address Title <small>*</small></label> <input type="text" data-ng-model="selectedAddress.label" class="required input-block-level" required />
+											</div>
+											
+											<div class="col_full nobottommargin">
+												<label>Address Line1 <small>*</small></label> <input type="text" data-ng-model="selectedAddress.line1" class="required input-block-level" required />
+											</div>
+											
+											<div class="col_full nobottommargin">
+												<label>Address Line2</label> <input type="text" data-ng-model="selectedAddress.line2" class="input-block-level" />
+											</div>
+				
+											<div class="col_one_third nobottommargin">
+												<label>PostCode</label> <input type="text" data-ng-model="selectedAddress.postcode" class="input-block-level" />
+											</div>
+											
+											<div class="col_one_third nobottommargin">
+												<label>City <small>*</small></label> <input type="text" data-ng-model="selectedAddress.city" class="required input-block-level" required />
+											</div>
+											
+											<div class="col_one_third nobottommargin col_last">
+												<label>State <small>*</small></label> <input type="text" data-ng-model="selectedAddress.state" class="required input-block-level" required />
+											</div>
+											
+											<div class="col_one_third nobottommargin">
+												<label>Country <small>*</small></label> <input type="text" data-ng-model="selectedAddress.country" class="required input-block-level" required />
+											</div>
+											<div class="col_one_third nobottommargin col_last">
+												<label>Is Primary</label> <input data-ng-model="selectedAddress.isDefault" type="checkbox" />
+											</div>
+				
+											<div class="clearfix"></div>
+											<div class="clear"></div>
+				
+											<div class="col_full nobottommargin" data-ng-show="selectedAddress.id">
+												<button class="btn" data-ng-click="updateAddress()" data-ng-disabled="!addressForm.$valid">Update Address</button>
+											</div>
+											
+											<div class="col_full nobottommargin" data-ng-hide="selectedAddress.id">
+												<button class="btn" data-ng-click="saveAddress()" data-ng-disabled="!addressForm.$valid">Save Address</button>
+											</div>
+				
+										</form>
+										
+										<br />
+										<br />
+						        </div>
+						        
+					        </div>
+                      	
+                        </div>
+                        
+                        <div id="channelEventsTab" class="tab_content clearfix">
+                        	<ul id="channelEventsTopTabs" class="nav nav-tabs">
+					          <li class="active" ><a href="javascirpt:void(0);" data-target="#channels" data-toggle="tab" >Channels</a></li>
+					          <li class="dropdown">
+			                      <a href="" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+			                      <ul class="dropdown-menu">
+			                           <li><a href="javascirpt:void(0);" data-target="#myLiveEvents" data-ng-click="getMyLiveEvents()" data-toggle="tab">LIVE Events</a></li>
+			                           <li><a href="javascirpt:void(0);" data-target="#myUpcomingEvents" data-ng-click="getMyUpcomingEvents()" data-toggle="tab">Upcoming Events</a></li>
+								       <li><a href="javascirpt:void(0);" data-target="#myCompletedEvents" data-ng-click="getMyCompletedEvents()" data-toggle="tab">Completed Events</a></li>
+			                      </ul>
+			                   </li>
+					        </ul>
+					        
+					        <div id="channelEventsTopTabsContent" class="tab-content">
+					    		<div class="tab-pane fade in active" id="channels" data-ng-controller="channelsController" data-ng-init="getMyChannels()" >
+						        	<br />
+						        	<div class="col_one_third nobottommargin">
+										<label for="channelId">Channel <small>*</small></label> <select data-ng-model="selectedChannel" class="required input-block-level" required data-ng-options="channel as channel.title for channel in mychannels">
+											<option value="">-- Select Channel --</option>
+										</select>
+									</div>
+						        
+						        	<form class="nobottommargin" id="channelForm" name="channelForm" novalidate>
+									
+										<div class="col_one_third nobottommargin">
+											<label>Channel Title<small>*</small></label> <input type="text" data-ng-model="selectedChannel.title" class="required input-block-level" required />
+										</div>
+										<div class="clear"></div>
+										
+										<div class="col_full nobottommargin">
+											<label for="description">Description <small>*</small></label>
+											<textarea class="required input-block-level" data-ng-model="selectedChannel.description" rows="10" cols="30" required></textarea>
+										</div>
+			
+										<div class="clearfix"></div>
+										<div class="clear"></div>
+										<div class="col_full nobottommargin" data-ng-if="selectedChannel.id && selectedChannel.id != '175045e6-0dcd-4b78-88ee-2221e9066326'">
+											<button class="btn" data-ng-click="updateChannel()" data-ng-disabled="!channelForm.$valid">Update Channel</button>
+										</div>
+										
+										<div class="col_full nobottommargin" data-ng-hide="selectedChannel.id">
+											<button class="btn" data-ng-click="createChannel()" data-ng-disabled="!channelForm.$valid">Create Channel</button>
+										</div>
+			
+									</form>
+						        </div>
+						        
+						        <div class="tab-pane fade" id="myLiveEvents">
+									<div data-ng-if="endpointsReady" >
+										<br />
+										<display-media widget-id="myLiveEventsWidget" current-user="currentUser" visible="false"
+										show-type="list" title="LIVE Events" media-search="myLiveEventsSearch" search-box="false" >
+										</display-media>
+									</div>			
+									
+						        </div>
+						        
+						        <div class="tab-pane fade" id="myUpcomingEvents">
+						        	<div data-ng-if="endpointsReady" >
+										<br />
+										<display-media widget-id="myUpcomingEventsWidget" current-user="currentUser" visible="false"
+										show-type="list" title="Upcomming Live Events" media-search="myUpcomingEventsSearch" search-box="false" >
+										</display-media>
+									</div>	
+						        </div>
+							        
+						        <div class="tab-pane fade" id="myCompletedEvents">
+						        	<div data-ng-if="endpointsReady" >
+										<br />
+										<display-media widget-id="myCompletedEventsWidget" current-user="currentUser" visible="false"
+										show-type="list" title="Completed Events" media-search="myCompletedEventsSearch" search-box="false" >
+										</display-media>
+									</div>	
+						        </div>
+							        
+							</div>
+					        
+                        </div>
+                        
+                        <div id="albumsTab" class="tab_content clearfix">
+                        	You have no Video or Photo Albums.  Please contact us to know more.
+                        </div>
+                        
+                      </div>
+                  
+                  </div>
+                        
+                 <div class="clear"></div>
+             
+             </div>
+
+		</div>
+
+</div>
+

@@ -5,7 +5,7 @@
 
 define(['angular'], function (angular) {
 	'use strict';
-  
+
 	return angular.module('app.config', [])
 		.constant('CONFIG', {
 			VERSION: '0.1',
@@ -18,5 +18,5 @@ define(['angular'], function (angular) {
 			     "auth_token": "Tun&)vjKlf6sJ_9BdK"
 			}
 		});
-    
+
 });

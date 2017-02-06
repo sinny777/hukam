@@ -1,0 +1,53 @@
+{
+  "name": "Notification",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "email": {
+      "type": "object",
+      "required": false,
+      "description": "To, CC, BCC etc"
+    },
+    "group": {
+      "type": "object",
+      "required": false,
+      "description": "Notify all members of Group"
+    },
+    "push": {
+      "type": "boolean",
+      "required": false
+    },
+    "sms": {
+      "type": "object",
+      "required": false
+    },
+    "type": {
+      "type": "string",
+      "required": false,
+      "description": "DEVICE, BOARD, PLACE"
+    },
+    "typeId": {
+      "type": "string",
+      "required": false
+    },
+    "typeParentId": {
+      "type": "string",
+      "required": false
+    },
+    "typeValue": {
+      "type": "any",
+      "required": false
+    },
+    "userId": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,34 @@
+{
+  "name": "UserSetting",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "notify": {
+      "type": "string",
+      "required": false
+    },
+    "userId": {
+      "type": "string",
+      "required": false
+    },
+    "registrationId": {
+      "type": "string",
+      "required": false
+    },
+    "placeId": {
+      "type": "string",
+      "required": false
+    },
+    "timestamp": {
+      "type": "date",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

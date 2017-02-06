@@ -1,0 +1,212 @@
+
+<div data-ng-init="initGroups();">
+
+	<div>
+		<div class="col-sm-8">
+			<h3 data-ng-if="selectedPlace.groups.length == 0">There are no groups added in
+				this Place</h3>
+			<h3 data-ng-if="selectedPlace.groups.length > 0">Groups in this Place</h3>
+		</div>
+		<div>
+			<div class="btn-group">
+				<button type="button" class="btn btn-primary"
+					data-ng-click="showAddNewGroupPanel();" data-toggle="tooltip"
+					data-placement="bottom" title="Add New Group">
+					<span class="fa fa-plus"></span>
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	<div class="panel panel-default"
+		data-ng-if="display == 'saveGroupPanel'">
+		<div class="panel-heading">
+			<h4 class="panel-title">
+				<a data-toggle="collapse" href="#groupPanel">Add/Update Group</a>
+			</h4>
+		</div>
+
+		<div id="groupPanel" class="panel-collapse collapse in">
+
+			<div class="panel-body">
+				<form class="form-horizontal" role="form" method="post">
+					<div class="form-group">
+						<label for="name" class="col-lg-2 control-label">Title:</label>
+						<div class="col-lg-4">
+							<input type="text" class="form-control"
+								data-ng-model="selectedGroup.title">
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="name" class="col-lg-2 control-label">Description:</label>
+						<div class="col-lg-4">
+							<textarea class="form-control"
+								data-ng-model="selectedGroup.description"></textarea>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="col-lg-offset-2 col-lg-10">
+							<button type="submit" data-ng-click="saveGroup();"
+								data-ng-if="!selectedGroup.id">Create</button>
+							<button type="submit" data-ng-click="saveGroup();"
+								data-ng-if="selectedGroup.id">Update</button>
+							<button type="submit" data-ng-click="fetchAndShowGroups();">cancel</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+	<div style="clear: both;"></div>
+
+	<div class="row" data-ng-if="display == 'groups'">
+		<div class="card col-sm-3" data-ng-repeat="group in selectedPlace.groups">
+			<div class="card-block" data-ng-if="showAddMember != group.id"
+				style="background-image: url('../assets/images/blurred3.jpg');">
+				<span class="fa-stack"> <a href=""
+					data-ng-click="showUpdateGroupPanel(group);"> <i
+						class="fa fa-circle fa-stack-2x icon-background"></i> <i
+						class="fa fa-cogs fa-stack-1x icon-white" data-toggle="tooltip"
+						data-placement="top" title="Modify"></i>
+				</a>
+				</span> <span class="fa-stack"> <a href=""
+					data-ng-click="showAddMemberPanel(group);"> <i
+						class="fa fa-circle fa-stack-2x icon-background"></i> <i
+						class="fa fa-user-plus fa-stack-1x icon-white"
+						data-toggle="tooltip" data-placement="top" title="Add Member"></i>
+				</a>
+				</span> <span class="fa-stack"> <a href=""
+					data-ng-click="showAddPermissionPanel(group);"> <i
+						class="fa fa-circle fa-stack-2x icon-background"></i> <i
+						class="fa fa-hand-grab-o fa-stack-1x icon-white"
+						data-toggle="tooltip" data-placement="top" title="Add Permission"></i>
+				</a>
+				</span> <span class="fa-stack"> <a href=""
+					data-ng-click="deleteGroup(group);"> <i
+						class="fa fa-circle fa-stack-2x icon-background"></i> <i
+						class="fa fa-trash-o fa-stack-1x icon-white" data-toggle="tooltip"
+						data-placement="top" title="Delete Group"></i>
+				</a>
+				</span>
+
+				<h4 class="card-title">
+					<a href="" data-ng-click="showUpdateGroupPanel(group);">{{group.title}}</a>
+				</h4>
+				<p>{{group.description}}</p>
+			</div>
+
+			<div class="card-block" data-ng-if="showAddMember == group.id">
+				<ul class="nav nav-tabs">
+					<li class="active"><a href="javascirpt:void(0);"
+						data-target="#addMemberTab" data-toggle="tab">Add</a></li>
+					<li><a href="javascirpt:void(0);"
+						data-target="#inviteMemberTab" data-toggle="tab">Invite</a></li>
+				</ul>
+				<div class="tab-content">
+					<div class="row tab-pane fade in active" id="addMemberTab">
+						<form class="form-horizontal" role="form" method="post">
+							<div class="input-group margin-bottom-md">
+								<span class="input-group-addon"><i
+									class="fa fa-envelope-o fa-fw"></i></span> 
+									<input type="text"
+									class="form-control" data-ng-model="member.username"
+									placeholder="Email/Username">
+							</div>
+							<div class="input-group margin-bottom-lg">
+								<span class="input-group-addon"><i
+									class="fa fa-key fa-fw"></i></span> 
+									<input type="password"
+									class="form-control" data-ng-model="member.password"
+									placeholder="Password">
+							</div>
+							<div class="form-group">
+								<div class="col-lg-10">
+									<button type="submit" class="btn btn-danger"
+										data-ng-click="addNewMember();">Add</button>
+									<button type="submit" class="btn btn-danger"
+										data-ng-click="cancelAddMember();">Cancel</button>
+								</div>
+							</div>
+						</form>
+					</div>
+
+					<div class="row tab-pane fade in" id="inviteMemberTab">
+						<form class="form-horizontal" role="form" method="post">
+							<div class="form-group">
+								<div class="col-lg-10">
+									<input type="text" class="form-control"
+										data-ng-model="member.username" placeholder="Email/Username">
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-lg-10">
+									<button type="submit" class="btn btn-danger"
+										data-ng-click="inviteNewMember();">Invite</button>
+									<button type="submit" class="btn btn-danger"
+										data-ng-click="cancelAddMember();">Cancel</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+
+			</div>
+			<div class="card-bottom">
+				<ul class="nav nav-tabs nav-justified">
+					<li class="active"><a href="#members_{{group.id}}"
+						data-toggle="tab"> <i class="fa fa-group"
+							data-toggle="tooltip" data-placement="top" title="Members"></i>
+					</a></li>
+					<li><a href="#permissions_{{group.id}}" data-toggle="tab">
+							<i class="fa fa-heart" data-toggle="tooltip" data-placement="top"
+							title="Permissions"></i>
+					</a></li>
+				</ul>
+
+				<div class="tab-content">
+					<div class="tab-pane fade in active" id="members_{{group.id}}">
+						<h5 data-ng-if="group.members.length == 0">No Members Found</h5>
+						<ul class="list-group list-group-flush small-font">
+							<li class="list-group-item"
+								data-ng-repeat="member in group.members">{{member.username}}
+								({{member.status}})
+								<div class="pull-right">
+									<a style="text-decoration: none;" href="javascript:void(0);"
+										data-ng-click="showUpdateMember(member);"
+										data-toggle="tooltip" data-placement="left" title="Update">
+										<span class="fa fa-edit"></span>
+									</a> &nbsp;<a style="color: red; text-decoration: none;"
+										href="javascript:void(0);"
+										data-ng-click="deleteMember(group, member)" data-toggle="tooltip"
+										data-placement="left" title="Delete"> <span
+										class="fa fa-trash-o"></span></a>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div class="tab-pane fade" id="permissions_{{group.id}}">
+						<ul class="list-group list-group-flush">
+							<li class="list-group-item">Cras justo odio</li>
+							<li class="list-group-item">Dapibus ac facilisis in</li>
+							<li class="list-group-item">Vestibulum at eros</li>
+						</ul>
+						<div class="card-footer">
+							<a href="#" class="card-link">Add Permission</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="clearfix"></div>
+		<div style="clear: both;"></div>
+		<br />
+
+	</div>
+
+</div>

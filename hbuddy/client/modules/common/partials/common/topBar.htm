@@ -1,0 +1,133 @@
+<!-- Google Tag Manager -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-W9LNTF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-W9LNTF');</script> 
+<!-- End Google Tag Manager -->
+
+<div id="fb-root"></div>
+<!-- <script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.3&appId=676775262334675";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script> -->
+
+<div id="top-bar" class="top-bar2" >
+
+	    <div id="top-menus">
+	        <ul class="nav">
+	        
+	          <!-- <li>
+	          	<a href="javascript:void(0);" data-ng-click="toggleRadioDisplay()" ><i class="icon-circled icon-light fa fa-bullhorn fa-2x stip" title="Listen To GransLive Radio"></i></a>
+	          </li> -->
+	          
+	          <!-- <li class="top-menu-em">
+	          	<a href="javascript:void(0);" data-ng-click="toggleNavBar()" ><i class="icon-plain fa fa-align-justify fa-2x stip" title="Navigation Menu"></i></a>
+	          </li> -->
+	        
+	          <!--  <li class="top-menu-em" data-ng-hide="currentUser.id">
+		          <a href="" data-ng-click="login();" class="stip" title="Login to Your Account" >
+		        	  <i></i>Login
+		          </a>
+	           </li> -->
+	           
+	           <li class="dropdown top-menu-em" data-ng-if="!currentUser.id">
+		          <a href="#" data-toggle="modal" data-target="#loginModal" ><b>Login</b></a>
+		       </li>
+			        <li class="dropdown" data-ng-if="currentUser.id">
+			          <a data-ng-if="currentUser.provider == 'granslive' && isAdmin();" href="#" class="dropdown-toggle" data-toggle="dropdown"><b>Admin</b> <span class="caret"></span></a>
+						<ul class="dropdown-menu">
+				            <li><a href="#!/admin/products"><i class="flaticon-device" ></i>&nbsp;Products</a></li>
+				            <li class="divider"></li>
+				            <li><a href="#" data-ng-click="logout()"><i class="fa fa-power-off" ></i>&nbsp; Logout</a></li>
+						</ul>
+					</li>
+			        <li class="dropdown" data-ng-if="currentUser.id">
+			          <a data-ng-if="currentUser.provider == 'granslive' && currentUser.profile" href="#" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.profile.username}}</b> <span class="caret"></span></a>
+			          <a data-ng-if="currentUser.provider != 'granslive' && currentUser.profile" href="#" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.profile.name}}</b> <span class="caret"></span></a>
+			          <a data-ng-if="currentUser.username && !currentUser.profile" href="#" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.username}}</b> <span class="caret"></span></a>
+						<ul class="dropdown-menu">
+				            <li><a href="#!/account"><i class="fa fa-cogs" ></i>&nbsp; Account Settings</a></li>
+							<li><a href="#!/places"><i class="fa fa-home" ></i>&nbsp; My Places</a></li>
+				            <li class="divider"></li>
+				            <li><a href="#" data-ng-click="logout()"><i class="fa fa-power-off" ></i>&nbsp; Logout</a></li>
+						</ul>
+					</li>	
+	          
+	        </ul>
+	  
+	    </div>
+	    	<div id="logo">
+		        
+		        <a href="/#!/" class="standard-logo" title="{{pageContent.siteName}}" >{{pageContent.siteName}}</a>
+		        <a href="/#!/" class="retina-logo" title="{{pageContent.siteName}}" >{{pageContent.siteName}}</a>
+		        
+		    </div>
+                
+            <div id="top-search" >
+		      <form id="top-search-form" data-ng-submit="searchFor(searchTerm)" class="navbar-search pull-left" >
+		        <input type="text" class="search-query span2" data-ng-model="searchTerm"  placeholder="Search Here ... " />
+		      </form>
+		    </div> 
+		    
+		    
+		    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+	           <div class="modal-dialog">
+	             <div class="modal-content">
+	               <div class="modal-header">
+	                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	                 <h3 class="modal-title nobottompadding" id="myModalLabel">Authentication</h3>
+	               </div>
+	               <div class="modal-body">
+	               
+								<div class="col-md-12">
+									Login via
+									<div class="social-buttons">
+										<a href="/auth/twitter" class="col-md-4 btn btn-social btn-twitter"><i class="fa fa-twitter"></i> Twitter</a>
+										<a href="/auth/facebook" class="col-md-4 btn btn-social btn-facebook"><i class="fa fa-facebook"></i> Facebook</a>
+										<a href="/auth/google" class="col-md-4 btn btn-social btn-google"><i class="fa fa-google"></i> Google</a>
+									</div>
+	                                
+	                                <div class="line"></div>
+	                                
+									 <form class="form" role="form" accept-charset="UTF-8" id="login-nav">
+											
+											<div class="input-group margin-bottom-md">
+											  <span class="input-group-addon"><i class="fa fa-envelope-o fa-fw"></i></span>
+											  <input class="form-control" type="text" data-ng-model="loginCredentials.email" placeholder="Email address / Username" >
+											</div>
+											<div class="input-group">
+											  <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
+											  <input class="form-control" type="password" data-ng-model="loginCredentials.password" placeholder="Password">
+											</div>
+											<div class="help-block text-right"><a href="">Forget the password ?</a></div>
+											
+											<div class="form-group">
+												 <button type="submit" class="btn btn-primary btn-block" data-ng-click="login();">Sign in</button>
+											</div>
+											<div class="checkbox">
+												 <label>
+												 <input type="checkbox" data-ng-model="loginCredentials.rememberMe"> keep me logged-in
+												 </label>
+											</div>
+									 </form>
+								</div>
+								<div class="bottom text-center">
+									New here ? <a href="#" data-ng-link="register();"><b>Join Us</b></a>
+								</div>
+	                 
+	               </div>
+	               <div class="modal-footer notopmargin">
+	                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	               </div>
+	             </div><!-- /.modal-content -->
+	           </div><!-- /.modal-dialog -->
+	         </div><!-- /.modal -->
+		    
+		    
+</div>

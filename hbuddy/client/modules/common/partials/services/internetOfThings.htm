@@ -1,0 +1,149 @@
+<div id="content" data-ng-init="setIoTPage();">
+
+<view-title>{{pageContent.title}}</view-title>
+<META view-head NAME="description"
+  CONTENT="{{pageContent.pageDescription}}">
+<meta view-head property="og:title" content="{{pageContent.pageTitle}}" />
+<meta view-head property="og:description"
+  content="{{pageContent.pageDescription}}" />
+<meta view-head property="og:site_name" content="http://www.granslive.com" />
+
+	<div class="container clearfix">
+	
+		<div class="tab_widget side-tabs clearfix nobottommargin" id="iotTabs" data-ng-init="handleTabWidgets('iotTabs')">
+                      <ul class="tabs" style="padding-top: 90px;">
+                          <li><a href="#smartHomePPTTab" data-href="#smartHomePPTTab" ><i class="fa fa-home"></i> Smart Home - Presentation </a></li>
+                          <li><a href="#iotInfoTab" data-href="#iotInfoTab" ><i class="fa fa-cloud"></i> Internet Of Things - IoT </a></li>
+                          <li><a href="#iotDiscussionTab" data-href="#iotDiscussionTab" ><i class="fa fa-comments"></i> IoT Discussion</a></li>
+                      </ul>
+                      
+                      <div class="tab_container">
+                        
+                        <div id="smartHomePPTTab" class="tab_content clearfix">
+                        
+                        		<div class="clear"></div>
+								<br />
+								
+								<h2 class="center" view-title>
+									Smart Home With Home Automation
+								</h2>
+								
+								<br />
+
+						        <iframe src="https://docs.google.com/presentation/d/1n28FFrKWHCOCOZW1-NS82lQxvSvGEDucC7TkZ6sx6XU/embed?start=true&loop=true&delayms=2000" 
+						        frameborder="0" width="935" height="545" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+								
+								<ul class="entry_meta clearfix" >
+									<li>
+										<div data-addthis-toolbox class="addthis_sharing_toolbox" data-url="{{getLocation()}}" data-title="{{videoData.title}}" data-description="{{videoData.description}}" ></div>
+							      	</li>
+								    <div class="fb-like" data-href="{{getLocation()}}" data-layout="standard" data-action="like" data-show-faces="false" data-share="false"></div>
+								</ul>
+								
+								<br /> <br />
+						        <h2>The Coolest Features of Home Automation Systems</h2>
+						        
+						        <h3>Lighting Switches On and Off Automatically</h3>
+						        <p view-description>Lighting systems can be programmed to switch certain lights on or off automatically. This means that lights can be set to switch off or dim in certain lighting 
+						        conditions (for example where natural light is adequate), reducing lighting costs. Alternatively, lights can be set to switch on automatically when one enters a 
+						        room or a dark stairwell, making the home safer and eliminating the need to fumble for light switches. In addition, lighting can be set to be dimmer or brighter, 
+						        with certain lights being brighter than others, to create specific moods. For example, one can pre-program settings for romantic evenings in, dinner parties, or 
+						        normal evenings at home with the family.</p>
+						        
+						        <h3>The House Can Let You Know How It Is</h3>
+						        <p>Home automation systems allow one to monitor conditions in the home from a remote location, provided the subsystems are connected to one's home internet network. 
+						        In fact, some systems can alert one to events via text, email, or social media applications like Twitter. Certain security systems can be set to email photos of 
+						        visitors to the homeowner when the system is armed, and some communication systems can let one know if the fridge breaks down while one is on holiday. 
+						        The latter type of system has integrated temperature, moisture, and vibration sensors that activate automated messages if certain criteria are met. 
+						        For example, if the moisture sensor in the basement gets wet, the device can text homeowners to let them know that the area has flooded.</p>
+						        
+						        <h3>Intelligent Climate Control</h3>
+						        <p>Heating and air conditioning systems can be set to certain levels based on expected and actual occupancy, the weather forecast, or the inside temperature. These 
+						        systems can also be controlled remotely, and can be programmed to switch off if a window or exterior door is left open. Again, this is a great savings mechanism, 
+						        reducing the amount of electricity wasted on unnecessary cooling or heating. It also ensures that the house is at the right temperature at all times, and will eliminate 
+						        scenarios where one walks into a boiling hot or freezing cold house after being out and misjudging the weather.</p>
+						        
+						        <h3> Security Systems are More Secure</h3>
+						        <p>Automated home security systems tend to offer a wider range of features than their predecessors. Systems respond to voice and biometric data, and locks can be 
+						        upgraded to keypads that are opened with codes or swipe cards. These systems can be turned on or off via remote control, email, or phone, and camera feeds can be 
+						        sent directly to one's computer. Audible alarms can be used to alert one of intruders, while silent alarms can be used to alert the authorities. That awful feeling 
+						        of uncertainty that some people feel about having locked all the doors when leaving the house can be eliminated. One can simply lock the offending door remotely and 
+						        carry on without giving it a second thought.</p>
+						        
+						        <h3>Systems are Designed to Work Together</h3>
+						        <p>Home automation systems are designed with the integration of subsystems in mind, allowing one to tie electronic devices together to perform as a unified system. 
+						        For example, one can have the lights turn off and the thermostats set lower when a motion sensor is triggered as you leave a room. Once again, this ties in with 
+						        energy and cost savings and environmental responsibility. Lights and heaters or air conditioning will not be left on unnecessarily.</p>
+						        
+						        <h3>Remote Access</h3>
+						        <p>Probably one of the coolest features of home automation systems, remote access allows one to control one's home environment from a remote location. One can change 
+						        settings from the office or while on holiday, or during the commute on the way home from the office. Should one's plans for the day or evening change, one can simply 
+						        update the settings for the home automation system to avoid unnecessary energy use. One can also monitor the home environment while away, or tweak settings without 
+						        having to ask someone to go in to make adjustments. This is especially useful when sudden snow or cold can make pipes freeze and thermostats need to be set higher.</p>
+						        
+						        <br /><br /><br />
+						    
+                        </div>
+                        
+                        <div id="iotInfoTab" class="tab_content clearfix">
+                        
+                        	<div class="clear"></div>
+							<br />
+							
+							<h2 class="center" >
+								Grans<span>LIVE</span> - Internet Of Things - IoT
+							</h2>
+							
+                        	<br />
+					           <iframe width="940" height="549" src="https://www.youtube.com/embed/QaTIt1C5R-M" frameborder="0" allowfullscreen></iframe>
+					           <ul class="entry_meta clearfix" >
+									<li>
+										<div data-addthis-toolbox class="addthis_sharing_toolbox" data-url="{{getLocation()}}" data-title="{{videoData.title}}" data-description="{{videoData.description}}" ></div>
+							      	</li>
+								    <div class="fb-like" data-href="{{getLocation()}}" data-layout="standard" data-action="like" data-show-faces="false" data-share="false"></div>
+								</ul>
+					         <br />
+					         <br />
+					         
+					         <p>
+					         	The Internet of Things (IoT) is a scenario in which objects, animals or people are provided with unique identifiers and the ability 
+					         	to transfer data over a network without requiring human-to-human or human-to-computer interaction. IoT has evolved from the convergence 
+					         	of wireless technologies, micro-electromechanical systems (MEMS) and the Internet.<br /> <br />
+					         	
+					         	A thing, in the Internet of Things, can be a person with a heart monitor implant, a farm animal with a biochip transponder, 
+					         	an automobile that has built-in sensors to alert the driver when tire pressure is low -- or any other natural or man-made object 
+					         	that can be assigned an IP address and provided with the ability to transfer data over a network. So far, the Internet of Things 
+					         	has been most closely associated with machine-to-machine (M2M) communication in manufacturing and power, oil and gas utilities. 
+					         	Products built with M2M communication capabilities are often referred to as being smart. (See: smart label, smart meter, 
+					         	smart grid sensor).
+					         </p>
+                        
+                        	<p><strong>WHAT IS SMARTLIVING ? A NEXT-GEN HOME AUTOMATION SOLUTION BUILT FOR THE INTERNET OF THINGS ERA</strong><br>
+					            <p>A cloud platform with built-in intelligence, which connects the Smart devices of today and tomorrow, letting them talk and work in sync and take autonomous decisions, to save time and conserve energy for a better world.</p>
+					
+					        <p><strong>BRING THE INTERNET OF THINGS TO YOU</strong><br>
+					        <p>Automate your home, office or check in to make sure your home if Ok.  Simple and with none of the limitations of existing home automation systems</p>
+					        
+					        <p><strong>PERSONALIZE IT THE WAY YOU WANT</strong><br>
+					        <p>Pick and mix the apps to run your Smart Home, as easily as installing apps on your smartphone.</p>
+					        
+                        </div>
+                        
+                        <div id="iotDiscussionTab" class="tab_content clearfix">
+                        	<dir-disqus disqus-shortname="Hukam"
+						         disqus-identifier="HukamIoTDiscussions"
+						         disqus-url="{{getLocation()}}"
+						         disqus-title="Hukam IoT Discussions">
+							</dir-disqus>
+                        </div>
+                          
+                      </div>
+                  
+            </div>
+                        
+           <div class="clear"></div>
+		
+	</div>
+
+</div>
+

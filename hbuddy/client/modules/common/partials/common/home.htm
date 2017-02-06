@@ -1,0 +1,375 @@
+<!-- <script type="text/javascript" src="//apis.google.com/js/plusone.js"></script> -->
+
+<!-- <div data-ng-include="'/modules/common/partials/slides/streaming.htm'" data-ng-if="endpointsReady"></div>  -->
+
+<div id="content" itemscope itemtype="http://schema.org/LocalBusiness" >
+
+	<span ></span><view-title><span itemprop="name">{{pageContent.pageTitle}}</span></view-title>
+
+	<view-title>{{pageContent.title}}</view-title>
+	<META itemprop="description" view-head NAME="description"
+		CONTENT="{{pageContent.pageDescription}}">
+	<meta view-head property="og:title" content="{{pageContent.pageTitle}}" />
+	<meta view-head property="og:description"
+		content="{{pageContent.pageDescription}}" />
+	<meta view-head property="og:site_name"
+		content="http://www.hukam.in" /> 
+
+	<div class="content-wrap" >
+
+		<div class="container clearfix">
+
+			<div class="alert {{pageContent.message.msgClass}}"
+				data-ng-show="pageContent.message.text">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+				<strong>{{pageContent.message.strongMsg}}</strong>
+				{{pageContent.message.text}}
+			</div>
+
+			<div class="promo">
+
+				<div class="promo-desc">
+
+					<h3>
+						Start LIVE Streaming FREE (Self Service) or get <span>25% Discount</span> on all Event Management
+						Services, including LIVE Webcasting
+					</h3>
+
+					<span>This offer is valid only till April 1st 2017</span>
+					<h8>Call us today @ {{pageContent.contact.phone}}</h8>
+
+				</div>
+
+				<div class="promo-action">
+					<a href="#!/contact">Contact Us</a>
+				</div>
+
+			</div>
+
+			<div class="clear"></div>
+
+			<h2>Our Services</h2>
+
+			<div class="clear"></div>
+
+			<div class="col_one_third">
+				<div class="product-feature product-feature3">
+					<a href="/#!/services/eventmanagement"><img
+						ng-src="//glcontents.s3.amazonaws.com/static/images/public/services/wedding_services.jpg"
+						alt="Event Management" /></a>
+					<h3>
+						<a href="/#!/services/eventmanagement">Event Management</a>
+					</h3>
+					<p>{{pageContent.siteName}} has been the heart of the most happening and
+						rocking corporate events, wedding events, birthday parties and
+						other event projects...</p>
+				</div>
+			</div>
+			
+			<div class="col_one_third">
+				<div class="product-feature product-feature3">
+					<a href="/#!/services/internetOfThings"><img
+						ng-src="//glcontents.s3.amazonaws.com/static/images/public/theinternetofthings2.jpg"
+						alt="Home Automation (IoT)" /></a>
+					<h3>
+						<a href="/#!/services/internetOfThings">Home Automation (IoT)</a>
+					</h3>
+					<p>A cloud platform with built-in intelligence, which connects the Smart devices of today and tomorrow, letting them talk and work in sync and take autonomous decisions...</p>
+				</div>
+			</div>
+
+			<div class="col_one_third col_last">
+				<div class="product-feature product-feature3">
+					<a href="/#!/services/applicationdevelopment"><img
+						ng-src="//glcontents.s3.amazonaws.com/static/images/public/services/development.jpg"
+						alt="Application Development" /></a>
+					<h3>
+						<a href="/#!/services/applicationdevelopment">Software
+							Development</a>
+					</h3>
+					<p>{{pageContent.siteName}} Business Solutions is a creative application
+						design and development company along with strong client base in
+						website designing and development field...</p>
+				</div>
+			</div>
+			
+			<div class="clear"></div>
+                    
+                    <div class="col_full topmargin nobottommargin">
+                    
+                        <div class="tab_widget side-tabs clearfix nobottommargin" id="homePageSideTabs" data-ng-init="handleTabWidgets('homePageSideTabs')">
+                        
+                            <ul class="tabs">
+                                <li><a href="#easyNFreeTab" data-href="#easyNFreeTab"><i class="fa fa-inr"></i> Easy and FREE</a></li>
+                                <li><a href="#unlimitedViewersTab" data-href="#unlimitedViewersTab"><i class="fa fa-group"></i> Unlimited Viewers</a></li>
+                                <li><a href="#albumsSideTab" data-href="#albumsSideTab"><i class="fa fa-picture-o"></i> Video/Photo Albums</a></li>
+                                <li><a href="#liveServicesSideTab" data-href="#liveServicesSideTab"><i class="fa fa-magic"></i> LIVE Services</a></li>
+                                <li><a href="#multiDeviceSideTab" data-href="#multiDeviceSideTab"><i class="fa fa-copy"></i> Multi Device Support</a></li>
+                            </ul>
+                            
+                            <div class="tab_container">
+                            
+                                <div id="easyNFreeTab" class="tab_content clearfix">
+                                
+                                    <h3>Its FREE &amp; Easy</h3>
+                                    <div class="col_two_fifth">
+                                   		 <img src="/../assets/images/catalog/catalog/easy.jpg" class="img-polaroid" alt="Easy like Sunday morning" />
+                                    </div>
+                                    <div class="col_three_fifth col_last">
+                                    	<br />
+	                                    <p>Just in minutes you can start streaming LIVE and that too FREE of cost.  There are no charges if you use our platform for any LIVE webcasting event.  Login to {{pageContent.siteName}} using Google authentication 
+	                                       and then you should be able to create LIVE event.
+	                                       If you want us to do your event LIVE in a professional way then there are minimal charges that you need to pay in hourly basis as mentioned below:</p>
+	                                    <p><i class="fa fa-inr"></i>3000 for initial setup <br />
+	                                    <i class="fa fa-inr"></i>2000 / hour</p>
+                                    </div>
+                                    
+                                    <!-- <div class="clear" /> -->
+                                    
+                                    <div class="promo">
+
+										<div class="promo-desc">
+						
+											<h5>
+												Call us today on <span>{{pageContent.contact.phone}}</span>.  You can also send an email to 
+												<a href="mailto:{{pageContent.contact.email}}"><i class="fa fa-envelope-alt"></i> {{pageContent.contact.email}}</a> if you have any queries.
+											</h5>
+						
+										</div>
+						
+										<div class="promo-action">
+											<a href="#!/contact">Contact Us</a>
+										</div>
+						
+									</div>
+                                    
+                                    
+                                </div>
+                                
+                                <div id="unlimitedViewersTab" class="tab_content clearfix">
+                                
+                                    <h3>Unlimited Viewers </h3>
+                                    <div class="col_two_fifth">
+                                   		 <img src="/../assets/images/catalog/catalog/online-video-viewers.jpg" class="img-polaroid" alt="Online Viewers" />
+                                    </div>
+                                    <div class="col_three_fifth col_last">
+                                    
+	                                	<p><div class="dropcap">H</div><span class="red">ukam</span> platform gives you the ability to reach the worldwide audience and there's no limit on the number of viewers that can watch it LIVE.
+	                                		Our infrastructure is supported by Google and Amazon cloud services and can handle millions of requests per second.  We are working hard in India to have good internet connectivity
+	                                		in some areas as LIVE streaming is all dependent on internet connectivity.  Viewers around the globe will have as good user experience of a LIVE event as good is their internet connection.  
+	                                	</p>
+	                                	
+	                                	<p>Viewers can watch a LIVE event on any device with internet from anywhere in the world and any place, home, office, playing ground or while traveling.</p>
+                                	
+                                	</div>
+                                </div>
+                                
+                                <div id="albumsSideTab" class="tab_content clearfix">
+                                
+                                    <h3>Video &amp; Photo Albums</h3>
+                                    <div class="col_two_fifth">
+                                   		 <img src="/../assets/images/catalog/catalog/PhotoAlbums.jpg" class="img-polaroid" alt="Video and Photo Albums" />
+                                    </div>
+                                    <div class="col_three_fifth col_last">
+                                    	<p>LIVE event is saved online and can be even watched after its completed.  You can upload more related videos along with the LIVE event.  For example, all wedding related event videos can be uploaded and shared with friends and family all around the world.
+                                    	<br /><br />Similarly, every photograph clicked in a LIVE event will be uploaded online in your account.  Now there'll be no delay and photographs will be available online as soon as they are clicked.  There's no limit to the number of photographs or videos you upload in your account, but you may need to 
+                                    	pay <i class="fa fa-inr"></i>1000 if the total space/size increases by 1GB</p>
+                                	</div>
+                                </div>
+                                
+                                <div id="liveServicesSideTab" class="tab_content clearfix">
+                                
+                                    <h3>Our LIVE Services</h3>
+                                    <p>
+                                    	<h6><span>LIVE </span>Request</h6>
+                                    		<div class="col_one_fifth">
+												 <img alt="LIVE DJ Requests" src="/../assets/images/wedding/dj.jpg" />
+											 </div>
+											  <div class="col_three_fifth col_last">
+											  	  We love music, people and self expression.  Our primary passion is to facilitate communication.  By just a single click of button you can rock
+												  the party, you can dedicate and tribute your favourite songs to your loved ones to fill your absence on that Eve.  Viewers can do a Video call at event place with Bride or Grooms family from anywhere around the world.
+											  </div>
+											 <div class="clear" ></div>
+											  
+											<h6><span>Souvenirs </span>(Gifts)</h6>
+											<div class="col_one_fifth">
+												<img alt="Send / Receive Gifts" src="/../assets/images/wedding/gifts.png" />
+											</div>
+											<div class="col_three_fifth col_last">
+												May no gift be too small to give, nor too simple to receive, which is wrapped in
+												thoughtfulness, and tied with love. Gifts have that special knack of bringing a genuine smile on the face of the people and lets you express that you genuinely care. 
+												Generally, people have relatives all across the country and it becomes practically impossible to be personally present during every occasion. However, that does not stop people from expecting surprise gifts from their near and dear ones.
+											</div>
+											<div class="clear" ></div>
+											
+											<h6><span>Share </span>Memories</h6>
+											<div class="col_one_fifth">
+												<img alt="Share Memorable Pictures" src="/../assets/images/wedding/memory-lane.jpg" >
+											</div>
+											<div class="col_three_fifth col_last">
+												Memories are the treasures that we keep locked deep within the storehouse of our souls, to keep our
+												hearts warm. {{pageContent.siteName}} provides you the perfect environment to share those memorable moments on special occasions.  You can even upload your photographs to share with the viewers.
+											</div>
+											<div class="clear" ></div>
+											<br />
+                                    </p>
+                                   
+                                </div>
+                                
+                                <div id="multiDeviceSideTab" class="tab_content clearfix">
+                                
+                                    <h3>Reach your audience on all devices</h3>
+                                    
+                                    <p>Viewable on desktops, mobile phones, tablets and more.  We built the {{pageContent.siteName}} platform to deliver beyond the desktop to smartphones, tablets and connected TVs.
+                                    Any desktop or device that can run HTML5 or Flash can be used to view a {{pageContent.siteName}} LIVE video.  All from a single embed code, no need to make a mobile specific page. The propriety HTML5/Flash video player from {{pageContent.siteName}} is compatible with 99.9% of internet browsers. This includes most mobile browsers on devices such as iPads and Android phones. No need to install apps or special plugins to view.</p>
+                                
+                                	<p>Below is a list of some of the more common browsers supported: <br />
+                                	  	<div class="col_one_third">
+                                
+                                            <ul class="fa-ul nobottommargin">
+		                                		<li class="fa fa-dot-circle-o"> Internet Explorer</li>
+		                                		<li class="fa fa-dot-circle-o"> Google Chrome</li>
+		                                		<li class="fa fa-dot-circle-o"> Firefox</li>
+		                                		<li class="fa fa-dot-circle-o"> Safari</li>
+		                                		<li class="fa fa-dot-circle-o"> Opera</li>
+		                                	</ul>
+                                	 	</div>
+                                	</p>
+                                
+                                </div>
+                                
+                            </div>
+                        
+                        </div>
+                        
+                        <div class="clear"></div>
+                    
+                    </div>
+			
+			<br />
+			<div class="clear"></div>
+			
+			<div class="col_two_third entry_content">
+			
+				<h2><span >About {{pageContent.siteName}}</span></h2>
+                                
+                  <p view-description>To Make Your Event "The Most Special Moments of Your Life" {{pageContent.siteName}} is established with an intention to create virtual presence at event locations of people, who are not be able to attend important events in their families.</p>
+                  
+                  <p>It has become very common that many of our family members are unable to attend some important functions in the family. In this era of globalization, people have settled in different places far away from each other. And the wedding-couples whom we have met felt unhappy that some of their close friends and well wishers could not make it to the wedding. And it is also not very uncommon for the bride and the bridegroom to edit the long list of their work colleagues for the final invitation.</p>
+                  
+                  <blockquote><p>At {{pageContent.siteName}} we intend to solve simple problems concerning human emotions through technology.</p></blockquote>
+
+				<h2><span>Our Ethics</span></h2>
+                                
+                  <p>Our ethics govern our attitudes and actions. They reflect our distinctive performance and responsibility for our foremost motto, i.e. customer satisfaction. Our ethics are integral to the way <span>{{pageContent.siteName}}</span> employees work together. Our shared commitment to GRANSLIVE operating as an ethical business strengthens us and what we offer to our clients.</p>
+                  
+                  <blockquote><p>By acting in accordance with these values, we earn the respect of, and show respect for, our clients and colleagues, Our ethics and values are put into practice through the {{pageContent.siteName}} Code of Conduct which sets out the principles and rules of conduct that guide our people in high professional and ethical standards required of them. The code is supported by a network of ethics advisers who are available to assist employees in dealing with ethical and professional concerns.</p></blockquote>
+                  
+                <h2><span>Our Core Values</span></h2>
+                  <p><strong>Integrity</strong>, which requires us to be honest and impartial in our dealings with others.</p>
+                  <p><strong>Professionalism</strong>, which demands excellence in working with our clients and interacting with their demands.</p>
+                  <p><strong>Commitment to the public good</strong>, which inspires us in what we do.</p>                
+                  
+            </div>
+            
+            <div class="col_one_third col_last"  >
+			
+				<div data-google-ad-sense></div><br />
+				
+				<br />
+					<div class="tab_widget nobottommargin" id="homePageTabs"
+						data-ng-init="handleTabWidgets('homePageTabs')">
+	
+						<ul class="tabs">
+							<li><a href="#tab-tab1" data-href="#tab-tab1"><i
+									class="fa fa-question-sign"></i> Get Support</a></li>
+							<li><a href="#tab-tab2" data-href="#tab-tab2"><i
+									class="fa fa-map-marker"></i> Locate Us</a></li>
+						</ul>
+	
+						<div class="tab_container">
+	
+							<div id="tab-tab1" class="tab_content entry_content clearfix">
+	
+								<div class="col_two_fifth">
+									<img src="/../assets/images/slider/support.jpg"
+										class="notopmargin norightmargin img-polaroid"
+										alt="{{pageContent.siteName}} Support" title="{{pageContent.siteName}} Support" />
+								</div>
+	
+								<div class="col_three_fifth col_last">
+	
+									<p>You need support or if you have any queries, you can call
+										us or send an email. We would prefer to talk to you to address
+										your queries.</p>
+	
+									<ul class="nobottommargin">
+	
+										<li class="icon-thumbs-up">Live Support (10 AM to 6 PM)</li>
+										<li class="icon-thumbs-up">Phone Support (10 AM to 10 PM)</li>
+										<li class="icon-thumbs-up">Email Support (24x7)</li>
+										<li class="icon-thumbs-up">Free Forum Access</li>
+	
+									</ul>
+	
+								</div>
+	
+								<div class="clear"></div>
+	
+							</div>
+	
+							<div id="tab-tab2" class="tab_content entry_content clearfix">
+	
+								<div class="col_two_fifth">
+									<a href="//maps.googleapis.com/maps/api/staticmap?center=Zirakpur,Punjab,India&zoom=14&size=700x550&maptype=roadmap&markers=color:blue%7Clabel:E%7CZirakpur,Punjab,India&sensor=false" >
+										<img class="img-polaroid" width="100%"
+										src="//maps.googleapis.com/maps/api/staticmap?center=Zirkpur,Punjab,India&zoom=14&size=450x350&maptype=roadmap&markers=color:blue%7Clabel:E%7CZirakpur,Punjab,India&sensor=false"
+										alt="Our Office Location" />
+									 </a>
+								</div>
+	
+								<div class="col_three_fifth col_last">
+								
+									<div itemscope itemtype="http://schema.org/LocalBusiness">
+									  <!-- <h1><span itemprop="name">{{pageContent.pageTitle}}</span></h1> -->
+									  <span itemprop="description">We aim to please, and enjoy what we do, so
+										give us a call and see what we can offer you.</span><br />
+									  <div itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">
+									  	<span><strong>Address:</strong> </span>
+									    <span itemprop="streetAddress">{{pageContent.contact.addressLine1}}</span>
+					    				<span itemprop="addressLocality">{{pageContent.contact.addressLine2}}</span>,
+					    				<span itemprop="addressRegion">{{pageContent.contact.state}}</span>
+									  </div>
+									  <br /><strong>Phone: </strong><span itemprop="telephone">{{pageContent.contact.phone}}</span>
+									  <br /><a href="mailto:{{pageContent.contact.email}}"><i class="fa fa-envelope-alt"></i><span itemprop="email"></span> {{pageContent.contact.email}}</a><br />
+									</div>
+	
+								</div>
+	
+								<div class="clear"></div>
+	
+							</div>
+	
+						</div>
+	
+					</div>
+					<br /><br />
+					<!-- <h4>Social Networks</h4>
+					<div id="fb-root"></div>
+					
+					<div data-ng-if="fbReady" >
+						<fb-like-box></fb-like-box>
+					</div> -->
+	
+			</div>
+			
+			<div class="clear"></div>
+			<br /><br />
+
+		</div>
+
+		<div class="clear"></div>
+
+	</div>
+
+</div>

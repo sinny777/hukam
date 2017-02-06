@@ -1,0 +1,80 @@
+
+<script type="text/javascript" src="/../js/utils/jquery/jquery.countdown.js"></script>
+
+<div id="landing-area" >
+
+  <div id="content">
+            
+            <div id="countdown-wrap">
+            
+            
+                <div class="container clearfix">
+                
+                    <h1>This section is currently <span>under construction</span> &amp; We'll be <span>LIVE</span> in</h1>
+                    
+                    <div id="countdown"></div>
+                    
+                    <script type="text/javascript">
+                        
+                        countDownDate = new Date( 2015, 08, 08 );
+                    	$('#countdown').countdown({until: countDownDate});
+                    
+                    </script>
+                
+                </div>
+            
+            </div>
+            
+            <div class="content-wrap">
+            
+                <div class="container clearfix">
+                
+                    <div class="lp-subscribe">
+                    
+                        <div id="subscribe-form-result"></div>
+                        
+                        <form id="comingsoon-subscribe" method="post" action="functions/mailchimp.php">
+                    
+                            <div class="lp-subscribe-input">
+                                <input type="text" id="lp-subscribe-email" name="lp-subscribe-email" value="" placeholder="Enter your Email to get notified.." class="required email" />
+                            </div>
+                            
+                            <div class="lp-subscribe-submit">
+                                <input type="submit" id="lp-subscribe-email-submit" name="lp-subscribe-email-submit" value="Subscribe Now" />
+                            </div>
+                        
+                        </form>
+                    
+                    </div>
+                    
+                    <script type="text/javascript">                            
+                    
+                        $("#comingsoon-subscribe").validate({
+                            messages: {
+                                'lp-subscribe-email': ''
+                            },
+                    		submitHandler: function(form) {
+                    			
+                                $(form).ajaxSubmit({
+                    				target: '#subscribe-form-result',
+                                    success: function() {
+                                        $("#comingsoon-subscribe").fadeOut(500, function(){
+                                            $('#subscribe-form-result').fadeIn(500);
+                                        });
+                                    },
+                                    error: function() {
+                                        $('#subscribe-form-result').fadeIn(500);
+                                    }
+                    			});
+                                
+                    		}
+                    	});
+                     
+                    </script>
+                
+                </div>
+            
+            </div>
+        
+        </div>
+</div>

@@ -1,0 +1,56 @@
+<div id="header" data-ng-show="showNavBar">
+	<div class="container clearfix">
+			<div id="primary-menu" class="col_four_fifth" style="margin-bottom:0px;">
+				<div class="rs-menu">
+					<i class="fa fa-align-justify"></i>
+				</div>
+				<ul id="main-menu">
+					<li class="current"><a href="/#!/"><div>Home</div></a></li>
+					<li><a href="/#!/"><div>Services</div></a>
+						<ul>
+							<li><a href="/#!/services/eventmanagement"><div>Event
+										Management</div></a></li>
+							<li><a href="/#!/services/internetOfThings"><div>Internet
+										Of Things (IoT)</div></a></li>
+							<li><a href="/#!/services/applicationdevelopment"><div>Application
+										Development</div></a></li>
+							<li class="divider"></li>
+							<li><a href="/#!/services/livestreaming"><div>Live
+										Streaming</div></a></li>
+							<li class="divider"></li>
+						</ul></li>
+					<li><a href="/#!/videos"><div>Media</div></a>
+						<ul>
+							<li><a href="/#!/events"><div>Live/Upcoming Events</div></a></li>
+							<li><a href="/#!/videos"><div>Popular Videos</div></a></li>
+						</ul></li>
+
+					<li data-ng-show="currentUser.status == 'active'">
+						<a href="/#!/account" >
+							<div>{{currentUser.nickname}}</div>
+						</a>
+						<ul data-ng-show="currentUser.status == 'active'">
+							<li data-ng-show="currentUser.status == 'active'"><a href="/#!/account">
+									<div>Account Settings</div>
+							</a></li>
+							<li data-ng-show="currentUser.status == 'active'"><a href="/#!/account/{{currentUser.id}}"><div>
+										My Page</div></a></li>
+							<li data-ng-show="currentUser.status == 'active'"><a href="/#!/account/events/planEvent"><div>
+										Plan LIVE Event</div></a></li>
+							<li data-ng-show="currentUser.status == 'active'"><a href="/#!/account/iot/smartplace"><div>My
+										Smart Place</div></a></li>
+							<li data-ng-show="currentUser.id == '107949895455737032599'"><a
+								href="/#!/shop/shopping"><div>Shopping</div></a></li>
+							<!-- <li><a href="javascript:void(0);" data-ng-click="toggleMyPlaylists()">My Playlists</a></li> -->
+							<li class="divider"></li>
+							<li data-ng-show="currentUser.status == 'active'"><a href="/#!/" data-ng-click="logout()"><div>
+										Logout</div></a></li>
+						</ul></li>
+				</ul>
+			</div>
+			
+			<!-- <div id="followDiv" class="col_one_fifth" >
+				<div class="addthis_horizontal_follow_toolbox " ></div>
+			</div> -->
+	</div>
+</div>

@@ -1,0 +1,51 @@
+<div id="content" >
+
+<META view-head NAME="description"
+  CONTENT="{{pageContent.pageDescription}}">
+<meta view-head property="og:title" content="{{pageContent.pageTitle}}" />
+<meta view-head property="og:description"
+  content="{{pageContent.pageDescription}}" />
+<meta view-head property="og:site_name" content="http://www.granslive.com" />
+
+	<div class="container clearfix" data-ng-if="endpointsReady"  >
+		<div class="entry_content" data-ng-init="getFeatures()">
+				<br />
+				<view-title>{{feature.title}}</view-title>
+				<h2>{{feature.title}}</h2>
+				
+            </div>
+            
+            <br />
+            
+            <img ng-src="{{feature.imagePath}}" alt="{{feature.title}}" width="200px" />
+            <br />
+            
+            <p ng-bind-html-unsafe="feature.content.value"></p>
+            
+            <br /> <br />
+            
+            <div class="clear clearfix"></div>
+            
+			<div class="clear"></div>
+			
+			<div class="clear"></div>
+			<div data-ng-repeat="feature in features">
+				<div class="col_one_third" data-ng-show="{{($index + 1) % 3 != 0}}">
+					<div class="product-feature product-feature3">
+						<img ng-src="{{feature.imagePath}}" alt="{{feature.title}}" /><h3><a href="/#!/services/dynamic/{{feature.featureKey}}" >{{feature.title}}</a> </h3>
+						<p ng-bind-html-unsafe="feature.content.value | truncate:150"></p>
+					</div>
+				</div>
+				<div class="col_one_third col_last" data-ng-show="{{($index + 1) % 3 == 0}}">
+					<div class="product-feature product-feature3">
+						<img ng-src="{{feature.imagePath}}" alt="{{feature.title}}" /><h3><a href="/#!/services/dynamic/{{feature.featureKey}}" >{{feature.title}}</a> </h3>
+						<p ng-bind-html-unsafe="feature.content.value | truncate:150"></p>
+					</div>
+				</div>
+			</div>
+            <div class="clear"></div>
+		
+	</div>
+
+</div>
+
