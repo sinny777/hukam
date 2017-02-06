@@ -13,7 +13,7 @@
     Document Reset
 -----------------------------------------------------------------*/
 
-/* http://meyerweb.com/eric/tools/css/reset/ 
+/* http://meyerweb.com/eric/tools/css/reset/
    v2.0 | 20110126
    License: none (public domain)
 */
@@ -27,8 +27,8 @@ b, u, i, center,
 dl, dt, dd, ol, ul, li,
 fieldset, form, label, legend,
 table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
 	margin: 0;
@@ -39,7 +39,7 @@ time, mark, audio, video {
 	vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure, 
+article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
 	display: block;
 }
@@ -112,7 +112,7 @@ body {
 	line-height: 1;
 	color: #777;
 	font: 12px/20px "Open Sans", Helvetica, Arial, sans-serif;
-	background: #EEE url("/hukam/static/assets/images/patterns/light/pattern10.png") repeat fixed;
+	background: #EEE url("//storage.googleapis.com/hukam-cdn/public/images/patterns/light/pattern10.png") repeat fixed;
 }
 
 input,
@@ -383,7 +383,7 @@ span.page-divider span {
 
 .dotted-divider {
     clear: both;
-    background: url("/hukam/static/assets/images/divider.png") repeat-x;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/divider.png") repeat-x;
     margin: 30px 0;
     height: 5px;
 }
@@ -395,7 +395,7 @@ span.page-divider span {
 	display: block;
 	width: 100%;
 	height: 100%;
-	background: url("/hukam/static/assets/images/preloader.gif") center center no-repeat #FFF;
+	background: url("//storage.googleapis.com/hukam-cdn/public/images/preloader.gif") center center no-repeat #FFF;
 }
 
 .preloader2 { background-color: transparent; }
@@ -524,7 +524,7 @@ input[type="radio"] {
     top: 2px;
 }
 
-textarea { 
+textarea {
 	width: 90%;
 	height: 150px;
 	line-height: 150%;
@@ -768,59 +768,59 @@ form small {
 
 #top-social li.ts-facebook a { background-color: #3B5998; }
 
-#top-social li.ts-facebook .ts-icon { background: url("/hukam/static/assets/images/icons/social/facebook.png") no-repeat center center; }
+#top-social li.ts-facebook .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/facebook.png") no-repeat center center; }
 
 #top-social li.ts-twitter a { background-color: #3CF; }
 
-#top-social li.ts-twitter .ts-icon { background: url("/hukam/static/assets/images/icons/social/twitter.png") no-repeat center center; }
+#top-social li.ts-twitter .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/twitter.png") no-repeat center center; }
 
 #top-social li.ts-gplus a { background-color: #BD3518; }
 
-#top-social li.ts-gplus .ts-icon { background: url("/hukam/static/assets/images/icons/social/gplus.png") no-repeat center center; }
+#top-social li.ts-gplus .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/gplus.png") no-repeat center center; }
 
 #top-social li.ts-dribbble a { background-color: #D97AA5; }
 
-#top-social li.ts-dribbble .ts-icon { background: url("/hukam/static/assets/images/icons/social/dribbble.png") no-repeat center center; }
+#top-social li.ts-dribbble .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/dribbble.png") no-repeat center center; }
 
 #top-social li.ts-forrst a { background-color: #304C25; }
 
-#top-social li.ts-forrst .ts-icon { background: url("/hukam/static/assets/images/icons/social/forrst.png") no-repeat center center; }
+#top-social li.ts-forrst .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/forrst.png") no-repeat center center; }
 
 #top-social li.ts-blogger a { background-color: #FCA448; }
 
-#top-social li.ts-blogger .ts-icon { background: url("/hukam/static/assets/images/icons/social/blogger.png") no-repeat center center; }
+#top-social li.ts-blogger .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/blogger.png") no-repeat center center; }
 
 #top-social li.ts-flickr a { background-color: #FF0084; }
 
-#top-social li.ts-flickr .ts-icon { background: url("/hukam/static/assets/images/icons/social/flickr.png") no-repeat center center; }
+#top-social li.ts-flickr .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/flickr.png") no-repeat center center; }
 
 #top-social li.ts-pinterest a { background-color: #CB2027; }
 
-#top-social li.ts-pinterest .ts-icon { background: url("/hukam/static/assets/images/icons/social/pinterest.png") no-repeat center center; }
+#top-social li.ts-pinterest .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/pinterest.png") no-repeat center center; }
 
 #top-social li.ts-rss a { background-color: #F88F16; }
 
-#top-social li.ts-rss .ts-icon { background: url("/hukam/static/assets/images/icons/social/rss.png") no-repeat center center; }
+#top-social li.ts-rss .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/rss.png") no-repeat center center; }
 
 #top-social li.ts-vimeo a { background-color: #0590B8; }
 
-#top-social li.ts-vimeo .ts-icon { background: url("/hukam/static/assets/images/icons/social/vimeo.png") no-repeat center center; }
+#top-social li.ts-vimeo .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/vimeo.png") no-repeat center center; }
 
 #top-social li.ts-youtube a { background-color: #F33; }
 
-#top-social li.ts-youtube .ts-icon { background: url("/hukam/static/assets/images/icons/social/youtube.png") no-repeat center center; }
+#top-social li.ts-youtube .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/youtube.png") no-repeat center center; }
 
 #top-social li.ts-phone a { background-color: #4818AB; }
 
-#top-social li.ts-phone .ts-icon { background: url("/hukam/static/assets/images/icons/social/phone.png") no-repeat center center; }
+#top-social li.ts-phone .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/phone.png") no-repeat center center; }
 
 #top-social li.ts-mail a { background-color: #444; }
 
-#top-social li.ts-mail .ts-icon { background: url("/hukam/static/assets/images/icons/social/mail.png") no-repeat center center; }
+#top-social li.ts-mail .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/mail.png") no-repeat center center; }
 
 #top-social li.ts-linkedin a { background-color: #0A6495; }
 
-#top-social li.ts-linkedin .ts-icon { background: url("/hukam/static/assets/images/icons/social/linkedin.png") no-repeat center center; }
+#top-social li.ts-linkedin .ts-icon { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/social/linkedin.png") no-repeat center center; }
 
 
 /* ----------------------------------------------------------------
@@ -916,7 +916,7 @@ a.brand-logo {
 #lp-contacts,
 .sticky-menu-wrap {
     position: relative;
-	/* float: right; 
+	/* float: right;
 	max-width: 710px;*/
 	height: 35px;
 	color: #ffffff;
@@ -955,7 +955,7 @@ a.brand-logo {
     position: relative;
 	float: left;
 	height: 35px;
-	/* background: url("/hukam/static/assets/images/icons/menu-divider.png") no-repeat left center; */
+	/* background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/menu-divider.png") no-repeat left center; */
 	margin-left: 1px;
 }
 
@@ -1131,7 +1131,7 @@ a.brand-logo {
 
 #primary-menu ul > li.sub-menu > a > div,
 .sticky-menu-wrap ul > li.sub-menu > a > div {
-    background-image: url("/hukam/static/assets/images/icons/mainsubmenuh.png");
+    background-image: url("//storage.googleapis.com/hukam-cdn/public/images/icons/mainsubmenuh.png");
     background-position: right top;
     background-repeat: no-repeat;
     padding-right: 16px;
@@ -1155,13 +1155,13 @@ a.brand-logo {
 .sticky-menu-wrap ul li.current.sub-menu > a > div,
 .sticky-menu-wrap > ul > li.current-menu-ancestor.sub-menu > a > div,
 .sticky-menu-wrap > ul > li.current-menu-parent.sub-menu > a > div,
-.sticky-menu-wrap > ul > li.current-menu-item.sub-menu > a > div { background-image: url("/hukam/static/assets/images/icons/mainsubmenuh.png"); }
+.sticky-menu-wrap > ul > li.current-menu-item.sub-menu > a > div { background-image: url("//storage.googleapis.com/hukam-cdn/public/images/icons/mainsubmenuh.png"); }
 
 #primary-menu ul ul > li.sub-menu > a,
 #primary-menu ul ul > li.sub-menu:hover > a,
 .sticky-menu-wrap ul ul > li.sub-menu > a,
 .sticky-menu-wrap ul ul > li.sub-menu:hover > a {
-    background-image: url("/hukam/static/assets/images/icons/submenu.png");
+    background-image: url("//storage.googleapis.com/hukam-cdn/public/images/icons/submenu.png");
     background-position: right center;
     background-repeat: no-repeat;
 }
@@ -1310,11 +1310,11 @@ a.brand-logo {
 
 #header.header6 #primary-menu li a { color: #FFF; }
 
-#header.header6 #primary-menu > div > ul > li.sub-menu > a > div { background-image: url("/hukam/static/assets/images/icons/mainsubmenuh.png"); }
+#header.header6 #primary-menu > div > ul > li.sub-menu > a > div { background-image: url("//storage.googleapis.com/hukam-cdn/public/images/icons/mainsubmenuh.png"); }
 
 
 #header.header6 #primary-menu ul li {
-    background-image: url("/hukam/static/assets/images/icons/menu-dividerd.png");
+    background-image: url("//storage.googleapis.com/hukam-cdn/public/images/icons/menu-dividerd.png");
     background-position: left center;
     background-repeat: no-repeat;
 }
@@ -1348,7 +1348,7 @@ a.brand-logo {
 #header.header7 #primary-menu ul ul a { padding: 0 15px; }
 
 #header.header7 #primary-menu > ul > li.sub-menu > a > div {
-    background-image: url("/hukam/static/assets/images/icons/mainsubmenu.png");
+    background-image: url("//storage.googleapis.com/hukam-cdn/public/images/icons/mainsubmenu.png");
     background-position: bottom center;
     padding: 0 0 24px 0;
 }
@@ -1416,7 +1416,7 @@ a.brand-logo {
     margin-left: 1px;
     /* width: 50px; */
     height: 60px;
-    background: url("/hukam/static/assets/images/icons/menu-divider.png") no-repeat left center;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/menu-divider.png") no-repeat left center;
 }
 
 #sticky-menu .sticky-search-trigger a,
@@ -1582,15 +1582,15 @@ a.brand-logo {
 .flexslider a:focus  { outline: none; border: none; }
 .slider-wrap,
 .flex-control-nav,
-.flex-direction-nav {margin: 0; padding: 0; list-style: none; border: none;} 
+.flex-direction-nav {margin: 0; padding: 0; list-style: none; border: none;}
 
 .flexslider {position: relative;margin: 0; padding: 0;}
 .flexslider .slider-wrap > .slide {display: none; -webkit-backface-visibility: hidden;}
 .flexslider .slider-wrap img {width: 100%; display: block;}
 .flex-pauseplay span {text-transform: capitalize;}
 
-.slider-wrap:after {content: "."; display: block; clear: both; visibility: hidden; line-height: 0; height: 0;} 
-html[xmlns] .slider-wrap {display: block;} 
+.slider-wrap:after {content: "."; display: block; clear: both; visibility: hidden; line-height: 0; height: 0;}
+html[xmlns] .slider-wrap {display: block;}
 * html .slider-wrap {height: 1%;}
 
 .no-js .slider-wrap > .slide:first-child {display: block;}
@@ -1680,7 +1680,7 @@ html[xmlns] .slider-wrap {display: block;}
     width: 36px !important;
     height: 36px !important;
     text-indent: -9999px;
-    background: url("/hukam/static/assets/images/icons/slider-nav.png") no-repeat 0 0;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/slider-nav.png") no-repeat 0 0;
     background-color: #111;
     background-color: rgba(11,11,11,0.8);
     transition: background-color .2s linear;
@@ -1693,7 +1693,7 @@ html[xmlns] .slider-wrap {display: block;}
 .tp-leftarrow.default,
 .tp-rightarrow.default {
     z-index: 30;
-    background: url("/hukam/static/assets/images/icons/slider-nav.png") no-repeat 0 0 !important;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/slider-nav.png") no-repeat 0 0 !important;
     background-color: #111 !important;
     background-color: rgba(11,11,11,0.8) !important;
     transition: opacity .25s ease-in-out, background-color .2s linear;
@@ -1742,7 +1742,7 @@ html[xmlns] .slider-wrap {display: block;}
     bottom: 0;
     width: 28px !important;
     height: 28px !important;
-    background-image: url("/hukam/static/assets/images/icons/portfolio-slider-nav.png");
+    background-image: url("//storage.googleapis.com/hukam-cdn/public/images/icons/portfolio-slider-nav.png");
     transition: background-color .2s linear;
     -moz-transition: background-color .2s linear;
     -webkit-transition: background-color .2s linear;
@@ -1884,7 +1884,7 @@ html[xmlns] .slider-wrap {display: block;}
 
 #top-search input {
     width: 430px;
-	background-image: url("/hukam/static/assets/images/icons/search.png");
+	background-image: url("//storage.googleapis.com/hukam-cdn/public/images/icons/search.png");
 	background-repeat: no-repeat;
 	background-position: left;
 	padding-left: 38px;
@@ -2077,7 +2077,7 @@ ul.landing-features li:hover { font-weight: bold; }
     padding: 13px 12px 11px 46px;
     font-size: 16px;
     color: #999;
-    background: url("/hukam/static/assets/images/icons/subscribe.png") left no-repeat;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/subscribe.png") left no-repeat;
     margin: 0 !important;
 }
 
@@ -2402,7 +2402,7 @@ ul.landing-features li:hover { font-weight: bold; }
     text-indent: -9999px;
     background-color: #222;
     background-repeat: no-repeat;
-    background-image: url("/hukam/static/assets/images/icons/portfolio-overlay.png");
+    background-image: url("//storage.googleapis.com/hukam-cdn/public/images/icons/portfolio-overlay.png");
 }
 
 .p-overlay-icons a:first-child { margin-left: 0; }
@@ -2637,7 +2637,7 @@ ul.landing-features li:hover { font-weight: bold; }
     text-indent: -9999px;
     width: 32px;
     height: 32px;
-    background: #E5E5E5 url("/hukam/static/assets/images/icons/portfolio-nav.png") no-repeat 0 0;
+    background: #E5E5E5 url("//storage.googleapis.com/hukam-cdn/public/images/icons/portfolio-nav.png") no-repeat 0 0;
     transition: background-color .2s linear,background-position .3s linear;
     -moz-transition: background-color .2s linear,background-position .3s linear;
     -webkit-transition: background-color .2s linear,background-position .3s linear;
@@ -3705,7 +3705,7 @@ p.wp-caption-text {
 
 .promo {
     position: relative;
-    background: url("/hukam/static/assets/images/promo.png") repeat;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/promo.png") repeat;
     padding: 15px 18px;
     border-left: 3px solid #b02e67;
     margin-bottom: 30px;
@@ -3828,7 +3828,7 @@ p.wp-caption-text {
     border: none;
     width: 48px;
     height: 48px;
-    background: #b02e67 url("/hukam/static/assets/images/icons/search-404.png") no-repeat center center;
+    background: #b02e67 url("//storage.googleapis.com/hukam-cdn/public/images/icons/search-404.png") no-repeat center center;
     text-indent: -9999px;
     border-radius: 24px;
     -moz-border-radius: 24px;
@@ -4049,12 +4049,12 @@ p.wp-caption-text {
     font-size: 15px;
     font-family: 'Open Sans', sans-serif;
 	color: #333;
-	background: url("/hukam/static/assets/images/icons/toggle-plus.png") no-repeat left;
+	background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/toggle-plus.png") no-repeat left;
 }
 
 .toggle .toggleta {
     font-weight: bold;
-    background: url("/hukam/static/assets/images/icons/toggle-minus.png") no-repeat left;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/toggle-minus.png") no-repeat left;
 }
 
 .toggle .togglec {
@@ -4485,7 +4485,7 @@ transition: color .25s ease, background-color .25s ease, opacity .5s ease;
 
 
 .quote {
-    background: url("/hukam/static/assets/images/icons/quote.png") left top no-repeat;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/quote.png") left top no-repeat;
     margin: 10px 0;
     padding: 0 0 0 15px;
 	font-size: 15px;
@@ -5022,7 +5022,7 @@ blockquote.quote-right {
 	white-space: nowrap;
 	margin: 5px;
 	padding: 0;
-	background-image: url("/hukam/static/assets/images/button.png");
+	background-image: url("//storage.googleapis.com/hukam-cdn/public/images/button.png");
 	background-repeat: repeat-x;
 	background-position: 0 0;
 	border: 1px solid rgba(114,114,114,0.4);
@@ -5036,7 +5036,7 @@ blockquote.quote-right {
 }
 
 .button:hover {
-    background-image: url("/hukam/static/assets/images/button.png");
+    background-image: url("//storage.googleapis.com/hukam-cdn/public/images/button.png");
 	background-position: 0 -30px;
     background-color: #666 !important;
 	text-decoration: none;
@@ -5325,7 +5325,7 @@ button.button span {
     line-height: 40px;
     font-family: "Droid Serif", serif;
     background-color: #444;
-    margin: 0 -1px;    
+    margin: 0 -1px;
     color: #FFF;
     text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
 }
@@ -5393,11 +5393,11 @@ button.button span {
     font-size: 16px;
     font-family: 'Open Sans', sans-serif;
 	color: #333;
-	background: url("/hukam/static/assets/images/icons/toggle-plus.png") no-repeat left;
+	background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/toggle-plus.png") no-repeat left;
 }
 
 .acctitlec {
-	background: url("/hukam/static/assets/images/icons/toggle-minus.png") no-repeat left;
+	background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/toggle-minus.png") no-repeat left;
 	cursor: auto;
 }
 
@@ -5447,7 +5447,7 @@ button.button span {
     text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
 }
 
-#twitter-panel .preloader2 { background-image: url("/hukam/static/assets/images/preloader-dark.gif"); }
+#twitter-panel .preloader2 { background-image: url("//storage.googleapis.com/hukam-cdn/public/images/preloader-dark.gif"); }
 
 #twitter-panel-icon {
     float: left;
@@ -5550,7 +5550,7 @@ button.button span {
     border-radius: 4px;
     border: 15px solid #FFF;
 }
-    
+
 .recaptcha_is_showing_audio embed {
     height: 0;
     width: 0;
@@ -5812,7 +5812,7 @@ body > iframe { display: none; }
     margin: 0 -40px -40px 0;
 }
 
-#footer .col_one_fourth {            
+#footer .col_one_fourth {
     width: 210px;
     margin: 0 40px 40px 0;
 }
@@ -5874,7 +5874,7 @@ body > iframe { display: none; }
 
 .widget_search input[type="text"] {
     margin: 0 !important;
-    background: url("/hukam/static/assets/images/icons/search.png") no-repeat left center;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/search.png") no-repeat left center;
     padding-left: 39px;
     width: 163px;
 }
@@ -5894,11 +5894,11 @@ body > iframe { display: none; }
 .twitter-widget ul li {
     padding: 0 0 0 18px;
     margin-top: 15px;
-    background: url("/hukam/static/assets/images/icons/twitter.png") top left no-repeat;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/twitter.png") top left no-repeat;
 }
 
 
-#footer.footer-dark .twitter-widget ul li { background: url("/hukam/static/assets/images/icons/ftwitter.png") top left no-repeat; }
+#footer.footer-dark .twitter-widget ul li { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/ftwitter.png") top left no-repeat; }
 
 .twitter-widget ul li:first-child { margin-top: 0; }
 
@@ -6091,11 +6091,11 @@ a.twitter-follow-me:hover,
 
 .widget_recent_comments li {
     display: block;
-    background: url("/hukam/static/assets/images/icons/sidebar-comment.png") left top no-repeat;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/sidebar-comment.png") left top no-repeat;
     padding: 4px 0 4px 20px;
 }
 
-#footer.footer-dark .widget_recent_comments li { background: url("/hukam/static/assets/images/icons/footer-comment.png") left top no-repeat; }
+#footer.footer-dark .widget_recent_comments li { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/footer-comment.png") left top no-repeat; }
 
 .widget_nav_menu li a,
 .widget_links li a,
@@ -6105,7 +6105,7 @@ a.twitter-follow-me:hover,
 .widget_categories li a,
 .widget_pages li a,
 .widget_recent_comments li a {
-    background: url("/hukam/static/assets/images/icons/sidebar-link.png") left top no-repeat;
+    background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/sidebar-link.png") left top no-repeat;
     border: none !important;
     color: #444;
     font-size: 13px;
@@ -6127,7 +6127,7 @@ a.twitter-follow-me:hover,
 #footer.footer-dark .widget_recent_comments li a,
 #footer.footer-dark .widget_recent_entries li a,
 #footer.footer-dark .widget_categories li a,
-#footer.footer-dark .widget_pages li a { background: url("/hukam/static/assets/images/icons/footer-link.png") left top no-repeat; }
+#footer.footer-dark .widget_pages li a { background: url("//storage.googleapis.com/hukam-cdn/public/images/icons/footer-link.png") left top no-repeat; }
 
 
 .widget_recent_comments li a {
@@ -6375,7 +6375,7 @@ a.twitter-follow-me:hover,
     height: 16px;
 }
 
- 
+
 /* ----------------------------------------------------------------
     Stretched Layout
 -----------------------------------------------------------------*/
@@ -6394,7 +6394,7 @@ a.twitter-follow-me:hover,
 .stretched .content-wrap {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     -moz-box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.1);            
+    -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 .stretched #header.header2 #primary-menu ul,
@@ -6460,7 +6460,7 @@ a.twitter-follow-me:hover,
     display: block;
     border: none;
     height: 11px;
-    background: transparent url("/hukam/static/assets/images/slider-shadow.png") repeat-x;
+    background: transparent url("//storage.googleapis.com/hukam-cdn/public/images/slider-shadow.png") repeat-x;
 }
 
 .stretched #page-title { padding: 30px 0; }
@@ -6561,4 +6561,3 @@ a.twitter-follow-me:hover,
 #loginModal .modal-dialog{
 	max-width: 450px;
 }
-

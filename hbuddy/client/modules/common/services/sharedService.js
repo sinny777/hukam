@@ -7,8 +7,8 @@ define(['angular'], function (angular) {
 	  var service = {};
 
 	  service.basicContent = {
-			    'siteName':'Hukam',
-			  	'pageTitle':'Hukam - Business Solutions',
+			    'siteName':'hBuddy',
+			  	'pageTitle':'hBuddy - Business Solutions',
 				'pageDescription':'For Webcasting Live Events with the availability of many live services to the online viewers and Internet of Things with Home Automation that includes Smart Meters and Smart WiFi Switches',
 				'topHeader' : 'modules/common/partials/common/topHeader.htm',
 				'stickyMenu' : 'modules/common/partials/common/stickyMenu.htm',

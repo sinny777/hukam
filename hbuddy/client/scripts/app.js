@@ -122,21 +122,21 @@ define([
         });
         
         /*
-        $rootScope.loadingScreen = $('<div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background-color:gray;background-color:rgba(70,70,70,0.2);"><img style="position:absolute;top:50%;left:50%;" alt="" src="/assets/images/loading.gif" /></div>')
+        $rootScope.loadingScreen = $('<div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background-color:gray;background-color:rgba(70,70,70,0.2);"><img style="position:absolute;top:50%;left:50%;" alt="" src="//storage.googleapis.com/hukam-cdn/public/images/loading.gif" /></div>')
         .appendTo($('body')).hide();
         */
         
         $rootScope.loginLable = 'Login';
     	$rootScope.fbReady = false;
     	$rootScope.isLogin = false;
-    	$rootScope.currentUser = {'imagePath':'/../assets/images/icons/avatar.png'};
+    	$rootScope.currentUser = {'imagePath':'/hukam-cdn/public/images/icons/avatar.png'};
     	$rootScope.plan = {};
     	$rootScope.showCalculator = false;
     	$rootScope.showPlans = true;
     	$rootScope.pageContent = {};
     	$rootScope.authResult = {};
     	
-    	$rootScope.loadingScreen = $('<div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background-color:gray;background-color:rgba(70,70,70,0.2);"><img style="position:absolute;top:50%;left:50%;" alt="" src="/../assets/images/loading.gif" /></div>')
+    	$rootScope.loadingScreen = $('<div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background-color:gray;background-color:rgba(70,70,70,0.2);"><img style="position:absolute;top:50%;left:50%;" alt="" src="//storage.googleapis.com/hukam-cdn/public/images/loading.gif" /></div>')
         .appendTo($('body')).hide();
     	
     	 $rootScope.$on('$locationChangeStart', function() {
