@@ -242,7 +242,7 @@ define(function () {
       		}, 1);
       };
       
-      $rootScope.showStreamingSlider = function(){
+      $rootScope.showHBuddySlider = function(){
       	var config = {width: '1020', height: '500'};
       		setTimeout(function(){
   				commonService.handleSlider(config);
