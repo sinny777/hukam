@@ -18,7 +18,6 @@ define(function () {
 		$rootScope.playlist = null;
 		$rootScope.showPlaylists = false;
 		$rootScope.share = {};
-		$rootScope.endpointsReady = false;
 		$rootScope.previousPage = '';
 		$rootScope.actions = {fetchingFromGoogle: false, fetchingUserFromGransLive: false};
 		
@@ -137,7 +136,7 @@ define(function () {
   		if(!$rootScope.endpointsReady){
   			console.log("<<<<<<<<<< IN initgapi >>>>>>>>>>>>>>>>>>.")
   			cloudendpoint.init().then(function(){
-  				console.log('GransLive Services Initialized ');
+  				console.log('Hukam Services Initialized ');
   				$rootScope.endpointsReady = true;
   			},function(){alert('Not Initialized')});
   		}
@@ -241,6 +240,13 @@ define(function () {
   				commonService.handleSlider(config);
       		}, 1);
       };
+      
+      $rootScope.showStreamingSlider = function(){
+        	var config = {width: '1020', height: '500'};
+        		setTimeout(function(){
+    				commonService.handleSlider(config);
+    			}, 3);
+        };
       
       $rootScope.showHBuddySlider = function(){
       	var config = {width: '1020', height: '500'};

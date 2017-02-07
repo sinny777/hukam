@@ -12,24 +12,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div id="top-bar" class="top-bar2" >
 
+		<div id="logo">
+	        <a href="/#!/" class="standard-logo" title="{{pageContent.siteName}}" >{{pageContent.siteName}}</a>
+	        <a href="/#!/" class="retina-logo" title="{{pageContent.siteName}}" >{{pageContent.siteName}}</a>
+	    </div>
+
 	    <div id="top-menus">
 	    
 	        <ul class="nav">
-	        
-	          <!-- <li>
-	          	<a href="javascript:void(0);" data-ng-click="toggleRadioDisplay()" ><i class="icon-circled icon-light fa fa-bullhorn fa-2x stip" title="Listen To GransLive Radio"></i></a>
-	          </li> -->
-	          
-	          <!-- <li class="top-menu-em">
-	          	<a href="javascript:void(0);" data-ng-click="toggleNavBar()" ><i class="icon-plain fa fa-align-justify fa-2x stip" title="Navigation Menu"></i></a>
-	          </li> -->
-	        
-	          <!--  <li class="top-menu-em" data-ng-hide="currentUser.id">
-		          <a href="" data-ng-click="login();" class="stip" title="Login to Your Account" >
-		        	  <i></i>Login
-		          </a>
-	           </li> -->
-	           
+
 	           <li>
 	           		<div style="float:right;margin-top:15px">
 					      <div data-addthis-toolbox data-url="http://hbuddy.hukam.in" id="hbuddy" 
@@ -69,19 +60,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	        </ul>
 	  
 	    </div>
-	    	<div id="logo">
-		        
-		        <a href="/#!/" class="standard-logo" title="{{pageContent.siteName}}" >{{pageContent.siteName}}</a>
-		        <a href="/#!/" class="retina-logo" title="{{pageContent.siteName}}" >{{pageContent.siteName}}</a>
-		        
-		    </div>
-                
-            <div id="top-search" >
-		      <form id="top-search-form" data-ng-submit="searchFor(searchTerm)" class="navbar-search pull-left" >
-		        <input type="text" class="search-query span2" data-ng-model="searchTerm"  placeholder="Search Here ... " />
-		      </form>
-		    </div> 
-		    
+	    
+        <div id="top-search" >
+	      <form id="top-search-form" data-ng-submit="searchFor(searchTerm)" class="navbar-search pull-left" >
+	        <input type="text" class="search-query span2" data-ng-model="searchTerm"  placeholder="Search Here ... " />
+	      </form>
+	    </div> 
+	    
 		    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
 	           <div class="modal-dialog">
 	             <div class="modal-content">

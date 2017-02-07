@@ -725,8 +725,13 @@ define(['angular'], function (angular) {
 	  service.handleSlider = function(config){
 		  if (jQuery.fn.cssOriginal != undefined)
 				jQuery.fn.css = jQuery.fn.cssOriginal;
-
+		  
+		  console.log("\n\nIN handleSlider with config: >>>> ", config);
 			jQuery('.fullwidthbanner').revolution({
+				responsiveLevels: [1240, 1024, 778, 480],
+			    gridwidth:[1240, 1024, 778, 480],
+			    gridheight:[400, 768, 960, 720],
+			    visibilityLevels:[1240, 1024, 1024, 480],
 				delay : 9000,
 				startwidth : config.width,
 				startheight : config.height,
