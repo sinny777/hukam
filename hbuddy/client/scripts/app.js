@@ -9,6 +9,7 @@ define([
     'angularFilesystem',
     'xeditable',
     'angularMoment',
+    'angularGoogleAnalytics',
     'cryptojslib',
     'querystring',
     'mqtt',
@@ -37,11 +38,10 @@ define([
 ], function (angular, angularRoute) {
     'use strict';
 
-    var granslive =  angular.module('granslive', [
+    var hukam =  angular.module('hukam', [
         'ngRoute',
         'ngResource',
         'ngAnimate',
-//        'ui.bootstrap',
         'LocalStorageModule',
         'toastr',
         'ngCookies',
@@ -51,6 +51,7 @@ define([
         'app.config',
         'lbServices',
         'angularjs-facebook-sdk.config',
+        'angular-google-analytics',
         'viewhead',
         'googleAPIModule',
         'socialModule',
@@ -62,41 +63,41 @@ define([
     ]);
     
     
-    granslive.config(function(toastrConfig) {
+    hukam.config(function(toastrConfig, AnalyticsProvider) {
     	
-        angular.extend(toastrConfig, {
-            allowHtml: false,
-            closeButton: true,
-            closeHtml: '<button>&times;</button>',
-            containerId: 'toast-container',
-            extendedTimeOut: 2000,
-            iconClasses: {
-                error: 'toast-error',
-                info: 'toast-info',
-                success: 'toast-success',
-                warning: 'toast-warning'
-            },
-            maxOpened: 0,
-            messageClass: 'toast-message',
-            newestOnTop: true,
-            onHidden: null,
-            onShown: null,
-            positionClass: 'toast-top-full-width',
-            preventDuplicates: false,
-            progressBar: false,
-            tapToDismiss: true,
-            target: 'body',
-            templates: {
-                toast: 'directives/toast/toast.html',
-                progressbar: 'directives/progressbar/progressbar.html'
-            },
-            timeOut: 5000,
-            titleClass: 'toast-title',
-            toastClass: 'toast'
-        });
+    	AnalyticsProvider.setAccount({
+    		  tracker: 'UA-91626049-1',
+    		  name: "hbuddy-tracker1",
+    		  fields: {
+    		    cookieDomain: 'hbuddy.hukam.in',
+    		    cookieName: 'hbuddy-hukam',
+    		    cookieExpires: 20000
+    		    // See: [Analytics Field Reference](https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference) for a list of all fields.
+    		  },
+    		  crossDomainLinker: true,
+    		  crossLinkDomains: ['domain-1.com', 'domain-2.com'],
+    		  displayFeatures: true,
+    		  enhancedLinkAttribution: true,
+    		  select: function (args) {
+    		    // This function is used to qualify or disqualify an account object to be run with commands.
+    		    // If the function does not exist, is not a function, or returns true then the account object will qualify.
+    		    // If the function exists and returns false then the account object will be disqualified.
+    		    // The 'args' parameter is the set of arguments (which contains the command name) that will be sent to Universal Analytics.
+    		    return true;
+    		  },
+    		  set: {
+    		    forceSSL: true
+    		    // This is any set of `set` commands to make for the account immediately after the `create` command for the account.
+    		    // The property key is the command and the property value is passed in as the argument, _e.g._, `ga('set', 'forceSSL', true)`.
+    		    // Order of commands is not guaranteed as it is dependent on the implementation of the `for (property in object)` iterator.
+    		  },
+    		  trackEvent: true,
+    		  trackEcommerce: true
+    		});
+    	
     });
     
-    granslive.run(['$rootScope','$location', '$window', 'LoopBackAuth', 'editableOptions', function($rootScope, $location, $window, LoopBackAuth, editableOptions) {
+    hukam.run(['$rootScope','$location', '$window', 'LoopBackAuth', 'editableOptions', function($rootScope, $location, $window, LoopBackAuth, editableOptions) {
         $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
             console.log('IN routeChangeStart >>>>>>> ');
              $rootScope.footerLinks = [];
@@ -191,7 +192,7 @@ define([
     }]);
      
     
-    return granslive;
+    return hukam;
 
 
 });

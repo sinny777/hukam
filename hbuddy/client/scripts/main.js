@@ -16,6 +16,7 @@ require.config({
         'angularCookies' : 'js/vendor/angular-cookies/angular-cookies.min',
         'xeditable' : 'js/vendor/angular-xeditable/dist/js/xeditable.min',
         'angularMoment' : 'js/vendor/angular-moment/angular-moment.min',
+        'angularGoogleAnalytics': 'js/vendor/angular-google-analytics/dist/angular-google-analytics',
         'cryptojslib' : 'js/vendor/cryptojslib/rollups/pbkdf2',
         'querystring': 'js/vendor/querystring/querystring.min',
         'mqtt':'js/vendor/paho-mqtt/src/mqttws31',
@@ -62,6 +63,9 @@ require.config({
         },
         'angularMoment' :{
             deps: ['angular']
+        },
+        'angularGoogleAnalytics':{
+        	 deps: ['angular']
         },
         'cryptojslib' : {
             exports : 'cryptojslib'
