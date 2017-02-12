@@ -168,7 +168,7 @@ define(['angular'], function (angular) {
 		  MyUser.login(credentials).$promise.then(function(userObj){
 			  console.log("In authService, AFTER LOGIN: >> ", userObj);
 			  if(!userObj.provider){
-				  userObj.provider = 'granslive';
+				  userObj.provider = 'hukam';
 				  if(userObj.user && !userObj.profile){
 					  userObj.profile = userObj.user;
 					  delete userObj.user;

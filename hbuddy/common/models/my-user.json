@@ -3,6 +3,7 @@
   "plural": "MyUsers",
   "base": "User",
   "idInjection": true,
+  "injectOptionsFromRemoteContext": true,
   "options": {
     "validateUpsert": true
   },

@@ -5,13 +5,13 @@
 	        <a href="/#!/" class="standard-logo" title="{{pageContent.siteName}}" >{{pageContent.siteName}}</a>
 	        <a href="/#!/" class="retina-logo" title="{{pageContent.siteName}}" >{{pageContent.siteName}}</a>
 	    </div>
-
+	    
 	    <div id="top-menus">
 	    
 	        <ul class="nav">
 
 	           <li>
-	           		<div style="float:right;margin-top:15px">
+	           		<div style="float:right;margin-top:17px;margin-bottom:7px; ">
 					      <div data-addthis-toolbox data-url="http://hbuddy.hukam.in" id="hbuddy" 
 					            class="addthis_toolbox addthis_default_style addthis_16x16_style">
 					        <a class="addthis_button_facebook"></a>
@@ -26,25 +26,32 @@
 	           <li class="dropdown top-menu-em" data-ng-if="!currentUser.id">
 		          <a href="#" data-toggle="modal" data-target="#loginModal" ><b>Login</b></a>
 		       </li>
-			        <li class="dropdown" data-ng-if="currentUser.id">
-			          <a data-ng-if="currentUser.provider == 'granslive' && isAdmin();" href="#" class="dropdown-toggle" data-toggle="dropdown"><b>Admin</b> <span class="caret"></span></a>
-						<ul class="dropdown-menu">
-				            <li><a href="#!/admin/products"><i class="flaticon-device" ></i>&nbsp;Products</a></li>
-				            <li class="divider"></li>
-				            <li><a href="#" data-ng-click="logout()"><i class="fa fa-power-off" ></i>&nbsp; Logout</a></li>
-						</ul>
-					</li>
-			        <li class="dropdown" data-ng-if="currentUser.id">
-			          <a data-ng-if="currentUser.provider == 'granslive' && currentUser.profile" href="#" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.profile.username}}</b> <span class="caret"></span></a>
-			          <a data-ng-if="currentUser.provider != 'granslive' && currentUser.profile" href="#" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.profile.name}}</b> <span class="caret"></span></a>
-			          <a data-ng-if="currentUser.username && !currentUser.profile" href="#" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.username}}</b> <span class="caret"></span></a>
-						<ul class="dropdown-menu">
-				            <li><a href="#!/account"><i class="fa fa-cogs" ></i>&nbsp; Account Settings</a></li>
-							<li><a href="#!/places"><i class="fa fa-home" ></i>&nbsp; My Places</a></li>
-				            <li class="divider"></li>
-				            <li><a href="#" data-ng-click="logout()"><i class="fa fa-power-off" ></i>&nbsp; Logout</a></li>
-						</ul>
-					</li>	
+		        <li class="dropdown" data-ng-if="currentUser.id">
+		          <a data-ng-if="currentUser.provider == 'hukam' && currentUser.role == 'admin'" href="javascript:void(0);" data-target="#" class="dropdown-toggle" data-toggle="dropdown"><b>Admin</b> <span class="caret"></span></a>
+					<ul class="dropdown-menu">
+			            <li><a href="#!/admin/products"><i class="flaticon-device" ></i>&nbsp;Products</a></li>
+			            <li><a href="https://34fd0b82-60b8-4d0d-9231-1f03135d4273-bluemix.cloudant.com/dashboard.html" target="_blank"><i class="fa fa-database" ></i>&nbsp;CloudantDB</a></li>
+			            <li><a href="https://rqeofj.internetofthings.ibmcloud.com/dashboard/" target="_blank"><i class="fa fa-microchip" ></i>&nbsp;IoT Platform</a></li>
+			            <li><a href="https://console.cloud.google.com/storage/browser/hukam-cdn/?project=hukam-157906" target="_blank"><i class="fa fa-cloud-download" ></i>&nbsp;Google Cloud Storage</a></li>
+			            
+			            
+			            <li><a href="https://34fd0b82-60b8-4d0d-9231-1f03135d4273-bluemix.cloudant.com/dashboard.html" target="_blank"><i class="fa fa-github" ></i>&nbsp;GIT Repository</a></li>
+			            
+			            <li class="divider"></li>
+			            <li><a href="#" data-ng-click="logout()"><i class="fa fa-power-off" ></i>&nbsp; Logout</a></li>
+					</ul>
+				</li>
+		        <li class="dropdown" data-ng-if="currentUser.id">
+		          <a data-ng-if="currentUser.provider == 'hukam' && currentUser.profile" data-target="#" href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.profile.username}}</b> <span class="caret"></span></a>
+		          <a data-ng-if="currentUser.provider != 'hukam' && currentUser.profile" data-target="#"  href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.profile.name}}</b> <span class="caret"></span></a>
+		          <a data-ng-if="currentUser.username && !currentUser.profile" data-target="#"  href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.username}}</b> <span class="caret"></span></a>
+					<ul class="dropdown-menu">
+			            <li><a href="#!/account"><i class="fa fa-cogs" ></i>&nbsp; Account Settings</a></li>
+						<li><a href="#!/places"><i class="fa fa-home" ></i>&nbsp; My Places</a></li>
+			            <li class="divider"></li>
+			            <li><a href="#" data-ng-click="logout()"><i class="fa fa-power-off" ></i>&nbsp; Logout</a></li>
+					</ul>
+				</li>	
 	          
 	        </ul>
 	  

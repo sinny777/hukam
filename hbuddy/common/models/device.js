@@ -28,7 +28,7 @@ module.exports = function(Device) {
 							  ctx.instance.registration = body.registration;
 							  ctx.instance.refs = body.refs;
 							  console.log("REGISTER RESPONSE, CODE: >>> ", response.statusCode, ", BODY: ", ctx.instance );
-							  return next();
+							  next();
 						  }
 					  }						  
 				  });
@@ -49,7 +49,7 @@ module.exports = function(Device) {
 							  next(error);
 						  }else{
 							  console.log("UPDATE RESPONSE, CODE: >>> ", response.statusCode, ", BODY: ", ctx.instance );
-							  return next();
+							  next();
 						  }						  
 					  }						  
 				  });

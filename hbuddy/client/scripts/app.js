@@ -91,10 +91,9 @@ define([
     
     hukam.run(['$rootScope','$location', '$window', 'LoopBackAuth', 'editableOptions', function($rootScope, $location, $window, LoopBackAuth, editableOptions) {
         $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
-            console.log('IN routeChangeStart >>>>>>> ');
              $rootScope.footerLinks = [];
              var currentUserId = LoopBackAuth.currentUserId;
-             if (/*!LoopBackAuth.isLoggedIn() &&*/ !currentUserId) {
+             if (!LoopBackAuth.isLoggedIn() && !currentUserId) {
                console.log("USER IS NOT LOGGEDIN: >>> ", currentUserId);
 //               $location.path("/#!/home");
 //               event.preventDefault();
@@ -107,12 +106,11 @@ define([
             	 console.log("USER IS LOGGEDIN: >>> ", currentUserId);
             	 if(!$rootScope.currentUser){
             		 $rootScope.currentUser = {permissions: {}};
-            	 }else{
-            		 console.log("$rootScope.currentUser: >>> ", $rootScope.currentUser);
             	 }
              }
              
              editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
+             console.log("IN routeChangeStart, currentUser: >>> ", $rootScope.currentUser);
 
         });
         

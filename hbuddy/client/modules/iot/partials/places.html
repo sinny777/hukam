@@ -26,7 +26,7 @@
 	
 <div class="row" data-ng-if="display == 'places'">
 	<div class="card col-sm-3" data-ng-repeat="place in places">
-	  <div class="card-block" style="background-image: url('../assets/images/blurred1.jpg');">
+	  <div class="card-block" style="background-image: url('//storage.googleapis.com/hukam-cdn/public/images/specific/blurred1.jpg');">
 	  	<span class="fa-stack">
 	  		<a href="#" data-ng-click="showSettingsFor(place);">
 	  			<i class="fa fa-circle fa-stack-2x icon-background"></i>
@@ -183,7 +183,7 @@
 	
 	<div class="row" data-ng-if="display == 'dashboard'">
 		<div class="card col-sm-3" data-ng-repeat="placeArea in selectedPlace.placeAreas">
-		  <div class="card-block" style="background-image: url('../assets/images/blurred2.jpg');" data-ng-if="showAddBoard != placeArea.id">
+		  <div class="card-block" style="background-image: url('//storage.googleapis.com/hukam-cdn/public/images/specific/blurred2.jpg');" data-ng-if="showAddBoard != placeArea.id">
 		  	<span class="fa-stack">
 		  		<a href="javascript:void(0);" data-ng-click="showUpdatePlaceAreaPanel(placeArea);">
 		  			<i class="fa fa-circle fa-stack-2x icon-background"></i>

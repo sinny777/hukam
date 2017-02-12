@@ -6,58 +6,46 @@
 				</div>
 				<ul id="main-menu">
 					<li class="current"><a href="/#!/"><div>Home</div></a></li>
-					<li><a href="/#!/"><div>Services</div></a>
-						<ul>
-							<li><a href="/#!/services/eventmanagement"><div>Event
-										Management</div></a></li>
-							<li><a href="/#!/services/internetOfThings"><div>Internet
-										Of Things (IoT)</div></a></li>
-							<li><a href="/#!/services/applicationdevelopment"><div>Application
-										Development</div></a></li>
-							<li class="divider"></li>
-							<li><a href="/#!/services/livestreaming"><div>Live
-										Streaming</div></a></li>
-							<li class="divider"></li>
-						</ul></li>
-					<li><a href="/#!/videos"><div>Media</div></a>
-						<ul>
-							<li><a href="/#!/events"><div>Live/Upcoming Events</div></a></li>
-							<li><a href="/#!/videos"><div>Popular Videos</div></a></li>
-						</ul></li>
-
-					<li data-ng-show="currentUser.status == 'active'">
-						<a href="/#!/account" >
-							<div>{{currentUser.nickname}}</div>
-						</a>
-						<ul data-ng-show="currentUser.status == 'active'">
-							<li data-ng-show="currentUser.status == 'active'"><a href="/#!/account">
-									<div>Account Settings</div>
-							</a></li>
-							<li data-ng-show="currentUser.status == 'active'"><a href="/#!/account/{{currentUser.id}}"><div>
-										My Page</div></a></li>
-							<li data-ng-show="currentUser.status == 'active'"><a href="/#!/account/events/planEvent"><div>
-										Plan LIVE Event</div></a></li>
-							<li data-ng-show="currentUser.status == 'active'"><a href="/#!/account/iot/smartplace"><div>My
-										Smart Place</div></a></li>
-							<li data-ng-show="currentUser.id == '107949895455737032599'"><a
-								href="/#!/shop/shopping"><div>Shopping</div></a></li>
-							<!-- <li><a href="javascript:void(0);" data-ng-click="toggleMyPlaylists()">My Playlists</a></li> -->
-							<li class="divider"></li>
-							<li data-ng-show="currentUser.status == 'active'"><a href="/#!/" data-ng-click="logout()"><div>
-										Logout</div></a></li>
+					<li class="dropdown top-menu-em" data-ng-if="!currentUser.id">
+			          <a href="#" data-toggle="modal" data-target="#loginModal" ><b>Login</b></a>
+			        </li>
+			        <li class="dropdown" data-ng-if="currentUser.id">
+			          <a data-ng-if="currentUser.provider == 'hukam' && currentUser.role == 'admin'" data-target="#" class="dropdown-toggle" data-toggle="dropdown"><b>Admin</b> <span class="caret"></span></a>
+						<ul class="dropdown-menu">
+				            <li><a href="#!/admin/products"><i class="flaticon-device" ></i>&nbsp;Products</a></li>
+				            <li><a href="https://34fd0b82-60b8-4d0d-9231-1f03135d4273-bluemix.cloudant.com/dashboard.html" target="_blank"><i class="fa fa-database" ></i>&nbsp;CloudantDB</a></li>
+				            <li><a href="https://rqeofj.internetofthings.ibmcloud.com/dashboard/" target="_blank"><i class="fa fa-microchip" ></i>&nbsp;IoT Platform</a></li>
+				            <li><a href="https://console.cloud.google.com/storage/browser/hukam-cdn/?project=hukam-157906" target="_blank"><i class="fa fa-cloud-download" ></i>&nbsp;Google Cloud Storage</a></li>
+				            
+				            
+				            <li><a href="https://34fd0b82-60b8-4d0d-9231-1f03135d4273-bluemix.cloudant.com/dashboard.html" target="_blank"><i class="fa fa-github" ></i>&nbsp;GIT Repository</a></li>
+				            
+				            <li class="divider"></li>
+				            <li><a href="#" data-ng-click="logout()"><i class="fa fa-power-off" ></i>&nbsp; Logout</a></li>
 						</ul>
 					</li>
-					
-						<!-- <div style="float:right;margin-top:9px">
-					      <div data-addthis-toolbox data-url="http://hbuddy.hukam.in" id="hbuddy" 
-					            class="addthis_toolbox addthis_default_style addthis_16x16_style">
-					        <a class="addthis_button_facebook"></a>
-					        <a class="addthis_button_twitter"></a>
-					        <a class="addthis_button_linkedin"></a>
-					        <a class="addthis_button_google_plusone_share"></a>
-					        <a class="addthis_button_email"></a>
-					      </div>
-				      </div>  -->
+			        <li class="dropdown" data-ng-if="currentUser.id">
+			          <a data-ng-if="currentUser.provider == 'hukam' && currentUser.profile" data-target="#" href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.profile.username}}</b> <span class="caret"></span></a>
+			          <a data-ng-if="currentUser.provider != 'hukam' && currentUser.profile" data-target="#"  href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.profile.name}}</b> <span class="caret"></span></a>
+			          <a data-ng-if="currentUser.username && !currentUser.profile" data-target="#"  href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><b>{{currentUser.username}}</b> <span class="caret"></span></a>
+						<ul class="dropdown-menu">
+				            <li><a href="#!/account"><i class="fa fa-cogs" ></i>&nbsp; Account Settings</a></li>
+							<li><a href="#!/places"><i class="fa fa-home" ></i>&nbsp; My Places</a></li>
+				            <li class="divider"></li>
+				            <li><a href="#" data-ng-click="logout()"><i class="fa fa-power-off" ></i>&nbsp; Logout</a></li>
+						</ul>
+					</li>
+						
+							<!-- <div style="float:right;margin-top:9px">
+						      <div data-addthis-toolbox data-url="http://hbuddy.hukam.in" id="hbuddy" 
+						            class="addthis_toolbox addthis_default_style addthis_16x16_style">
+						        <a class="addthis_button_facebook"></a>
+						        <a class="addthis_button_twitter"></a>
+						        <a class="addthis_button_linkedin"></a>
+						        <a class="addthis_button_google_plusone_share"></a>
+						        <a class="addthis_button_email"></a>
+						      </div>
+					      </div>  -->
 					
 				</ul>
 			</div>

@@ -5,7 +5,7 @@ require.config({
 //	waitSeconds: 200,
 //	baseUrl: 'scripts/',
     paths :{
-    	'jquery' : 'js/vendor/jquery-3.1.1.min/index',
+    	'jquery' : 'js/utils/jquery/jquery',
         'angular' :'js/vendor/angular/angular.min',
         'angularRoute' : 'js/vendor/angular-route/angular-route.min',
         'angularResource' : 'js/vendor/angular-resource/angular-resource.min',

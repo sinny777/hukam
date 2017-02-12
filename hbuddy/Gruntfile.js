@@ -28,7 +28,7 @@ module.exports = function(grunt) {
                         mangle: false
                     },
                     baseUrl: "client/scripts",
-                    out: 'client/scripts/webapp.min.js',
+                    out: 'client/scripts/hukam.min.js',
                     optimize: 'uglify2',
                     mainConfigFile:'client/scripts/main.js',
                     logLevel: 0,

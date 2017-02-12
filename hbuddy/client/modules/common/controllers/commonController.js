@@ -7,7 +7,6 @@ define(function () {
 
   function ctrl($scope, $rootScope, $routeParams, $location, $anchorScroll, $sce, $http, $window, commonService, sharedService, cloudendpoint, authService){
 	  
-	  	$rootScope.currentUser = {"permissions": {}};
 	  	$rootScope.loginCredentials = {};
 	  	$rootScope.googleAPILoaded = false;
 		$rootScope.showRadio = false;
@@ -33,12 +32,26 @@ define(function () {
 		});
 		
 		$rootScope.$on('CurrentUserUpdated ', function(){
-			$rootScope.currentUser = sharedService.currentUser;
+			console.log("IN CurrentUserUpdated: >>> ", $rootScope.currentUser);
+//			$rootScope.currentUser = sharedService.currentUser;
 		});
 		
 		$scope.$on('$locationChangeSuccess',function(evt, absNewUrl, absOldUrl) {
 		   console.log('success >>>>>>>>>>>>>>>>>>>>>>>>>> ' +absOldUrl);
 		   $rootScope.previousPage = absOldUrl;
+		   
+		   $rootScope.checkUser(function(userObj){
+			   console.log("Logged In User: >>>> ", userObj);
+			   if($rootScope.currentUser && $rootScope.currentUser.profile){
+		      		  if($rootScope.currentUser.profile.email == 'sinny777@gmail.com' ||
+		      				  $rootScope.currentUser.profile.username == 'sinny777'){
+		      			$rootScope.currentUser.role = 'admin';
+		      		  }else{
+		      			$rootScope.currentUser.role = 'guest';
+		      		  }
+			   }
+		   });
+		   
 		});
 		
 		$window.load = function() {
@@ -66,7 +79,11 @@ define(function () {
     		authService.ensureCurrentUser(function(currentUser){
     			$rootScope.loadingScreen.hide();
     			$rootScope.currentUser = currentUser;
-    			console.log("IN checkUser 2: >>>>>>>> ", $rootScope.currentUser);
+    			
+    			if($rootScope.currentUser && $rootScope.currentUser.profile && !$rootScope.currentUser.profile.username){
+    				$rootScope.currentUser.profile.username = $rootScope.currentUser.username;
+    			}
+    			
     			if(callback){
     				callback($rootScope.currentUser);
     			}
@@ -83,6 +100,17 @@ define(function () {
     	authService.login($rootScope.loginCredentials, function(userObj){
     		$rootScope.currentUser = userObj;
     		console.log('USER OBJ AFTER LOGIN: $rootScope.currentUser >>>>>> ', $rootScope.currentUser);
+    		$("[data-dismiss=modal]").trigger({ type: "click" });
+    		
+    		if($rootScope.currentUser && $rootScope.currentUser.profile){
+	      		  if($rootScope.currentUser.profile.email == 'sinny777@gmail.com' ||
+	      				  $rootScope.currentUser.profile.username == 'sinny777'){
+	      			$rootScope.currentUser.role = 'admin';
+	      		  }else{
+	      			$rootScope.currentUser.role = 'guest';
+	      		  }
+		   }
+    		
     	});
       };  
 	    
@@ -99,22 +127,6 @@ define(function () {
             });
         }, 1000);
         */
-      };
-      
-      $rootScope.isAdmin = function(){
-    	  if($rootScope.currentUser.profile){
-    		  if($rootScope.currentUser.profile.email == 'contact@granslive.com'){
-    			  return true;
-    		  }else{
-    			  return false;
-    		  }
-    	  }
-    	  
-    	  if($rootScope.currentUser.email == 'contact@granslive.com'){
-    		  return true;
-    	  }else{
-    		  return false;
-    	  }
       };
       
     $rootScope.loginRequired = function(){
@@ -217,7 +229,7 @@ define(function () {
   	        }
   	    });
   		
-  		if(!result && (sharedService.currentUser.emailId == 'sinny777@gmail.com' || sharedService.currentUser.emailId == 'contact@granslive.com')){
+  		if(!result && sharedService.currentUser.emailId == 'sinny777@gmail.com'){
   			result = true;
   		}
   		

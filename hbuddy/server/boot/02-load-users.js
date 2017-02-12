@@ -23,22 +23,12 @@ module.exports = function(app) {
     var roles = [{
       name: 'admin',
       users: [{
-        firstName: 'GransLive',
-        lastName: 'Admin',
-        email: 'contact@granslive.com',
-        username: 'granslive',
+        firstName: 'Gurvinder',
+        lastName: 'Singh',
+        email: 'sinny777@gmail.com',
+        username: 'sinny777',
         password: '1SatnamW',
-        provider: 'granslive'
-      }]
-    }, {
-      name: 'guest',
-      users: [{
-        firstName: 'Guest',
-        lastName: 'User',
-        email: 'guest@granslive.com',
-        username: 'guest',
-        password: 'guest',
-        provider: 'granslive'
+        provider: 'hukam'
       }]
     }];
 
@@ -49,6 +39,7 @@ module.exports = function(app) {
         function(err, createdRole, created) {
           if (err) {
             console.error('error running findOrCreate('+role.name+')', err);
+            return false;
           }
           
           console.log('created: >>>>> ', created);

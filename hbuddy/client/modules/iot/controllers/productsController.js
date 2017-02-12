@@ -6,7 +6,7 @@ define(function () {
 	  $scope.display = 'boards';
 	  $scope.selectedBoard = {};
 	  $scope.boards = [];
-	  $scope.boardTypes = ["SWITCH_BOARD", "SENSOR_BOARD", "GransLiveGateway"];
+	  $scope.boardTypes = ["SWITCH_BOARD", "SENSOR_BOARD", "HukamGateway"];
 	  $scope.switches = {"digital": [1, 2, 3, 4, 5, 6, 7, 8, 9], "analog": [1, 2, 3, 4, 5, 6, 7, 8, 9]};
 	  $scope.selectedSwitchCounts = {digital: 0, analog: 0};
 	  
@@ -24,7 +24,7 @@ define(function () {
 		    		$scope.ownerId = $rootScope.currentUser.userId;
 		    	}
 			  
-			  if($rootScope.isAdmin()){
+			  if($rootScope.currentUser.role == 'admin'){
 				  $scope.fetchAndShowBoards();
 			  }
 		  });
@@ -92,7 +92,7 @@ define(function () {
     $scope.saveBoard = function(){
     	console.log('$rootScope.currentUser: >> ', $rootScope.currentUser);
     	
-    	if($scope.selectedBoard.type == 'GransLiveGateway'){
+    	if($scope.selectedBoard.type == 'HukamGateway'){
     		$scope.saveGatewayDevice();
     		return;
     	}

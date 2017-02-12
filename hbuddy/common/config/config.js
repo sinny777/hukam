@@ -3,20 +3,20 @@
 
 module.exports.get = function() {
 		return {
-			"gatewayId": "GG-000-000-001",
+			"gatewayId": "000000001x2xx34y",
 			"CLOUD_CONFIG": {
 		      "org": "rqeofj",
 		      "id": "a-rqeofj-i7nm1fdo5d",
-		      "auth-key": "a-rqeofj-i7nm1fdo5d",
-		      "auth-token": "3X0bTD*8tf4Q1rq12n",
+		      "authkey": "a-rqeofj-i7nm1fdo5d",
+		      "authtoken": "3X0bTD*8tf4Q1rq12n",
 		      "type": "shared"
 		    },
 		    "SERVICES_CONFIG":{
 		    	"IOT_CONFIG":{
 		    		"org": "rqeofj",
 				    "id": "a-rqeofj-i7nm1fdo5d",
-				    "auth-key": "a-rqeofj-i7nm1fdo5d",
-				    "auth-token": "3X0bTD*8tf4Q1rq12n",
+				    "authkey": "a-rqeofj-i7nm1fdo5d",
+				    "authtoken": "3X0bTD*8tf4Q1rq12n",
 				    "type": "shared"
 		    	},
 				"cloudantNOSQLDB":{
