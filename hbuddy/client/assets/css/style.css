@@ -6690,6 +6690,10 @@ img {
     padding: 5px 5px
 }
 
+.very-small-font{
+    font-size: 9px;
+}
+
 .card-title {
     color: #fff;
 }
@@ -6727,6 +6731,8 @@ img {
 .card-bottom .list-group{
 	overflow: auto;
     max-height: 500px;
+    margin-left: 0px;
+    margin-top: 0px
 }
 
 .card-footer {
@@ -6745,9 +6751,9 @@ i.active { color: #5cb85c}
 i.inactive {color: #000000}
 i.locked {color: #d9534f}
 
-i.deviceON { color: #5cb85c}
-i.deviceOFF {color: #000000}
-i.deviceLOCKED {color: #d9534f}
+i.deviceON { color: #5cb85c; font-size: 20px;}
+i.deviceOFF {color: #000000; font-size: 20px;}
+i.deviceLOCKED {color: #d9534f; font-size: 20px;}
 
 .list-group-item span{
 	display: inline-block;
@@ -6792,3 +6798,4 @@ p{
 .panel-body {
 	font-size: 11px;
 } 
+

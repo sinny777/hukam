@@ -22,3 +22,4 @@ npm-debug.log
 client/scripts/js/vendor
 lib
 hbuddy-mobile
+hbuddy-mobile/*

@@ -16,7 +16,8 @@ define(['angular'], function (angular) {
 			    "id": "a-rqeofj-i7nm1fdo5d",
 			    "authkey": "a-rqeofj-i7nm1fdo5d",
 			    "authtoken": "3X0bTD*8tf4Q1rq12n",
-			    "type": "shared"
+			    "type": "shared",
+			    "gatewayType": "HukamGateway"
 			}
 		});
     

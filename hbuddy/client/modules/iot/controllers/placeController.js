@@ -75,9 +75,15 @@ define(function () {
 	  
 	  $scope.mqttConnectSuccess = function(){
    	   console.log('MQTT Connection SUCCESS >>>>>>>>>>');
+   	   
+   	   if(!$scope.selectedPlace.gatewayId){
+   		   console.log("This place has not installed any Gateway Yet !!! ");
+   		   return false;
+   	   }
+   	   
 	   	try{
 	   		  $scope.isMqttConnected = true;
-					var subscribeTopic = "iot-2/type/HukamGateway/id/" +$scope.selectedPlace.gatewayId + "/evt/+/fmt/json";
+					var subscribeTopic = "iot-2/type/" +CONFIG.IOT_CONFIG.gatewayType +"/id/" +$scope.selectedPlace.gatewayId + "/evt/+/fmt/json";
 			    	var subscribeOptions = {
 						qos : 0,
 						onSuccess : function() {
@@ -551,7 +557,7 @@ define(function () {
 					}
     			  };
     	console.log('$scope.selectedPlace.gatewayId: >>' , $scope.selectedPlace.gatewayId);
-    	var topic = "iot-2/type/HukamGateway/id/"+$scope.selectedPlace.gatewayId+"/evt/gateway/fmt/json";
+    	var topic = "iot-2/type/" +CONFIG.IOT_CONFIG.gatewayType +"/id/"+$scope.selectedPlace.gatewayId+"/evt/gateway/fmt/json";
     	mqttService.publishToMqtt(topic, msg);
     };
     
@@ -569,7 +575,7 @@ define(function () {
 						analogValue: device.analogValue
 					}
     			  };
-    	var topic = "iot-2/type/HukamGateway/id/"+$scope.selectedPlace.gatewayId+"/evt/gateway/fmt/json";
+    	var topic = "iot-2/type/" +CONFIG.IOT_CONFIG.gatewayType +"/id/"+$scope.selectedPlace.gatewayId+"/evt/gateway/fmt/json";
     	mqttService.publishToMqtt(topic, msg);
     };
     

@@ -16,7 +16,8 @@ define(['angular'], function (angular) {
 			    "id": "a-o6oosq-gwvhfgityg",
 			    "authkey": "a-o6oosq-gwvhfgityg",
 			    "authtoken": "xwottObtqR@WHSe+q-",
-			    "type": "shared"
+			    "type": "shared",
+			    "gatewayType": "GransLiveGateway"
 			}
 		});
     
