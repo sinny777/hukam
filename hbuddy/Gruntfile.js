@@ -8,17 +8,26 @@ module.exports = function(grunt) {
             install: { }
         },
     	copy: {
-        	manifestprod: {
-	        	src: 'environments/production/manifest.yml',
-	        	dest: 'manifest.yml'
+        	local:{
+        		files:[
+        		       	{src: ['environments/local/manifest.yml'], dest: 'manifest.yml'},
+        		       	{src: ['environments/local/client-config.js'], dest: 'client/scripts/config.js'},
+        		       	{src: ['environments/local/server-config.js'], dest: 'common/config/config.js'}
+        		       ]
         	},
-        	configlocal: {
-	        	src: 'environments/local/config.js',
-	        	dest: 'client/scripts/config.js'
+        	office:{
+        		files:[
+        		       	{src: ['environments/office/manifest.yml'], dest: 'manifest.yml'},
+        		       	{src: ['environments/office/client-config.js'], dest: 'client/scripts/config.js'},
+        		       	{src: ['environments/office/server-config.js'], dest: 'common/config/config.js'}
+        		       ]
         	},
-        	configprod: {
-	        	src: 'environments/production/config.js',
-	        	dest: 'client/scripts/config.js'
+        	production:{
+        		files:[
+        		       	{src: ['environments/production/manifest.yml'], dest: 'manifest.yml'},
+        		       	{src: ['environments/production/client-config.js'], dest: 'client/scripts/config.js'},
+        		       	{src: ['environments/production/server-config.js'], dest: 'common/config/config.js'}
+        		       ]
         	}
     	},
         requirejs: {
@@ -55,8 +64,9 @@ module.exports = function(grunt) {
 
     grunt.registerTask('compile', ['requirejs:compile']);
 
-    grunt.registerTask('local', ['bower:install', 'copy:manifestprod',  'copy:configlocal', 'compile']);
-    grunt.registerTask('production', ['bower:install', 'copy:manifestprod', 'copy:configprod', 'compile']);
+    grunt.registerTask('local', ['bower:install', 'copy:local', 'compile']);
+    grunt.registerTask('office', ['bower:install', 'copy:office', 'compile']);
+    grunt.registerTask('production', ['bower:install', 'copy:production', 'compile']);
 
     grunt.registerTask('start', ['nodemon']);
 

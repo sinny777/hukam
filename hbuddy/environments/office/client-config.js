@@ -1,6 +1,6 @@
 /*global define */
 
-// API_URL: 'https://hbuddy.hukam.in/api'
+// API_URL: 'http://granslive-web.mybluemix.net/api'
 // API_URL: 'http://localhost:3000/api'
 
 define(['angular'], function (angular) {
@@ -10,7 +10,7 @@ define(['angular'], function (angular) {
 		.constant('CONFIG', {
 			VERSION: '0.1',
 			ENVIRONMENT: 'LOCAL',
-			API_URL: '//localhost:3000/api',
+			API_URL: '//granslive-web.mybluemix.net/api',
 			IOT_CONFIG:{
 				"org": "rqeofj",
 			    "id": "a-rqeofj-i7nm1fdo5d",
