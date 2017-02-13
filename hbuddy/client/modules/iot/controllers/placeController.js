@@ -10,8 +10,8 @@ define(function () {
 	  $scope.selectedPlaceArea = {};
 	  $scope.newboard = {};
 	  $scope.isMqttConnected = false;
-	  $scope.mqttOptions = {api_key: CONFIG.IOT_CONFIG.auth_key, 
-			  				auth_token: CONFIG.IOT_CONFIG.auth_token,
+	  $scope.mqttOptions = {api_key: CONFIG.IOT_CONFIG.authkey, 
+			  				auth_token: CONFIG.IOT_CONFIG.authtoken,
 			  				orgId: CONFIG.IOT_CONFIG.org,
 			  				clientId: "a:"+CONFIG.IOT_CONFIG.org+":" +Date.now(),
 			  				hostname: CONFIG.IOT_CONFIG.org+".messaging.internetofthings.ibmcloud.com"};
