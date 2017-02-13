@@ -6751,9 +6751,9 @@ i.active { color: #5cb85c}
 i.inactive {color: #000000}
 i.locked {color: #d9534f}
 
-i.deviceON { color: #5cb85c; font-size: 20px;}
-i.deviceOFF {color: #000000; font-size: 20px;}
-i.deviceLOCKED {color: #d9534f; font-size: 20px;}
+i.deviceON { color: #5cb85c; font-size: 20px; margin-top: 10px }
+i.deviceOFF {color: #000000; font-size: 20px; margin-top: 10px }
+i.deviceLOCKED {color: #d9534f; font-size: 20px; margin-top: 10px }
 
 .list-group-item span{
 	display: inline-block;
