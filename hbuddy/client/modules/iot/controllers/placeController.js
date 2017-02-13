@@ -263,16 +263,16 @@ define(function () {
 						  $scope.fetchConnectedBoards();
 						  $scope.display = "dashboard";
 						  $scope.fetchPlaceAreas();
-					  }    				  
-    				  
-    				  angular.forEach($scope.places, function(place) {
-    					  console.log('PLACE FETCHED: >>>> ', place);
-    					  if(place.isDefault){
-    						  $scope.selectedPlace = place;
-    						  $scope.display = "dashboard";
-    						  $scope.fetchPlaceAreas();
-    					  }
-    					});
+					  }else{
+						  angular.forEach($scope.places, function(place) {
+	    					  console.log('PLACE FETCHED: >>>> ', place);
+	    					  if(place.isDefault){
+	    						  $scope.selectedPlace = place;
+	    						  $scope.display = "dashboard";
+	    						  $scope.fetchPlaceAreas();
+	    					  }
+	    					});
+					  }  				  
     			  },
 	    		  function(errorResponse) { 
     				  $rootScope.loadingScreen.hide();
@@ -433,7 +433,7 @@ define(function () {
       			  },
   	    		  function(errorResponse) { 
       				  $rootScope.loadingScreen.hide();
-      				  console.log(errorResponse);
+      				  console.log("Error in PlaceArea.find: >> ", errorResponse);
       		});
     	}    	
     };
@@ -531,9 +531,20 @@ define(function () {
       			  function(boards) { 
     				  placeArea.boards = boards;
     				  console.log("BOARDS FETCHED: >>> ", placeArea.boards);
+    				  angular.forEach(boards, function(board) {
+    					  angular.forEach(board.devices, function(device) {
+    						  if(device.analog){
+    							  try{
+    								  device.analogValue = parseInt(device.analogValue);
+    							  }catch(err){
+    								  device.analogValue = 0;
+    							  }
+    						  }
+    					  });
+    				  });
       			  },
   	    		  function(errorResponse) { 
-      				  console.log(errorResponse);
+      				  console.log("Error in Board.find: >>> ", errorResponse);
       		});
     	}    	
     };
