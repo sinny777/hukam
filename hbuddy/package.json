@@ -2,10 +2,6 @@
   "name": "hbuddy",
   "version": "1.0.0",
   "main": "server/server.js",
-  "engines": {
-    "node": "4.2.4",
-    "npm": "3.10.10"
-  },
   "private": true,
   "scripts": {
     "start": "node server/server.js",
