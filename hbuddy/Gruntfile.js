@@ -92,7 +92,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-nodemon');
 
-    grunt.registerTask('compile', ['requirejs:compile', 'cssmin']);
+    grunt.registerTask('compile', ['requirejs:compile']);
 
     grunt.registerTask('local', ['bower:install', 'copy:local', 'compile']);
     grunt.registerTask('office', ['bower:install', 'copy:office', 'compile']);
