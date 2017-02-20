@@ -6799,3 +6799,9 @@ p{
 	font-size: 11px;
 } 
 
+
+.header{ 
+  padding:0px 17px; z-index: 99999; position: relative;
+  height:140px;
+}
+

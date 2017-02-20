@@ -54,6 +54,7 @@
     "watson-developer-cloud": "latest"
   },
   "devDependencies": {
+    "grunt-contrib-cssmin": "^2.0.0",
     "jshint": "^2.5.6"
   },
   "repository": {

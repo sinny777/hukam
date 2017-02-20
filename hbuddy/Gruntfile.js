@@ -37,7 +37,7 @@ module.exports = function(grunt) {
                         mangle: false
                     },
                     baseUrl: "client/scripts",
-                    out: 'client/scripts/hukam.min.js',
+                    out: 'client/assets/release/hukam.min.js',
                     optimize: 'uglify2',
                     mainConfigFile:'client/scripts/main.js',
                     logLevel: 0,
@@ -49,6 +49,35 @@ module.exports = function(grunt) {
                 }
             }
         },
+        cssmin: {
+	    	  options: {
+	    	    mergeIntoShorthands: false,
+	    	    roundingPrecision: -1,
+	    	    keepSpecialComments: 0
+	    	  },
+	    	  minify : {
+	              expand : true,
+	              cwd : 'client/assets/css/',
+	              src : ['*.css', '!*.min.css'],
+	              dest : 'client/assets/release/css',
+	              ext : '.min.css'
+	    	  },
+	    	  combine: {
+	    	    files: {
+	    	      'client/assets/release/theme1.min.css': [ 
+	    	                                       'client/assets/release/css/tipsy.min.css',
+//	    	                                       'cient/scripts/js/vendor/bootstrap/dist/css/bootstrap.min.css',
+	    	                                       'client/assets/release/css/bootstrap-social.min.css',
+	    	                                       'client/assets/release/css/style.min.css',
+	    	                                       'client/assets/release/css/prettyPhoto.min.css',
+	    	                                       'client/assets/release/css/animate.min.css',
+	    	                                       'client/assets/release/css/magnific-popup.min.css',
+	    	                                       'client/assets/css/weather-icons.min.css',
+	    	                                       'client/assets/release/css/responsive.min.css'
+	    	                                       ]
+	    	    }
+	    	  }
+    	},
         nodemon: {
             dev: {
                 script: 'server/server.js'
@@ -60,9 +89,10 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-bower-installer');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-requirejs');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-nodemon');
 
-    grunt.registerTask('compile', ['requirejs:compile']);
+    grunt.registerTask('compile', ['requirejs:compile', 'cssmin']);
 
     grunt.registerTask('local', ['bower:install', 'copy:local', 'compile']);
     grunt.registerTask('office', ['bower:install', 'copy:office', 'compile']);

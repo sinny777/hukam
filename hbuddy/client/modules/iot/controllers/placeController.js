@@ -1,7 +1,7 @@
 define(function () {
     'use strict';
 
-  function ctrl($rootScope, $scope, CONFIG, authService, mqttService, dataService, Place, PlaceArea, Board, Group){
+  function ctrl($rootScope, $scope, CONFIG, authService, mqttService, dataService, iotService){
 	  
 	  $scope.memberships = [];
 	  $scope.places = [];
@@ -224,16 +224,15 @@ define(function () {
 	    					};
 	    	console.log('findReq: >>> ', findReq);
 	    	$rootScope.loadingScreen.show();
-	    	Group.find(findReq,
-	  			  function(list) { 
+	    	iotService.findGroups(findReq,
+	  			  function(errResp, list) { 
+			    		$rootScope.loadingScreen.hide();
+	    				if(errResp){
+	   	  				  	$scope.fetchMyPlaces();
+	    				}
 	    			  console.log('RESPONSE of GROUP.find: >>>>> ', list);
 	  				  $scope.memberships = list;
 	  				  $rootScope.loadingScreen.hide();
-	  				  $scope.fetchMyPlaces();
-	  			  },
-	      		  function(errorResponse) { 
-	  				  $rootScope.loadingScreen.hide();
-	  				  console.log(errorResponse);
 	  				  $scope.fetchMyPlaces();
 	  			  });
 	    	
@@ -252,17 +251,21 @@ define(function () {
 		} 
     	console.log(findReq);
     	$rootScope.loadingScreen.show();
-    	$scope.places = Place.find(findReq,
-    			  function(list) { 
+    	$scope.places = iotService.findPlaces(findReq,
+    			  function(errResp, list) { 
     				  $rootScope.loadingScreen.hide();
+    				  if(errResp){
+    					  return;
+    				  }
     				  $scope.places = list;
     				  $scope.display = 'places';
     				  if($scope.places && $scope.places.length == 1){
 						  $scope.selectedPlace = $scope.places[0];
+						  console.log("RESP:>>> ", errResp, ", selectedPlace: ", $scope.selectedPlace);
+						  $scope.fetchPlaceAreas();
 						  $scope.fetchPlaceSensorsData();
 						  $scope.fetchConnectedBoards();
 						  $scope.display = "dashboard";
-						  $scope.fetchPlaceAreas();
 					  }else{
 						  angular.forEach($scope.places, function(place) {
 	    					  console.log('PLACE FETCHED: >>>> ', place);
@@ -273,10 +276,6 @@ define(function () {
 	    					  }
 	    					});
 					  }  				  
-    			  },
-	    		  function(errorResponse) { 
-    				  $rootScope.loadingScreen.hide();
-    				  console.log(errorResponse);
     			  });
     };
     
@@ -297,25 +296,25 @@ define(function () {
 									}
     						};
 //    		var findReq = {filter: {where: {connectedToId: $scope.selectedPlace.id}}};
-    		Board.find(findReq,
-      			  function(sensors) { 
-    				  console.log("SENSOR BOARD FETCHED: >>> ", sensors);
-    				  angular.forEach(sensors, function(sensor) {
-    	    			  sensorDataReq.type = sensor.subType;
-    	    			  sensorDataReq.uniqueId = sensor.uniqueIdentifier;
-    	    			  
-    	    			  Place.sensorData(sensorDataReq,
-    	    	    			  function(resp) { 
-    	    	    				  console.log("RESPONSE OF Place.sensorData: >>> ", resp);
-    	    	    			  },
-    	    		    		  function(errorResponse) { 
-    	    	    				  console.log(errorResponse);
-    	    	    			  });
-    	    			});
-      			  },
-  	    		  function(errorResponse) { 
-      				  console.log(errorResponse);
-      		});
+    		iotService.findBoards(findReq,
+      			  function(errResp, sensors) { 
+    					if(errResp){
+    						return;
+    					}
+	    				  console.log("SENSOR BOARD FETCHED: >>> ", sensors);
+	    				  angular.forEach(sensors, function(sensor) {
+	    	    			  sensorDataReq.type = sensor.subType;
+	    	    			  sensorDataReq.uniqueId = sensor.uniqueIdentifier;
+	    	    			  
+	    	    			  iotService.fetchSensorsData(sensorDataReq,
+	    	    	    			  function(errResp2, resp) { 
+	    	    				  			if(errResp2){
+	    	    				  				return;
+	    	    				  			}
+	    	    				  			console.log("RESPONSE OF fetchSensorsData: >>> ", resp);
+	    	    	    			  });
+	    	    			});
+      			  	});
     	}
     };
     
@@ -326,36 +325,34 @@ define(function () {
     	delete $scope.selectedPlace["placeAreas"];
     	
     	$rootScope.loadingScreen.show();
-    	$scope.selectedPlace = Place.upsert($scope.selectedPlace,
-		  function(place) { 
+    	$scope.selectedPlace = iotService.save($scope.selectedPlace,
+		  function(errResp, place) { 
     		$rootScope.loadingScreen.hide();
+    		if(errResp){
+  			  	$scope.selectedPlace.placeAreas = areas;
+  			  	$scope.showPlaces();
+  			  	return;
+    		}
 			$scope.selectedPlace = place;
 			console.log('PLACE SAVED: >>>> ', place);
 			$scope.selectedPlace.placeAreas = areas;
 			$scope.showPlaces();
-		  },
-		  function(errorResponse) { 
-			  $rootScope.loadingScreen.hide();
-			  console.log(errorResponse);
-			  $scope.selectedPlace.placeAreas = areas;
-			  $scope.showPlaces();
 		  });
     };
     
     $scope.deletePlace = function(){
     	$scope.selectedPlace.ownerId = $rootScope.currentUser.id;
     	$rootScope.loadingScreen.show();
-    	$scope.selectedPlace = Place.deleteById({id: $scope.selectedPlace.id},
-		  function(resp) { 
+    	$scope.selectedPlace = iotService.deletePlace($scope.selectedPlace.id,
+		  function(errResp, resp) { 
+    		$rootScope.loadingScreen.hide();
+    		if(errResp){
+   			  	$scope.showPlaces();
+   			  	return;
+    		}
 			console.log('PLACE DELETED: >>>> ', resp);
 			$scope.selectedPlace = {};
 			$scope.showPlaces();
-			$rootScope.loadingScreen.hide();
-		  },
-		  function(errorResponse) { 
-			  $rootScope.loadingScreen.hide();
-			  console.log(errorResponse);
-			  $scope.showPlaces();
 		  });
     };
     
@@ -374,36 +371,36 @@ define(function () {
     	delete $scope.selectedPlaceArea["boards"];
     	
     	$rootScope.loadingScreen.show();
-    	PlaceArea.upsert($scope.selectedPlaceArea,
-		  function(placeArea) {
-			 placeArea.boards = boards;
-			 $scope.selectedPlaceArea.boards = boards;
-    		  if(!$scope.selectedPlace.placeAreas){
-    			  $scope.selectedPlace.placeAreas = [];
-    			  $scope.selectedPlace.placeAreas.push(placeArea);
-    		  }else{
-    			  var updated = false;
-    			  angular.forEach($scope.selectedPlace.placeAreas, function(area) {
-					  if(area.id == placeArea.id){
-						  var index = $scope.selectedPlace.placeAreas.indexOf(area);
-						  $scope.selectedPlace.placeAreas.splice(index, 1);
-						  $scope.selectedPlace.placeAreas.push(placeArea);
-						  updated = true;
-					  }
-					});
-    			  if(!updated){
-    				  $scope.selectedPlace.placeAreas.push(placeArea); 
-    			  }
-    		  }
-			  $scope.selectedPlaceArea = placeArea;
-			  $rootScope.loadingScreen.hide();
-			  $scope.showDashboard();
-		  },
-		  function(errorResponse) { 
-			  $rootScope.loadingScreen.hide();
-			  console.log(errorResponse);
-			  $scope.selectedPlaceArea.boards = boards;
-			  $scope.showDashboard();
+    	iotService.savePlaceArea($scope.selectedPlaceArea,
+		  function(errResp, placeArea) {
+    		$rootScope.loadingScreen.hide();
+    			if(errResp){
+    				  $scope.selectedPlaceArea.boards = boards;
+    				  $scope.showDashboard();
+    				  return;
+    			}
+    		
+				 placeArea.boards = boards;
+				 $scope.selectedPlaceArea.boards = boards;
+	    		  if(!$scope.selectedPlace.placeAreas){
+	    			  $scope.selectedPlace.placeAreas = [];
+	    			  $scope.selectedPlace.placeAreas.push(placeArea);
+	    		  }else{
+	    			  var updated = false;
+	    			  angular.forEach($scope.selectedPlace.placeAreas, function(area) {
+						  if(area.id == placeArea.id){
+							  var index = $scope.selectedPlace.placeAreas.indexOf(area);
+							  $scope.selectedPlace.placeAreas.splice(index, 1);
+							  $scope.selectedPlace.placeAreas.push(placeArea);
+							  updated = true;
+						  }
+						});
+	    			  if(!updated){
+	    				  $scope.selectedPlace.placeAreas.push(placeArea); 
+	    			  }
+	    		  }
+				  $scope.selectedPlaceArea = placeArea;
+				  $scope.showDashboard();
 		  });
     };
     
@@ -422,19 +419,17 @@ define(function () {
     		console.log('FETCH AREAS FOR PLACE: ', $scope.selectedPlace);
     		var findReq = {filter: {where: {placeId: $scope.selectedPlace.id}}};
     		$rootScope.loadingScreen.show();
-    		PlaceArea.find(findReq,
-      			  function(list) { 
-    				  $scope.selectedPlace.placeAreas = list;
-    				  $rootScope.loadingScreen.hide();
-    				  
-    				  angular.forEach($scope.selectedPlace.placeAreas, function(area) {
+    		iotService.findPlaceAreas(findReq,
+      			  function(errResp, list) { 
+		    			$rootScope.loadingScreen.hide();
+    					if(errResp){
+    	      				  return;
+    					}
+    					$scope.selectedPlace.placeAreas = list;
+    					angular.forEach($scope.selectedPlace.placeAreas, function(area) {
     					  $scope.fetchBoardsAndDevices(area);
     					});
-      			  },
-  	    		  function(errorResponse) { 
-      				  $rootScope.loadingScreen.hide();
-      				  console.log("Error in PlaceArea.find: >> ", errorResponse);
-      		});
+      			  });
     	}    	
     };
     
@@ -456,14 +451,14 @@ define(function () {
     			  		 				]}
 								}
 						};
-		Board.find(findReq,
-  			  function(boards) { 
+		iotService.findBoards(findReq,
+  			  function(errResp, boards) { 
+					if(errResp){
+						return;
+					}
 				  $scope.connectedBoards = boards;
 				  console.log("CONNECTED BOARDS FETCHED: >>> ", $scope.connectedBoards);
-  			  },
-	    		  function(errorResponse) { 
-  				  console.log(errorResponse);
-  		});
+  			  });
     };
     
     $scope.activateBoardAtPlaceArea = function(connectedBoard){
@@ -475,21 +470,20 @@ define(function () {
     	connectedBoard.connectedToId = $scope.selectedPlaceArea.id;
     	connectedBoard.status = "active";
     	
-    	Board.upsert(connectedBoard,
-    			  function(activeBoard) {
-    				  console.log('BORAD ACTIVATED: >>>> ', activeBoard);
-    				  $scope.selectedPlaceArea.boards.push(activeBoard);
-    				  $rootScope.loadingScreen.hide();
-    				  angular.forEach($scope.connectedBoards, function(board) {
-    					  if(board.id == connectedBoard.id){
-    						  var index = $scope.connectedBoards.indexOf(board);
-    						  $scope.connectedBoards.splice(index, 1); 
-    					  }
-    				  });
-    			  },
-    			  function(errorResponse) { 
-    				  $rootScope.loadingScreen.hide();
-    				  console.log(errorResponse);
+    	iotService.saveBoard(connectedBoard,
+    			  function(errResp, activeBoard) {
+    					$rootScope.loadingScreen.hide();
+    					if(errResp){
+    						return;
+    					}
+	    				  console.log('BORAD ACTIVATED: >>>> ', activeBoard);
+	    				  $scope.selectedPlaceArea.boards.push(activeBoard);
+	    				  angular.forEach($scope.connectedBoards, function(board) {
+	    					  if(board.id == connectedBoard.id){
+	    						  var index = $scope.connectedBoards.indexOf(board);
+	    						  $scope.connectedBoards.splice(index, 1); 
+	    					  }
+	    				  });
     			  });
     };
     
@@ -500,12 +494,12 @@ define(function () {
     };
     
     $scope.saveBoard = function(board){
-    	Board.upsert(board,
-  			  function(board) {
-  				  console.log('BORAD UPDATED: >>>> ', board);
-  			  },
-  			  function(errorResponse) { 
-  				  console.log(errorResponse);
+    	iotService.saveBoard(board,
+  			  function(errResp, board) {
+    				if(errResp){
+    					return;
+    				}
+  				  	console.log('BORAD UPDATED: >>>> ', board);
   			  });
     };
     
@@ -527,8 +521,11 @@ define(function () {
     								}
     						};
     		console.log("findReq for fetching PlaceArea active boards: >> ", findReq);
-    		Board.find(findReq,
-      			  function(boards) { 
+    		iotService.findBoards(findReq,
+      			  function(errResp, boards) { 
+    					if(errResp){
+    						return;
+    					}
     				  placeArea.boards = boards;
     				  console.log("BOARDS FETCHED: >>> ", placeArea.boards);
     				  angular.forEach(boards, function(board) {
@@ -542,10 +539,7 @@ define(function () {
     						  }
     					  });
     				  });
-      			  },
-  	    		  function(errorResponse) { 
-      				  console.log("Error in Board.find: >>> ", errorResponse);
-      		});
+      			  });
     	}    	
     };
     
@@ -604,7 +598,7 @@ define(function () {
     
   }
   
-  ctrl.$inject = ['$rootScope', '$scope', 'CONFIG', 'authService', 'mqttService', 'dataService', 'Place', 'PlaceArea', 'Board', 'Group'];
+  ctrl.$inject = ['$rootScope', '$scope', 'CONFIG', 'authService', 'mqttService', 'dataService', 'iotService'];
   return ctrl;
 
 });
