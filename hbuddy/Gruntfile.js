@@ -58,7 +58,7 @@ module.exports = function(grunt) {
 	    	  minify : {
 	              expand : true,
 	              cwd : 'client/assets/css/',
-	              src : ['*.css', '!*.min.css', '!animate.css'],
+	              src : ['*.css', '!*.min.css'],
 	              dest : 'client/assets/release/css',
 	              ext : '.min.css'
 	    	  },
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
 	    	                                       'client/assets/release/css/bootstrap-social.min.css',
 	    	                                       'client/assets/release/css/style.min.css',
 	    	                                       'client/assets/release/css/prettyPhoto.min.css',
-	    	                                       'client/assets/css/animate.min.css',
+	    	                                       'client/assets/release/css/animate.min.css',
 	    	                                       'client/assets/release/css/magnific-popup.min.css',
 	    	                                       'client/assets/css/weather-icons.min.css',
 	    	                                       'client/assets/release/css/responsive.min.css'
