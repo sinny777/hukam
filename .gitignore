@@ -10,4 +10,5 @@
 **/.settings
 **/BUILD
 .mbed
+**/mbed
 .cproject
