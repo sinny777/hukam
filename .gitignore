@@ -1,0 +1,13 @@
+/node_modules
+/npm-debug.log
+/app/public/external
+/lib
+/public/scripts/lib
+.DS_Store
+.project
+**/.hg
+**/.temp
+**/.settings
+**/BUILD
+.mbed
+.cproject
