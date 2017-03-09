@@ -6,49 +6,50 @@
 using namespace std;
 
 #define IAP_LOCATION 0x1FFF1FF1
- 
 typedef void (*IAP)(unsigned long [], unsigned long[] );
-IAP iap_entry = (IAP) IAP_LOCATION; 
+IAP iap_entry = (IAP) IAP_LOCATION;
 
 MbedJSONValue command;
 Ticker tempTicker;
 Ticker energyTicker;
 
-    TTP229 touchpad(p9, p10); // For Connecting Capacitive Touchpad using I2C 
-    
+    TTP229 touchpad(p9, p10); // For Connecting Capacitive Touchpad using I2C
     Serial xbeeSerial(p13, p14);
-    
     Serial pc(USBTX, USBRX);//Opens up serial communication through the USB port via the computer
+
     DigitalOut heartbeatLED(LED1, 0); // LED1
     DigitalOut xbeeLED(LED2); // LED2
     DigitalOut sensorLED(LED3); // LED3
     DigitalOut led4(LED4); // LED4
 
-    DigitalOut DSw1_p5(p5);
-    DigitalOut DSw2_p6(p6);
-    DigitalOut DSw3_p7(p7);
-    DigitalOut DSw4_p8(p8);
-    DigitalOut DSw5_p12(p12);
-    DigitalOut DSw6_p15(p15);
-    DigitalOut DSw7_p16(p16);
-    DigitalOut ASw1P_p17(p17);
-    DigitalOut ASw1_p18(p18);
-    DigitalOut ASw1M_p19(p19);
-    DigitalOut ASw2P_p21(p21);
-    DigitalOut ASw2_p22(p22);
-    DigitalOut ASw2M_p23(p23);
-    DigitalOut ASw3P_p24(p24);
-    DigitalOut ASw3_p25(p25);
-    DigitalOut ASw3M_p26(p26);
-    
+    DigitalOut DSw1(p5);
+    DigitalOut DSw2(p6);
+    DigitalOut DSw3(p7);
+    DigitalOut DSw4(p8);
+    DigitalOut DSw5(p11);
+    DigitalOut DSw6(p12);
+    DigitalOut DSw7(p15);
+    DigitalOut DSw8(p16);
+    DigitalOut ASw1P(p17);
+    DigitalOut ASw1(p18);
+    DigitalOut ASw1M(p19);
+    DigitalOut ASw2P(p20);
+    DigitalOut ASw2(p21);
+    DigitalOut ASw2M(p22);
+    DigitalOut ASw3P(p23);
+    DigitalOut ASw3(p24);
+    DigitalOut ASw3M(p25);
+
+    DigitalOut p26Led(p26);
     DigitalOut p27Led(p27);
     DigitalOut p28Led(p28);
-    DigitalOut p29Led(p29); 
-    
+    DigitalOut p29Led(p29);
+    DigitalOut p30Led(p30);
+
 void broadcastChange(std::string command){
     command = command + "\n";
-    printf("Broadcast = %s\r\n" ,  command.c_str());  
-    xbeeSerial.puts(command.c_str()); 
+    printf("Broadcast = %s\r\n" ,  command.c_str());
+    xbeeSerial.puts(command.c_str());
     xbeeLED = 1;
     wait(0.5);
     xbeeLED = 0;
@@ -59,7 +60,7 @@ void refreshMyStatus(){
 }
 
 void readTempHumidityData(){
-    command["temp"] = 25.1; 
+    command["temp"] = 25.1;
     command["hum"] = 45.7;
     sensorLED = 1;
     wait_ms(2);
@@ -85,76 +86,76 @@ void switchTouched(){
     command["index"] = key;
     switch(key){
         case 1:
-            DSw1_p5 = !DSw1_p5;
-            command["dv"] = DSw1_p5;
+            DSw1 = !DSw1;
+            command["dv"] = DSw1;
             break;
         case 2:
-            DSw2_p6 = !DSw2_p6;
-            command["dv"] = DSw2_p6;
+            DSw2 = !DSw2;
+            command["dv"] = DSw2;
             break;
         case 3:
-            DSw3_p7 = !DSw3_p7;
-            command["dv"] = DSw3_p7;
+            DSw3 = !DSw3;
+            command["dv"] = DSw3;
             break;
         case 4:
-            DSw4_p8 = !DSw4_p8;
-            command["dv"] = DSw4_p8;
+            DSw4 = !DSw4;
+            command["dv"] = DSw4;
             break;
         case 5:
-            DSw5_p12 = !DSw5_p12;
-            command["dv"] = DSw5_p12;
+            DSw5 = !DSw5;
+            command["dv"] = DSw5;
             break;
         case 6:
-            DSw6_p15 = !DSw6_p15;
-            command["dv"] = DSw6_p15;
+            DSw6 = !DSw6;
+            command["dv"] = DSw6;
             break;
         case 7:
-            DSw7_p16 = !DSw7_p16;
-            command["dv"] = DSw7_p16;
+            DSw7 = !DSw7;
+            command["dv"] = DSw7;
             break;
         case 8:
-            ASw1P_p17 = !ASw1P_p17;
-            command["dv"] = ASw1P_p17;
+            ASw1P = !ASw1P;
+            command["dv"] = ASw1P;
             break;
         case 9:
-            ASw1_p18 = !ASw1_p18;
-            command["dv"] = ASw1_p18;
+            ASw1 = !ASw1;
+            command["dv"] = ASw1;
             break;
         case 10:
-            ASw1M_p19 = !ASw1M_p19;
-            command["dv"] = ASw1M_p19;
+            ASw1M = !ASw1M;
+            command["dv"] = ASw1M;
             break;
         case 11:
-            ASw2P_p21 = !ASw2P_p21;
-            command["dv"] = ASw2P_p21;
+            ASw2P = !ASw2P;
+            command["dv"] = ASw2P;
             break;
         case 12:
-            ASw2_p22 = !ASw2_p22;
-            command["dv"] = ASw2_p22;
+            ASw2 = !ASw2;
+            command["dv"] = ASw2;
             break;
         case 13:
-            ASw2M_p23 = !ASw2M_p23;
-            command["dv"] = ASw2M_p23;
+            ASw2M = !ASw2M;
+            command["dv"] = ASw2M;
             break;
         case 14:
-            ASw3P_p24 = !ASw3P_p24;
-            command["dv"] = ASw3P_p24;
+            ASw3P = !ASw3P;
+            command["dv"] = ASw3P;
             break;
         case 15:
-            ASw3_p25 = !ASw3_p25;
-            command["dv"] = ASw3_p25;
+            ASw3 = !ASw3;
+            command["dv"] = ASw3;
             break;
         case 16:
-            ASw3M_p26 = !ASw3M_p26;
-            command["dv"] = ASw3M_p26;
+            ASw3M = !ASw3M;
+            command["dv"] = ASw3M;
             break;
     }
-    
+
     if(key > 0){
         std::string str = command.serialize();
-        broadcastChange(str);    
+        broadcastChange(str);
     }
-} 
+}
 
 void setDeviceId(){
     unsigned long comm[5] = {0,0,0,0,0};
@@ -174,39 +175,38 @@ void setDeviceId(){
         /*
         std::string temp = "";
         for(int i = 1; i < 5; i++) {
-           // printf( "0x%x\r\n", result[i] );   
+           // printf( "0x%x\r\n", result[i] );
             unsigned char *s=(unsigned char *)&result[i];
             char buffer [10];
             sprintf (buffer, "%lu" , result[i] );
-            temp = temp + buffer;            
+            temp = temp + buffer;
         }
         command["id"] = temp;
         */
     } else {
         printf("Status error!\r\n");
-    }     
-} 
+    }
+}
 
 // main() runs in its own thread in the OS
 int main() {
     setDeviceId();
-    refreshMyStatus();    
+    refreshMyStatus();
     readNSaveSensorsData();
     touchpad.attach(&switchTouched);
-    
+
     while (true) {
         heartbeatLED = 1;
         wait(0.5);
         heartbeatLED = 0;
         wait(0.5);
-        
+
         if (pc.readable()) {//Checking for serial comminication
             xbeeSerial.putc(pc.getc()); //XBee write whatever the PC is sending
         }
         if(xbeeSerial.readable()){
             pc.putc(xbeeSerial.getc());
         }
-        
+
     }
 }
-
