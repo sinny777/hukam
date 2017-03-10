@@ -178,7 +178,7 @@ void switchTouched(){
               av = av + 1;
               command["av"] = av;
               boardData["ASw1_aval"] = av;
-              // ASw1.write(av);
+              ASw1.write(av);
             }else{
               key = 0; // DO NOTHING
             }
@@ -191,7 +191,7 @@ void switchTouched(){
             }else{
               dv = 1;
             }
-            // ASw1 = dv;
+            ASw1 = dv;
             command["dv"] = dv;
             boardData["ASw1_dval"] = command["dv"];
             break;
@@ -202,7 +202,7 @@ void switchTouched(){
               av = av - 1;
               command["av"] = av;
               boardData["ASw1_aval"] = av;
-              // ASw1.write(av);
+              ASw1.write(av);
             }else{
               key = 0; // DO NOTHING
             }
@@ -214,7 +214,7 @@ void switchTouched(){
               av = av + 1;
               command["av"] = av;
               boardData["ASw2_aval"] = av;
-              // ASw2.write(av);
+              ASw2.write(av);
             }else{
               key = 0; // DO NOTHING
             }
@@ -227,7 +227,7 @@ void switchTouched(){
             }else{
               dv = 1;
             }
-            // ASw2.write(dv);
+            ASw2.write(dv);
             command["dv"] = dv;
             boardData["ASw2_dval"] = command["dv"];
             break;
@@ -238,7 +238,7 @@ void switchTouched(){
               av = av - 1;
               command["av"] = av;
               boardData["ASw2_aval"] = av;
-              // ASw2.write(av);
+              ASw2.write(av);
             }else{
               key = 0; // DO NOTHING
             }
@@ -250,7 +250,7 @@ void switchTouched(){
               av = av + 1;
               command["av"] = av;
               boardData["ASw3_aval"] = av;
-              // ASw3.write(av);
+              ASw3.write(av);
             }else{
               key = 0; // DO NOTHING
             }
@@ -263,7 +263,7 @@ void switchTouched(){
             }else{
               dv = 1;
             }
-            // ASw3 = dv;
+            ASw3 = dv;
             command["dv"] = dv;
             boardData["ASw3_dval"] = command["dv"];
             break;
@@ -274,7 +274,7 @@ void switchTouched(){
               av = av - 1;
               command["av"] = av;
               boardData["ASw3_aval"] = av;
-              // ASw3.write(av);
+              ASw3.write(av);
             }else{
               key = 0; // DO NOTHING
             }
