@@ -16,46 +16,46 @@ Ticker energyTicker;
 Ticker sensorDataTicker;
 
 //MODULES COMMUNICATION
-    TTP229 touchpad(p9, p10); // For Connecting Capacitive Touchpad using I2C
-    Serial xbeeSerial(p13, p14);
-    Serial pc(USBTX, USBRX);//Opens up serial communication through the USB port via the computer
+    TTP229 touchpad(P0_0, P0_1); // For Connecting Capacitive Touchpad using I2C
+    Serial pc(P0_2, P0_3); // (USBTX, USBRX) Opens up serial communication through the USB port via the computer
+    Serial xbeeSerial(P0_15, P0_16);
 
 // LED LIGHTS ON BOARD
-    DigitalOut heartbeatLED(LED1, 0); // LED1
-    DigitalOut xbeeLED(LED2); // LED2
-    DigitalOut sensorLED(LED3); // LED3
-    DigitalOut led4(LED4); // LED4
+    DigitalOut heartbeatLED(P1_18, 0); // LED1
+    DigitalOut xbeeLED(P1_20); // LED2
+    DigitalOut sensorLED(P1_21); // LED3
+    DigitalOut led4(P1_23); // LED4
 
 // DIGITAL SWITCHES
-    DigitalOut DSw1(p5);
-    DigitalOut DSw2(p6);
-    DigitalOut DSw3(p7);
-    DigitalOut DSw4(p8);
-    DigitalOut DSw5(p11);
-    DigitalOut DSw6(p12);
-    DigitalOut DSw7(p15);
+    DigitalOut DSw1(P0_9);
+    DigitalOut DSw2(P0_8);
+    DigitalOut DSw3(P0_7);
+    DigitalOut DSw4(P0_6);
+    DigitalOut DSw5(P0_18);
+    DigitalOut DSw6(P0_17);
+    DigitalOut DSw7(P0_23);
 
 // ANALOG SWITCHES
 
-    PwmOut ASw1(p21);  // Connect Potentiometer (Trimpot 10K with Knob)
-    PwmOut ASw2(p22);  // Connect Potentiometer (Trimpot 10K with Knob)
-    PwmOut ASw3(p23);  // Connect Potentiometer (Trimpot 10K with Knob)
+    PwmOut ASw1(P2_5);  // Connect Potentiometer (Trimpot 10K with Knob)
+    PwmOut ASw2(P2_4);  // Connect Potentiometer (Trimpot 10K with Knob)
+    PwmOut ASw3(P2_3);  // Connect Potentiometer (Trimpot 10K with Knob)
 
-    AnalogIn temHumSensor(p19);
-    AnalogIn energySensor(p20);
+    AnalogIn temHumSensor(P1_30);
+    AnalogIn energySensor(P1_31);
 
 // RGB LED PINS THAT CAN BE USED
 
-    DigitalOut DSw1Led(p16);
-    DigitalOut DSw2Led(p17);
-    DigitalOut DSw3Led(p18);
-    DigitalOut DSw4Led(p24);
-    DigitalOut DSw5Led(p25);
-    DigitalOut DSw6Led(p26);
-    DigitalOut DSw7Led(p27);
-    DigitalOut ASw1Led(p28);
-    DigitalOut ASw2Led(p29);
-    DigitalOut ASw3Led(p30);
+    DigitalOut DSw1Led(P0_24);
+    DigitalOut DSw2Led(P0_25);
+    DigitalOut DSw3Led(P0_26);
+    DigitalOut DSw4Led(P2_2);
+    DigitalOut DSw5Led(P2_1);
+    DigitalOut DSw6Led(P2_0);
+    DigitalOut DSw7Led(P0_11); //p27 (Serial RX)
+    DigitalOut ASw1Led(P0_10); //p28 (Serial TX)
+    DigitalOut ASw2Led(P0_5);
+    DigitalOut ASw3Led(P0_4);
 
 void broadcastChange(std::string command){
     command = command + "\n";
@@ -318,6 +318,10 @@ void setDeviceId(){
     }
 }
 
+void handleDataReceived(char data[128]){
+    pc.puts(data);
+}
+
 // main() runs in its own thread in the OS
 int main() {
     setDeviceId();
@@ -327,16 +331,29 @@ int main() {
 
     while (true) {
         heartbeatLED = 1;
-        wait(0.5);
+        wait(1);
         heartbeatLED = 0;
-        wait(0.5);
+        wait(1);
 
         if (pc.readable()) {//Checking for serial comminication
             xbeeSerial.putc(pc.getc()); //XBee write whatever the PC is sending
         }
-        if(xbeeSerial.readable()){
-            pc.putc(xbeeSerial.getc());
-        }
+
+        char value[128];
+        int index=0;
+        char ch;
+
+        do
+        {
+           if (xbeeSerial.readable()){      // if there is an character to read from the device
+              ch = xbeeSerial.getc();   // read it
+              if (index<128)               // just to avoid buffer overflow
+                 value[index++]=ch;  // put it into the value array and increment the index
+          }
+        } while (ch!='\n');    // loop until the '\n' character
+
+        value[index]='\x0';  // add un 0 to end the c string
+        handleDataReceived(value);
 
     }
 }
