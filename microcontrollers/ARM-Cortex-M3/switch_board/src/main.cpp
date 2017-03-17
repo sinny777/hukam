@@ -1,6 +1,7 @@
 #include "mbed.h"
 #include "TTP229.h"
 #include "MbedJSONValue.h"
+#include "DHT.h"
 #include <string>
 
 using namespace std;
@@ -21,7 +22,7 @@ Ticker sensorDataTicker;
     Serial xbeeSerial(P0_15, P0_16);
 
 // LED LIGHTS ON BOARD
-    DigitalOut heartbeatLED(P1_18, 0); // LED1
+    DigitalOut heartbeatLED(P1_18); // LED1
     DigitalOut xbeeLED(P1_20); // LED2
     DigitalOut sensorLED(P1_21); // LED3
     DigitalOut led4(P1_23); // LED4
@@ -41,7 +42,7 @@ Ticker sensorDataTicker;
     PwmOut ASw2(P2_4);  // Connect Potentiometer (Trimpot 10K with Knob)
     PwmOut ASw3(P2_3);  // Connect Potentiometer (Trimpot 10K with Knob)
 
-    AnalogIn temHumSensor(P1_30);
+    DHT temHumSensor(P1_30, DHT11);
     AnalogIn energySensor(P1_31);
 
 // RGB LED PINS THAT CAN BE USED
@@ -81,8 +82,8 @@ void refreshMyStatus(){
   boardData["ASw3_dval"] = 0;
   boardData["ASw3_aval"] = 0;
 
-  boardData["temp"] = 0.00;
-  boardData["hum"] = 0.00;
+  boardData["temp"] = 0;
+  boardData["hum"] = 0;
   boardData["energy"] = 0.00;
 
   MbedJSONValue command;
@@ -94,11 +95,29 @@ void refreshMyStatus(){
 }
 
 void readTempHumidityData(){
-    boardData["temp"] = boardData["temp"].get<double>() + 0.11;
-    boardData["hum"] = boardData["hum"].get<double>() + 0.23;
+
+    float temperature;
+    float temperature_f;
+    float humidity;
+    float dewpoint;
+
+    temHumSensor.readData();
+
+    temperature = temHumSensor.ReadTemperature(CELCIUS);
+    temperature_f = temHumSensor.ReadTemperature(FARENHEIT);
+    humidity = temHumSensor.ReadHumidity();
+    dewpoint = temHumSensor.CalcdewPointFast(temperature, humidity);
+
+    printf("\r\n");
+    printf("Temperature: %f C / %f F\r\n", temperature, temperature_f);
+    printf("Humidity: %f%%\r\n", humidity);
+    printf("Dewpoint: %f C / %f F\r\n", dewpoint, (dewpoint * 1.8f) + 32);
+
+    boardData["temp"] = temperature;
+    boardData["hum"] = humidity;
+
     sensorLED = 1;
-    wait_ms(2);
-    sensorLED = 0;
+
 }
 
 void readEnergyConsumption(){
@@ -119,7 +138,7 @@ void sendSensorData(){
 }
 
 void readNSaveSensorsData(){
-    tempTicker.attach(&readTempHumidityData, 15.0);
+    tempTicker.attach(&readTempHumidityData, 3.0);
     energyTicker.attach(&readEnergyConsumption, 1.0);
     sensorDataTicker.attach(&sendSensorData, 5.0);
 }
@@ -330,10 +349,11 @@ int main() {
     touchpad.attach(&switchTouched);
 
     while (true) {
+        sensorLED = 0;
         heartbeatLED = 1;
-        wait(1);
+        wait(0.5);
         heartbeatLED = 0;
-        wait(1);
+        wait(0.5);
 
         if (pc.readable()) {//Checking for serial comminication
             xbeeSerial.putc(pc.getc()); //XBee write whatever the PC is sending
