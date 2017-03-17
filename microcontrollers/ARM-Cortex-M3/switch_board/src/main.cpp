@@ -42,8 +42,8 @@ Ticker sensorDataTicker;
     PwmOut ASw2(P2_4);  // Connect Potentiometer (Trimpot 10K with Knob)
     PwmOut ASw3(P2_3);  // Connect Potentiometer (Trimpot 10K with Knob)
 
-    DHT temHumSensor(P1_30, DHT11);
-    AnalogIn energySensor(P1_31);
+    DHT sensor(p20, DHT11);
+    AnalogIn energySensor(P1_30);
 
 // RGB LED PINS THAT CAN BE USED
 
@@ -97,24 +97,17 @@ void refreshMyStatus(){
 void readTempHumidityData(){
 
     float temperature;
-    float temperature_f;
     float humidity;
     float dewpoint;
 
-    temHumSensor.readData();
-
-    temperature = temHumSensor.ReadTemperature(CELCIUS);
-    temperature_f = temHumSensor.ReadTemperature(FARENHEIT);
-    humidity = temHumSensor.ReadHumidity();
-    dewpoint = temHumSensor.CalcdewPointFast(temperature, humidity);
-
-    printf("\r\n");
-    printf("Temperature: %f C / %f F\r\n", temperature, temperature_f);
-    printf("Humidity: %f%%\r\n", humidity);
-    printf("Dewpoint: %f C / %f F\r\n", dewpoint, (dewpoint * 1.8f) + 32);
+    int status = sensor.readData();
+    temperature = sensor.ReadTemperature(CELCIUS);
+    humidity = sensor.ReadHumidity();
+    dewpoint = sensor.CalcdewPointFast(temperature, humidity);
 
     boardData["temp"] = temperature;
     boardData["hum"] = humidity;
+    boardData["dewpoint"] = dewpoint;
 
     sensorLED = 1;
 
@@ -138,7 +131,7 @@ void sendSensorData(){
 }
 
 void readNSaveSensorsData(){
-    tempTicker.attach(&readTempHumidityData, 3.0);
+    tempTicker.attach(&readTempHumidityData, 5.0);
     energyTicker.attach(&readEnergyConsumption, 1.0);
     sensorDataTicker.attach(&sendSensorData, 5.0);
 }
@@ -349,11 +342,11 @@ int main() {
     touchpad.attach(&switchTouched);
 
     while (true) {
-        sensorLED = 0;
         heartbeatLED = 1;
         wait(0.5);
         heartbeatLED = 0;
         wait(0.5);
+        sensorLED = 0;
 
         if (pc.readable()) {//Checking for serial comminication
             xbeeSerial.putc(pc.getc()); //XBee write whatever the PC is sending
