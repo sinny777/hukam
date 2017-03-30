@@ -1,5 +1,4 @@
 #include "mbed.h"
-#include "TTP229.h"
 #include "MbedJSONValue.h"
 #include "DHT.h"
 #include <string>
@@ -17,7 +16,7 @@ Ticker energyTicker;
 Ticker sensorDataTicker;
 
 //MODULES COMMUNICATION
-    TTP229 touchpad(P0_0, P0_1); // For Connecting Capacitive Touchpad using I2C
+    Serial touchpad(P0_0, P0_1); // (SDA, SLC) For Connecting Capacitive Touchpad using I2C
     Serial pc(P0_2, P0_3); // (USBTX, USBRX) Opens up serial communication through the USB port via the computer
     Serial xbeeSerial(P0_15, P0_16);
 
@@ -60,7 +59,7 @@ Ticker sensorDataTicker;
 
 void broadcastChange(std::string command){
     command = command + "\n";
-    printf("\nBroadcast = %s\r\n" ,  command.c_str());
+    printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
     xbeeSerial.puts(command.c_str());
     xbeeLED = 1;
     wait(0.5);
@@ -136,17 +135,43 @@ void readNSaveSensorsData(){
     sensorDataTicker.attach(&sendSensorData, 5.0);
 }
 
+/*
+string to_string(const bitset<16>& bs){
+    return bs.to_string<char, std::char_traits<char>, std::allocator<char> >();
+}
+*/
+
 void switchTouched(){
-//    printf("%16s\r\n",to_string(touchpad).c_str());
-    int8_t key = touchpad.onkey();
+    // printf("%16s\r\n",to_string(touchpad).c_str());
+    // int8_t key = touchpad.onkey();
+    int key = 0;
+    char value[2];
+    int index=0;
+    char ch;
+    do{
+       if (touchpad.readable()){      // if there is an character to read from the device
+          ch = touchpad.getc();   // read it
+          if (index<2)               // just to avoid buffer overflow
+             value[index++]=ch;  // put it into the value array and increment the index
+      }
+    } while (ch!='\n');    // loop until the '\n' character
+    value[index]='\x0';
+
+    key = atoi(value);
+
+    if(key == 0){
+      printf("Do Nothing as Key is %d\r\n", key);
+      return;
+    }
     int dv;
     int av;
-    // printf("%d\r\n", key);
+    printf("KEY: %d\r\n", key);
     //int sw=touchpad.getsingle();
     //if(sw!=0) myleds=sw%16;
     MbedJSONValue command;
     command["id"] = boardData["id"];
     command["type"] = "sb";
+
     switch(key){
         case 1:
             DSw1 = !DSw1;
@@ -297,6 +322,8 @@ void switchTouched(){
         std::string str = command.serialize();
         broadcastChange(str);
     }
+
+    wait(0.5);
 }
 
 void setDeviceId(){
