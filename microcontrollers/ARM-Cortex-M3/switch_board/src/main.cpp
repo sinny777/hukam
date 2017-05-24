@@ -49,7 +49,7 @@ Ticker sensorDataTicker;
     DigitalOut ASw2(P2_4);
     DigitalOut ASw3(P2_3);
 
-    DHT sensor(p20, DHT11);
+    DHT sensor(P1_31, DHT11);
     AnalogIn energySensor(P1_30);
 
 // RGB LED PINS THAT CAN BE USED
