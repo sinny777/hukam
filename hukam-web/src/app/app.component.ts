@@ -1,5 +1,6 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { AuthService } from "angular2-social-login";
+import { SharedService } from './services/shared.service';
 
 @Component({
   selector: 'app-root',
@@ -8,7 +9,9 @@ import { AuthService } from "angular2-social-login";
 })
 export class AppComponent {
 
-  constructor(public _auth: AuthService){ }
+  constructor(public _auth: AuthService, public sharedService: SharedService){
+      this.currentUser = this.sharedService.getCurrentUser();
+   }
 
   sub: any;
   currentUser: any;
@@ -20,6 +23,7 @@ export class AppComponent {
       (data) => {
                   console.log(data);
                   this.currentUser = data;
+                  this.sharedService.setCurrentUser(this.currentUser);
                   this.closeBtn.nativeElement.click();
                 }
     );

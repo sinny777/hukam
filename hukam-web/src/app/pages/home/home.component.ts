@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { SharedService } from '../../services/shared.service';
 
 @Component({
   selector: 'app-home',
@@ -7,9 +8,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HomeComponent implements OnInit {
 
-  constructor() { }
+  currentUser: any;
+
+  constructor(public sharedService: SharedService) {
+
+  }
 
   ngOnInit() {
+    this.currentUser = this.sharedService.getCurrentUser();
   }
 
 }

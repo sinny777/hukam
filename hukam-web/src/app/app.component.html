@@ -8,7 +8,7 @@
 		        	<span class="icon-bar"></span>
 		        	<span class="icon-bar"></span>
 		    	</button>
-	    		<a href="/home">
+	    		<a routerLink="/home">
 	        	<div class="logo-container">
 	                <div class="brand">
 	                    Hukam
@@ -29,7 +29,7 @@
 									 {{currentUser.name}}
 								</a>
 								<ul class="dropdown-menu dropdown-menu-right">
-										<li><a href="/account">Account Settings</a></li>
+										<li><a routerLink="/account" >Account Settings</a></li>
 										<li><a href="/account/places">My Places</a></li>
 										<li class="divider"></li>
 										<li><a href="javascript:void(0);" (click)="logout();">Logout</a></li>
@@ -46,7 +46,7 @@
 										<li><a href="/contact">Contact Us</a></li>
 										<li class="divider"></li>
 										<li class="dropdown-header">Services</li>
-										<li><a href="/iot/hbuddy">Home Automation</a></li>
+										<li><a routerLink="/iot/hbuddy" >Home Automation</a></li>
 										<li><a href="/iot/industries">Industry Solutions</a></li>
 										<li><a href="/iot/agriculture">Smart Agriculture</a></li>
 								</ul>
