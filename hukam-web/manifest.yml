@@ -1,8 +1,0 @@
-applications:
-- services:
-  - hukam-cloudant-dev
-  - hukam-iot-dev
-  name: hukam-dev
-  command: node .
-  path: .
-  memory: 512M
