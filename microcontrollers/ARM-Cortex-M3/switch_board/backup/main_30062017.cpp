@@ -1,5 +1,11 @@
+/*
+*  This program is for ExploreEmbedded LPC1768 board
+*
+*
+*/
+
+
 #include "mbed.h"
-#include "TTP229.h"
 #include "MbedJSONValue.h"
 #include "DHT.h"
 #include <string>
@@ -17,9 +23,12 @@ Ticker energyTicker;
 Ticker sensorDataTicker;
 
 //MODULES COMMUNICATION
-    TTP229 touchpad(P0_0, P0_1); // (SDA, SLC) For Connecting Capacitive Touchpad using I2C
+    // TTP229(SDA, SLC) connect to Arduino(A4, A5)
+    // Connect Arduino(10, 11) LPC1768(9, 10)
+    Serial touchUNO(P0_15, P0_16); // (TouchUNO TX, RX) (LPC1768 p14, p13)
     Serial pc(P0_2, P0_3); // (USBTX, USBRX) Opens up serial communication through the USB port via the computer
-    Serial xbeeSerial(P0_15, P0_16);
+    Serial xbeeSerial(P0_0, P0_1); // (XBEE TX, RX) (LPC1768 p9, p10)
+    Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
 
 // LED LIGHTS ON BOARD
     DigitalOut heartbeatLED(P1_18); // LED1
@@ -28,39 +37,37 @@ Ticker sensorDataTicker;
     DigitalOut led4(P1_23); // LED4
 
 // DIGITAL SWITCHES
-    DigitalOut DSw1(P0_9);
-    DigitalOut DSw2(P0_8);
-    DigitalOut DSw3(P0_7);
-    DigitalOut DSw4(P0_6);
-    DigitalOut DSw5(P0_18);
-    DigitalOut DSw6(P0_17);
-    DigitalOut DSw7(P0_23);
-
+    DigitalOut DSw1(P0_4);
+    DigitalOut DSw2(P0_5);
+    DigitalOut DSw3(P0_6);
+    DigitalOut DSw4(P0_7);
+    DigitalOut DSw5(P0_8);
+    DigitalOut DSw6(P0_9);
+    DigitalOut DSw7(P0_21);
 // ANALOG SWITCHES
+    DigitalOut ASw1(P2_5);
+    DigitalOut ASw2(P2_4);
+    DigitalOut ASw3(P2_3);
 
-    PwmOut ASw1(P2_5);  // Connect Potentiometer (Trimpot 10K with Knob)
-    PwmOut ASw2(P2_4);  // Connect Potentiometer (Trimpot 10K with Knob)
-    PwmOut ASw3(P2_3);  // Connect Potentiometer (Trimpot 10K with Knob)
-
-    DHT sensor(p20, DHT11);
+    DHT sensor(P1_31, DHT11);
     AnalogIn energySensor(P1_30);
 
 // RGB LED PINS THAT CAN BE USED
 
-    DigitalOut DSw1Led(P0_24);
-    DigitalOut DSw2Led(P0_25);
-    DigitalOut DSw3Led(P0_26);
-    DigitalOut DSw4Led(P2_2);
+    DigitalOut DSw1Led(P0_22);
+    DigitalOut DSw2Led(P0_23);
+    DigitalOut DSw3Led(P0_24);
+    DigitalOut DSw4Led(P2_0);
     DigitalOut DSw5Led(P2_1);
-    DigitalOut DSw6Led(P2_0);
-    DigitalOut DSw7Led(P0_11); //p27 (Serial RX)
-    DigitalOut ASw1Led(P0_10); //p28 (Serial TX)
-    DigitalOut ASw2Led(P0_5);
-    DigitalOut ASw3Led(P0_4);
+    DigitalOut DSw6Led(P2_2);
+    DigitalOut DSw7Led(P0_17);
+    DigitalOut ASw1Led(P0_18);
+    DigitalOut ASw2Led(P0_25);
+    DigitalOut ASw3Led(P0_26);
 
 void broadcastChange(std::string command){
     command = command + "\n";
-    printf("\nBroadcast = %s\r\n" ,  command.c_str());
+    printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
     xbeeSerial.puts(command.c_str());
     xbeeLED = 1;
     wait(0.5);
@@ -136,17 +143,37 @@ void readNSaveSensorsData(){
     sensorDataTicker.attach(&sendSensorData, 5.0);
 }
 
+/*
 string to_string(const bitset<16>& bs){
     return bs.to_string<char, std::char_traits<char>, std::allocator<char> >();
 }
+*/
 
 void switchTouched(){
-    printf("%16s\r\n",to_string(touchpad).c_str());
-    int8_t key = touchpad.onkey();
+    // printf("%16s\r\n",to_string(touchUNO).c_str());
+    // int8_t key = touchUNO.onkey();
+    int key = 0;
+    char value[2];
+    int index=0;
+    char ch;
+    do{
+       if (touchUNO.readable()){      // if there is an character to read from the device
+          ch = touchUNO.getc();   // read it
+          if (index<2)               // just to avoid buffer overflow
+             value[index++]=ch;  // put it into the value array and increment the index
+      }
+    } while (ch!='\n');    // loop until the '\n' character
+    value[index]='\x0';
+    key = atoi(value);
+
+    if(key == 0){
+      printf("Do Nothing as Key is %d\r\n", key);
+      return;
+    }
     int dv;
     int av;
-    printf("%d\r\n", key);
-    //int sw=touchpad.getsingle();
+    printf("KEY: %d\r\n", key);
+    //int sw=touchUNO.getsingle();
     //if(sw!=0) myleds=sw%16;
     MbedJSONValue command;
     command["id"] = boardData["id"];
@@ -302,6 +329,8 @@ void switchTouched(){
         std::string str = command.serialize();
         broadcastChange(str);
     }
+
+    wait(0.5);
 }
 
 void setDeviceId(){
@@ -343,8 +372,8 @@ void handleDataReceived(char data[128]){
 int main() {
     setDeviceId();
     refreshMyStatus();
-    readNSaveSensorsData();
-    touchpad.attach(&switchTouched);
+    // readNSaveSensorsData();
+    touchUNO.attach(&switchTouched);
 
     while (true) {
         heartbeatLED = 1;

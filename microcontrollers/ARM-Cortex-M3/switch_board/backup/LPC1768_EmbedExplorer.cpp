@@ -25,15 +25,22 @@ Ticker sensorDataTicker;
 //MODULES COMMUNICATION
     // TTP229(SDA, SLC) connect to Arduino(A4, A5)
     // Connect Arduino(10, 11) LPC1768(9, 10)
-    Serial touchpad(P0_0, P0_1);
+    Serial touchUNO(P0_15, P0_16); // (TouchUNO TX, RX) (LPC1768 p14, p13)
     Serial pc(P0_2, P0_3); // (USBTX, USBRX) Opens up serial communication through the USB port via the computer
-    Serial xbeeSerial(P0_15, P0_16);
+    Serial xbeeSerial(P0_0, P0_1); // (XBEE TX, RX) (LPC1768 p9, p10)
+    Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
 
 // LED LIGHTS ON BOARD
-    DigitalOut heartbeatLED(P2_0); // LED1
-    DigitalOut xbeeLED(P2_1); // LED2
-    DigitalOut sensorLED(P2_2); // LED3
-    DigitalOut led4(P2_3); // LED4
+    DigitalOut heartbeatLED(P1_18); // LED1
+    DigitalOut xbeeLED(P1_20); // LED2
+    DigitalOut sensorLED(P1_21); // LED3
+    DigitalOut led4(P1_23); // LED4
+
+
+    // DigitalOut heartbeatLED(P2_0); // LED1
+    // DigitalOut xbeeLED(P2_1); // LED2
+    // DigitalOut sensorLED(P2_2); // LED3
+    // DigitalOut led4(P2_3); // LED4
 
 // DIGITAL SWITCHES
     DigitalOut DSw1(P0_4);
@@ -43,14 +50,12 @@ Ticker sensorDataTicker;
     DigitalOut DSw5(P0_8);
     DigitalOut DSw6(P0_9);
     DigitalOut DSw7(P0_21);
-
 // ANALOG SWITCHES
+    DigitalOut ASw1(P2_5);
+    DigitalOut ASw2(P2_4);
+    DigitalOut ASw3(P1_23);
 
-    PwmOut ASw1(P2_5);  // Connect Potentiometer (Trimpot 10K with Knob)
-    PwmOut ASw2(P2_4);  // Connect Potentiometer (Trimpot 10K with Knob)
-    PwmOut ASw3(P2_3);  // Connect Potentiometer (Trimpot 10K with Knob)
-
-    DHT sensor(p20, DHT11);
+    DHT sensor(P1_31, DHT11);
     AnalogIn energySensor(P1_30);
 
 // RGB LED PINS THAT CAN BE USED
@@ -58,11 +63,11 @@ Ticker sensorDataTicker;
     DigitalOut DSw1Led(P0_22);
     DigitalOut DSw2Led(P0_23);
     DigitalOut DSw3Led(P0_24);
-    DigitalOut DSw4Led(P1_21);
+    DigitalOut DSw4Led(P1_18);
     DigitalOut DSw5Led(P1_20);
-    DigitalOut DSw6Led(P1_18);
-    DigitalOut DSw7Led(P0_11); //p27 (Serial RX)
-    DigitalOut ASw1Led(P0_10); //p28 (Serial TX)
+    DigitalOut DSw6Led(P1_21);
+    DigitalOut DSw7Led(P0_17);
+    DigitalOut ASw1Led(P0_18);
     DigitalOut ASw2Led(P0_25);
     DigitalOut ASw3Led(P0_26);
 
@@ -151,21 +156,20 @@ string to_string(const bitset<16>& bs){
 */
 
 void switchTouched(){
-    // printf("%16s\r\n",to_string(touchpad).c_str());
-    // int8_t key = touchpad.onkey();
+    // printf("%16s\r\n",to_string(touchUNO).c_str());
+    // int8_t key = touchUNO.onkey();
     int key = 0;
     char value[2];
     int index=0;
     char ch;
     do{
-       if (touchpad.readable()){      // if there is an character to read from the device
-          ch = touchpad.getc();   // read it
+       if (touchUNO.readable()){      // if there is an character to read from the device
+          ch = touchUNO.getc();   // read it
           if (index<2)               // just to avoid buffer overflow
              value[index++]=ch;  // put it into the value array and increment the index
       }
     } while (ch!='\n');    // loop until the '\n' character
     value[index]='\x0';
-
     key = atoi(value);
 
     if(key == 0){
@@ -175,7 +179,7 @@ void switchTouched(){
     int dv;
     int av;
     printf("KEY: %d\r\n", key);
-    //int sw=touchpad.getsingle();
+    //int sw=touchUNO.getsingle();
     //if(sw!=0) myleds=sw%16;
     MbedJSONValue command;
     command["id"] = boardData["id"];
@@ -374,8 +378,8 @@ void handleDataReceived(char data[128]){
 int main() {
     setDeviceId();
     refreshMyStatus();
-    readNSaveSensorsData();
-    touchpad.attach(&switchTouched);
+    // readNSaveSensorsData();
+    touchUNO.attach(&switchTouched);
 
     while (true) {
         heartbeatLED = 1;

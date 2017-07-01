@@ -1,0 +1,27 @@
+service: web
+runtime: nodejs
+env: flex
+threadsafe: true
+api_version: 1
+
+# Temporary setting to keep gcloud from uploading node_modules
+skip_files:
+ - ^node_modules$
+health_check:
+ enable_health_check: True
+ check_interval_sec: 5
+ timeout_sec: 4
+ unhealthy_threshold: 2
+ healthy_threshold: 2
+handlers:
+- url: /favicon.ico
+  static_files: dist/favicon.ico
+  upload: dist/assets/favicon.ico
+
+- url: /(.*\.(gif|png|jpg|css|js)(|\.map))$
+  static_files: dist/\1
+  upload: dist/(.*)(|\.map)
+
+- url: /(.*)
+  static_files: dist/index.html
+  upload: dist/index.html
