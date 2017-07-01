@@ -30,11 +30,19 @@ Ticker sensorDataTicker;
     Serial xbeeSerial(P0_0, P0_1); // (XBEE TX, RX) (LPC1768 p9, p10)
     Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
 
-// LED LIGHTS ON BOARD
+// LED LIGHTS ON EXPLORE EMBEDDED BOARD LPC1768
     DigitalOut heartbeatLED(P1_18); // LED1
     DigitalOut xbeeLED(P1_20); // LED2
     DigitalOut sensorLED(P1_21); // LED3
     DigitalOut led4(P1_23); // LED4
+
+/*
+    UNCOMENT FOR LPC1768 MBED BOARD.  MODIFY THE PINS
+    DigitalOut heartbeatLED(P2_0); // LED1
+    DigitalOut xbeeLED(P2_1); // LED2
+    DigitalOut sensorLED(P2_2); // LED3
+    DigitalOut led4(P2_3); // LED4
+*/
 
 // DIGITAL SWITCHES
     DigitalOut DSw1(P0_4);
@@ -47,7 +55,7 @@ Ticker sensorDataTicker;
 // ANALOG SWITCHES
     DigitalOut ASw1(P2_5);
     DigitalOut ASw2(P2_4);
-    DigitalOut ASw3(P2_3);
+    DigitalOut ASw3(P1_23);
 
     DHT sensor(P1_31, DHT11);
     AnalogIn energySensor(P1_30);
@@ -57,9 +65,9 @@ Ticker sensorDataTicker;
     DigitalOut DSw1Led(P0_22);
     DigitalOut DSw2Led(P0_23);
     DigitalOut DSw3Led(P0_24);
-    DigitalOut DSw4Led(P2_0);
-    DigitalOut DSw5Led(P2_1);
-    DigitalOut DSw6Led(P2_2);
+    DigitalOut DSw4Led(P1_18);
+    DigitalOut DSw5Led(P1_20);
+    DigitalOut DSw6Led(P1_21);
     DigitalOut DSw7Led(P0_17);
     DigitalOut ASw1Led(P0_18);
     DigitalOut ASw2Led(P0_25);
@@ -372,7 +380,7 @@ void handleDataReceived(char data[128]){
 int main() {
     setDeviceId();
     refreshMyStatus();
-    // readNSaveSensorsData();
+    readNSaveSensorsData();
     touchUNO.attach(&switchTouched);
 
     while (true) {

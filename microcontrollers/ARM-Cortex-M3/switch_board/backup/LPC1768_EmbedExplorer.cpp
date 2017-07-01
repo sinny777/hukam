@@ -380,7 +380,7 @@ void handleDataReceived(char data[128]){
 int main() {
     setDeviceId();
     refreshMyStatus();
-    // readNSaveSensorsData();
+    readNSaveSensorsData();
     touchUNO.attach(&switchTouched);
 
     while (true) {
