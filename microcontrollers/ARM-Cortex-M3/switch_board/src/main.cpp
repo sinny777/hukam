@@ -43,7 +43,7 @@ Ticker sensorDataTicker;
 
 // INPUTS FOR PUSH BUTTONS
   DigitalIn DSwIn1(P1_13);
-  DigitalIn DSwI22(P1_14);
+  DigitalIn DSwIn2(P1_14);
   DigitalIn DSwIn3(P1_15);
   DigitalIn DSwIn4(P1_16);
   DigitalIn DSwIn5(P1_17);
@@ -176,61 +176,71 @@ void checkSwitches(){
     MbedJSONValue command;
     command["id"] = boardData["id"];
     command["type"] = "sb";
-
+    int changed = 0;
     if(DSwIn1){
         DSwO1 = !DSwO1;
         command["index"] = 1;
         command["dv"] = DSwIn1;
+        changed = 1;
     }
     if(DSwIn2){
         DSwO2 = !DSwO2;
         command["index"] = 2;
         command["dv"] = DSwIn2;
+        changed = 2;
     }
     if(DSwIn3){
         DSwO3 = !DSwO3;
         command["index"] = 3;
         command["dv"] = DSwIn3;
+        changed = 3;
     }
     if(DSwIn4){
         DSwO4 = !DSwO4;
         command["index"] = 4;
         command["dv"] = DSwIn4;
+        changed = 4;
     }
     if(DSwIn5){
         DSwO5 = !DSwO5;
         command["index"] = 5;
         command["dv"] = DSwIn5;
+        changed = 5;
     }
     if(DSwIn6){
         DSwO6 = !DSwO6;
         command["index"] = 6;
         command["dv"] = DSwIn6;
+        changed = 6;
     }
     if(DSwIn7){
         DSwO7 = !DSwO7;
         command["index"] = 7;
         command["dv"] = DSwIn7;
+        changed = 7;
     }
     if(DSwIn8){
         DSwO8 = !DSwO8;
         command["index"] = 8;
         command["dv"] = DSwIn8;
+        changed = 8;
     }
     if(DSwIn9){
         DSwO9 = !DSwO9;
         command["index"] = 9;
         command["dv"] = DSwIn9;
+        changed = 9;
     }
     if(DSwIn10){
         DSwO10 = !DSwO10;
         command["index"] = 10;
         command["dv"] = DSwIn10;
+        changed = 10;
     }
 
     //TODO: Analog Switch implementation
 
-    if(command["index"]){
+    if(changed > 0){
         std::string str = command.serialize();
         broadcastChange(str);
     }
@@ -271,6 +281,7 @@ void setDeviceId(){
 }
 
 void handleDataReceived(char data[128]){
+  // TODO: Action from Internet
     pc.puts(data);
 }
 
