@@ -73,19 +73,19 @@ Ticker sensorDataTicker;
     DigitalOut DSwO10(P0_16);
 
 // OUTPUT FOR RGB LEDs (FOR LOCK)
-    // DigitalOut RGB1(P0_0);
-    // DigitalOut RGB2(P0_1);
-    // DigitalOut RGB3(P0_2);
-    // DigitalOut RGB4(P0_3);
-    DigitalOut RGB5(P0_4);
-    DigitalOut RGB6(P0_5);
-    DigitalOut RGB7(P0_6);
-    DigitalOut RGB8(P0_7);
-    DigitalOut RGB9(P0_8);
-    DigitalOut RGB10(P0_9);
+    DigitalOut RGB1(P0_4);
+    DigitalOut RGB2(P0_5);
+    DigitalOut RGB3(P0_6);
+    DigitalOut RGB4(P0_7);
+    DigitalOut RGB5(P0_8);
+    DigitalOut RGB6(P0_9);
+    DigitalOut RGB7(P0_17);
+    DigitalOut RGB8(P0_18);
+    DigitalOut RGB9(P0_19);
+    DigitalOut RGB10(P0_20);
 
     DHT tempHumSensor(P0_23, DHT11);
-    ACS712 energySensor(ACS712_30A);
+    ACS712 energySensor(ACS712_30A); // Connect to PIN P0_26
     // AnalogIn energySensor(P0_24);
 
   void readEnergyConsumption(){
