@@ -8,6 +8,7 @@
 #include "mbed.h"
 #include "MbedJSONValue.h"
 #include "DHT.h"
+#include "ACS712.h"
 #include <string>
 
 using namespace std;
@@ -29,17 +30,17 @@ Ticker sensorDataTicker;
     Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
 
 // LED LIGHTS ON EXPLORE EMBEDDED BOARD LPC1768
+/*
     DigitalOut heartbeatLED(P1_18); // LED1
     DigitalOut xbeeLED(P1_20); // LED2
     DigitalOut sensorLED(P1_21); // LED3
+*/
 
-/*
-    UNCOMENT FOR LPC1768 MBED BOARD.  MODIFY THE PINS
+// UNCOMENT FOR LPC1768 MBED BOARD.  MODIFY THE PINS
     DigitalOut heartbeatLED(P2_0); // LED1
     DigitalOut xbeeLED(P2_1); // LED2
     DigitalOut sensorLED(P2_2); // LED3
     DigitalOut led4(P2_3); // LED4
-*/
 
 // INPUTS FOR PUSH BUTTONS
   DigitalIn DSwIn1(P1_13);
@@ -72,10 +73,10 @@ Ticker sensorDataTicker;
     DigitalOut DSwO10(P0_16);
 
 // OUTPUT FOR RGB LEDs (FOR LOCK)
-    DigitalOut RGB1(P0_0);
-    DigitalOut RGB2(P0_1);
-    DigitalOut RGB3(P0_2);
-    DigitalOut RGB4(P0_3);
+    // DigitalOut RGB1(P0_0);
+    // DigitalOut RGB2(P0_1);
+    // DigitalOut RGB3(P0_2);
+    // DigitalOut RGB4(P0_3);
     DigitalOut RGB5(P0_4);
     DigitalOut RGB6(P0_5);
     DigitalOut RGB7(P0_6);
@@ -83,8 +84,9 @@ Ticker sensorDataTicker;
     DigitalOut RGB9(P0_8);
     DigitalOut RGB10(P0_9);
 
-    DHT sensor(P0_23, DHT11);
-    AnalogIn energySensor(P0_24);
+    DHT tempHumSensor(P0_23, DHT11);
+    ACS712 energySensor(ACS712_30A);
+    // AnalogIn energySensor(P0_24);
 
 void broadcastChange(std::string command){
     command = command + "\n";
@@ -128,10 +130,10 @@ void readTempHumidityData(){
     float humidity;
     float dewpoint;
 
-    int status = sensor.readData();
-    temperature = sensor.ReadTemperature(CELCIUS);
-    humidity = sensor.ReadHumidity();
-    dewpoint = sensor.CalcdewPointFast(temperature, humidity);
+    int status = tempHumSensor.readData();
+    temperature = tempHumSensor.ReadTemperature(CELCIUS);
+    humidity = tempHumSensor.ReadHumidity();
+    dewpoint = tempHumSensor.CalcdewPointFast(temperature, humidity);
 
     boardData["temp"] = temperature;
     boardData["hum"] = humidity;
@@ -142,7 +144,13 @@ void readTempHumidityData(){
 }
 
 void readEnergyConsumption(){
-    boardData["energy"] = boardData["energy"].get<double>() + 0.31;
+  float U = 220;
+  float I = energySensor.getCurrentAC();
+  float P = U * I;
+  // UNCOMMENT TO CHECK ENERGY CONSUMPTOIN EVERY SECOND
+  // printf("Energy Consumption: %3.7f and Current usage: %3.7f\n\n", P, I);
+  boardData["energy"] = P;
+  sensorLED = 1;
 }
 
 void sendSensorData(){
@@ -153,14 +161,11 @@ void sendSensorData(){
     command["hum"] = boardData["hum"];
     std::string str = command.serialize();
     broadcastChange(str);
-    // boardData["energy"] = 0.00;
-    // boardData["temp"] = 0.00;
-    // boardData["hum"] = 0.00;
 }
 
 void readNSaveSensorsData(){
     tempTicker.attach(&readTempHumidityData, 5.0);
-    energyTicker.attach(&readEnergyConsumption, 1.0);
+    // energyTicker.attach(&readEnergyConsumption, 1.0);
     sensorDataTicker.attach(&sendSensorData, 5.0);
 }
 
@@ -289,15 +294,20 @@ void handleDataReceived(char data[128]){
 int main() {
     setDeviceId();
     refreshMyStatus();
+    wait(5);
     readNSaveSensorsData();
 
-    while (true) {
-        heartbeatLED = 1;
-        wait(0.5);
-        heartbeatLED = 0;
-        wait(0.5);
-        sensorLED = 0;
+    float offset = energySensor.calibrate();
 
+    while (true) {
+        // heartbeatLED = 1;
+        // wait(0.5);
+        // heartbeatLED = 0;
+        // wait(0.5);
+        readEnergyConsumption();
+        wait(1);
+        sensorLED = 0;
+        checkSwitches();
         if (pc.readable()) {//Checking for serial comminication
             xbeeSerial.putc(pc.getc()); //XBee write whatever the PC is sending
         }
