@@ -88,6 +88,17 @@ Ticker sensorDataTicker;
     ACS712 energySensor(ACS712_30A);
     // AnalogIn energySensor(P0_24);
 
+  void readEnergyConsumption(){
+    float U = 220;
+    float I = energySensor.getCurrentAC();
+    float P = U * I;
+    // UNCOMMENT TO CHECK ENERGY CONSUMPTOIN EVERY SECOND
+    // printf("Energy Consumption: %3.7f and Current usage: %3.7f\n\n", P, I);
+    boardData["energy"] = P;
+    sensorLED = 1;
+    wait(1);
+  }
+
 void broadcastChange(std::string command){
     command = command + "\n";
     printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
@@ -143,16 +154,6 @@ void readTempHumidityData(){
 
 }
 
-void readEnergyConsumption(){
-  float U = 220;
-  float I = energySensor.getCurrentAC();
-  float P = U * I;
-  // UNCOMMENT TO CHECK ENERGY CONSUMPTOIN EVERY SECOND
-  // printf("Energy Consumption: %3.7f and Current usage: %3.7f\n\n", P, I);
-  boardData["energy"] = P;
-  sensorLED = 1;
-}
-
 void sendSensorData(){
     MbedJSONValue command;
     command["id"] = boardData["id"];
@@ -165,7 +166,7 @@ void sendSensorData(){
 
 void readNSaveSensorsData(){
     tempTicker.attach(&readTempHumidityData, 5.0);
-    // energyTicker.attach(&readEnergyConsumption, 1.0);
+    energyTicker.attach(&readEnergyConsumption, 1.0);
     sensorDataTicker.attach(&sendSensorData, 5.0);
 }
 
@@ -297,15 +298,13 @@ int main() {
     wait(5);
     readNSaveSensorsData();
 
-    float offset = energySensor.calibrate();
+    energySensor.calibrate();
 
     while (true) {
         // heartbeatLED = 1;
         // wait(0.5);
         // heartbeatLED = 0;
         // wait(0.5);
-        readEnergyConsumption();
-        wait(1);
         sensorLED = 0;
         checkSwitches();
         if (pc.readable()) {//Checking for serial comminication
