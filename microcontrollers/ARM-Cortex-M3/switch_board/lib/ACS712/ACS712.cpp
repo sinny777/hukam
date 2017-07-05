@@ -72,6 +72,6 @@ float ACS712::getCurrentAC(unsigned int frequency) {
 		measurements_count++;
 	}
 	t.stop();
-	float Irms = sqrt(Isum / measurements_count) / ADC_SCALE * VREF / sensitivity;
+	float Irms = pow((Isum / measurements_count), 0.5) / ADC_SCALE * VREF / sensitivity;
 	return Irms;
 }

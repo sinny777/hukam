@@ -89,14 +89,15 @@ Ticker sensorDataTicker;
     // AnalogIn energySensor(P0_24);
 
   void readEnergyConsumption(){
-    float U = 220;
+    wait(0.5f);
+    float U = 230;
     float I = energySensor.getCurrentAC();
     float P = U * I;
     // UNCOMMENT TO CHECK ENERGY CONSUMPTOIN EVERY SECOND
     // printf("Energy Consumption: %3.7f and Current usage: %3.7f\n\n", P, I);
     boardData["energy"] = P;
     sensorLED = 1;
-    wait(1);
+    wait(0.5f);
   }
 
 void broadcastChange(std::string command){
