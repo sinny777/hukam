@@ -8,7 +8,8 @@ AnalogIn sensor(P0_26);
  float zero = 512.0;
  float sensitivity;
 
-ACS712::ACS712(ACS712_type type) {
+ACS712::ACS712(ACS712_type type){
+
 	switch (type) {
 		case ACS712_05B:
 			sensitivity = 0.185;
@@ -42,7 +43,7 @@ int ACS712::calibrate() {
 	return _zero;
 }
 
-void setZeroPoint(int _zero) {
+void ACS712::setZeroPoint(int _zero) {
 	zero = _zero;
 }
 
@@ -56,22 +57,30 @@ float ACS712::getCurrentDC() {
 }
 
 float ACS712::getCurrentAC() {
-	return getCurrentAC(DEFAULT_FREQUENCY);
+  if(zero < 500.0f){
+    return 0.0f;
+  }else{
+    return getCurrentAC(DEFAULT_FREQUENCY);
+  }
 }
 
 float ACS712::getCurrentAC(unsigned int frequency) {
 	unsigned int period = 1000000 / frequency;
-	t.start();
-	unsigned int t_start = t.read_us();
 	unsigned int Isum = 0, measurements_count = 0;
 	int Inow;
 
+  t.start();
+	unsigned int t_start = t.read_us();
 	while (t.read_us() - t_start < period) {
 		Inow = zero - readSensor();
 		Isum += Inow*Inow;
 		measurements_count++;
 	}
 	t.stop();
-	float Irms = pow((Isum / measurements_count), 0.5) / ADC_SCALE * VREF / sensitivity;
+
+  float meanVolt = float(Isum / measurements_count);
+  float volts = pow(meanVolt, 0.5);
+	float Irms = (volts / ADC_SCALE) * (VREF / sensitivity);
+  // printf("Isum: %d, Count: %d, meanVolt: %3.5f, Volts: %3.7f \n", Isum, measurements_count, meanVolt, volts);
 	return Irms;
 }

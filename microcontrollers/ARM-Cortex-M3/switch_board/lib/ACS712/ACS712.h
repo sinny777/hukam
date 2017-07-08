@@ -20,8 +20,8 @@ public:
 	float getCurrentAC();
 	float getCurrentAC(unsigned int frequency);
 
-private:
-	//  float zero = 512.0;
+protected:
+	 //  float zero = 512.0;
 	//  float sensitivity;
 };
 
