@@ -39,19 +39,21 @@ Ticker sensorDataTicker;
     Mpr121 touchPad2(&i2c, Mpr121::ADD_VSS);
 
     Serial xbeeSerial(P0_15, P0_16); // (XBEE TX, RX) (LPC1768 p9, p10)
-    Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
+    // Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
 
 // LED LIGHTS ON EXPLORE EMBEDDED BOARD LPC1768
-/*
     DigitalOut heartbeatLED(P1_18); // LED1
     DigitalOut xbeeLED(P1_20); // LED2
     DigitalOut sensorLED(P1_21); // LED3
     DigitalOut led4(P1_23); // LED4
-*/
 
-//    UNCOMENT FOR LPC1768 MBED BOARD.  MODIFY THE PINS
-    DigitalOut heartbeatLED(P2_2); // LED3
-    DigitalOut xbeeLED(P2_3); // LED4
+/*
+    UNCOMENT FOR LPC1768 MBED BOARD.  MODIFY THE PINS
+    DigitalOut heartbeatLED(P2_0); // LED1
+    DigitalOut xbeeLED(P2_1); // LED2
+    DigitalOut sensorLED(P2_2); // LED3
+    DigitalOut led4(P2_3); // LED4
+*/
 
 // DIGITAL SWITCHES
 DigitalOut DSw1(P2_4);
@@ -59,11 +61,11 @@ DigitalOut DSw2(P2_5);
 DigitalOut DSw3(P2_6);
 DigitalOut DSw4(P2_7);
 DigitalOut DSw5(P2_8);
-DigitalOut DSw6(P0_21);
-DigitalOut DSw7(P0_22);
-DigitalOut ASw1(P0_24);
-DigitalOut ASw2(P0_25);
-DigitalOut ASw3(P0_27);
+DigitalOut DSw6(P2_9);
+DigitalOut DSw7(P0_10);
+DigitalOut ASw1(P0_11);
+DigitalOut ASw2(P0_27);
+DigitalOut ASw3(P0_28);
 
 // RGB LED PINS THAT CAN BE USED
 DigitalOut RGB1(P0_4);
@@ -89,11 +91,12 @@ void readEnergyConsumption(){
   // printf("Energy Consumption: %3.7f and Current usage: %3.7f\n\n", P, I);
   boardData["energy"] = P;
   boardData["offset"] = offset;
+  sensorLED = 1;
 }
 
 void broadcastChange(std::string command){
     command = command + "\n";
-    printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
+    // printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
     xbeeSerial.puts(command.c_str());
     xbeeLED = 1;
     wait(0.5);
@@ -142,6 +145,8 @@ void readTempHumidityData(){
     boardData["temp"] = temperature;
     boardData["hum"] = humidity;
     boardData["dewpoint"] = dewpoint;
+
+    sensorLED = 1;
 
 }
 
@@ -439,6 +444,7 @@ int main() {
          wait(0.5);
          heartbeatLED = 0;
          wait(0.5);
+         sensorLED = 0;
 
         char value[128];
         int index=0;
