@@ -7,7 +7,7 @@ script:
 - docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 # build image
-- docker build -t hukam/rpi-motion-detection .
+- docker build -t hukam/rpi-motion-detection ./dockers/rpi-motion-detection
 # push image
 - >
   if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
