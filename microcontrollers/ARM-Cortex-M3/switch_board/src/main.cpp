@@ -3,6 +3,7 @@
 *  19 August 2017
 *  This program is to handle 10 Digital and 3 Analog SWITCHES
 *  It also handles Temperature, Humidity, Light and Current Sensors
+*  Contact Email: contact@hukamtechnologies.com
 */
 
 
@@ -34,6 +35,7 @@ Ticker sensorDataTicker;
     Mpr121 touchPad1(&i2c, Mpr121::ADD_VDD);
     Mpr121 touchPad2(&i2c, Mpr121::ADD_VSS);
 
+    Serial usbSerial(P0_2, P0_3);
     Serial xbeeSerial(P0_15, P0_16); // (XBEE TX, RX) (LPC1768 p9, p10)
     Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
 
@@ -79,7 +81,7 @@ void readEnergyConsumption(){
 void broadcastChange(std::string command){
     xbeeLED = 1;
     command = command + "\n";
-    // printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
+    usbSerial.printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
     xbeeSerial.puts(command.c_str());
     xbeeLED = 0;
     wait(0.2);
@@ -389,6 +391,8 @@ void setDeviceId(){
 
 void handleDataReceived(char data[128]){
     // pc.puts(data);
+    usbSerial.puts(data);
+    // broadcastChange(data);
 }
 
 // main() runs in its own thread in the OS
