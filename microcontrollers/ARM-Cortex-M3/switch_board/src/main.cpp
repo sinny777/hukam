@@ -1,7 +1,8 @@
 /*
-*  This program is for ExploreEmbedded LPC1768 board
-*
-*
+*  Hukam Technologies Switch Board based on LPC1768 IC
+*  19 August 2017
+*  This program is to handle 10 Digital and 3 Analog SWITCHES
+*  It also handles Temperature, Humidity, Light and Current Sensors
 */
 
 
@@ -27,11 +28,6 @@ Ticker tempTicker;
 Ticker energyTicker;
 Ticker sensorDataTicker;
 
-//MODULES COMMUNICATION
-    // TTP229(SDA, SLC) connect to Arduino(A4, A5)
-    // Connect Arduino(10, 11) LPC1768(9, 10)
-    // Serial touchUNO(P0_15, P0_16); // (TouchUNO TX, RX) (LPC1768 p14, p13)
-
     InterruptIn touchPad1Interrupt(P2_0);
     InterruptIn touchPad2Interrupt(P2_1);
     I2C i2c(P0_0, P0_1);
@@ -41,17 +37,8 @@ Ticker sensorDataTicker;
     Serial xbeeSerial(P0_15, P0_16); // (XBEE TX, RX) (LPC1768 p9, p10)
     Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
 
-// LED LIGHTS ON EXPLORE EMBEDDED BOARD LPC1768
-/*
-    DigitalOut heartbeatLED(P1_18); // LED1
-    DigitalOut xbeeLED(P1_20); // LED2
-    DigitalOut sensorLED(P1_21); // LED3
-    DigitalOut led4(P1_23); // LED4
-*/
-
-//    UNCOMENT FOR LPC1768 MBED BOARD.  MODIFY THE PINS
-    DigitalOut heartbeatLED(P2_2); // LED3
-    DigitalOut xbeeLED(P2_3); // LED4
+    DigitalOut heartbeatLED(P0_6);
+    DigitalOut xbeeLED(P1_1, 1);
 
 // DIGITAL SWITCHES
 DigitalOut DSw1(P2_4);
@@ -68,7 +55,7 @@ DigitalOut ASw3(P0_27);
 // RGB LED PINS THAT CAN BE USED
 DigitalOut RGB1(P0_4);
 DigitalOut RGB2(P0_5);
-DigitalOut RGB3(P0_6);
+DigitalOut RGB3(P2_2);
 DigitalOut RGB4(P0_7);
 DigitalOut RGB5(P0_8);
 DigitalOut RGB6(P0_9);
@@ -85,19 +72,18 @@ ACS712 energySensor(ACS712_30A); // Connect to PIN P0_26
 void readEnergyConsumption(){
   float I = energySensor.getCurrentAC();
   float P = U * I;
-  // UNCOMMENT TO CHECK ENERGY CONSUMPTOIN EVERY SECOND
-  // printf("Energy Consumption: %3.7f and Current usage: %3.7f\n\n", P, I);
   boardData["energy"] = P;
   boardData["offset"] = offset;
 }
 
 void broadcastChange(std::string command){
-    command = command + "\n";
-    printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
-    xbeeSerial.puts(command.c_str());
     xbeeLED = 1;
-    wait(0.5);
+    command = command + "\n";
+    // printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
+    xbeeSerial.puts(command.c_str());
     xbeeLED = 0;
+    wait(0.2);
+    xbeeLED = 1;
 }
 
 void refreshMyStatus(){
@@ -129,11 +115,9 @@ void refreshMyStatus(){
 }
 
 void readTempHumidityData(){
-
     float temperature;
     float humidity;
     float dewpoint;
-
     int status = tempHumSensor.readData();
     temperature = tempHumSensor.ReadTemperature(CELCIUS);
     humidity = tempHumSensor.ReadHumidity();
@@ -142,7 +126,6 @@ void readTempHumidityData(){
     boardData["temp"] = temperature;
     boardData["hum"] = humidity;
     boardData["dewpoint"] = dewpoint;
-
 }
 
 void sendSensorData(){
@@ -159,7 +142,7 @@ void sendSensorData(){
 void readNSaveSensorsData(){
     tempTicker.attach(&readTempHumidityData, 5.0);
     energyTicker.attach(&readEnergyConsumption, 2.0);
-    sensorDataTicker.attach(&sendSensorData, 5.0);
+    sensorDataTicker.attach(&sendSensorData, 10.0);
 }
 
 /*
@@ -173,13 +156,9 @@ void keyPad1Touched(){
     int i=0;
     int value=touchPad1.read(0x00);
     value +=touchPad1.read(0x01)<<8;
-    // LED demo mod
-    i=0;
-    // puts key number out to LEDs for demo
     for (i=0; i<12; i++) {
-    if (((value>>i)&0x01)==1) key_code=i+1;
+      if (((value>>i)&0x01)==1) key_code=i+1;
     }
-    // pc.printf("value: %d, key_code: %d \n", value, key_code);
     xbeeSerial.printf("TouchPad1 >> Value: %d, Key_code: %d \n", value, key_code);
 }
 
@@ -188,13 +167,9 @@ void keyPad2Touched(){
     int i=0;
     int value=touchPad2.read(0x00);
     value +=touchPad2.read(0x01)<<8;
-    // LED demo mod
-    i=0;
-    // puts key number out to LEDs for demo
     for (i=0; i<12; i++) {
-    if (((value>>i)&0x01)==1) key_code=i+1;
+      if (((value>>i)&0x01)==1) key_code=i+1;
     }
-    // pc.printf("value: %d, key_code: %d \n", value, key_code);
     xbeeSerial.printf("TouchPad2 >> Value: %d, Key_code: %d \n", value, key_code);
 }
 
@@ -393,11 +368,8 @@ void setDeviceId(){
     boardData["id"] = "";
     char tmpbuf[256];
     if (result[0] == 0) {
-        // printf("\nSerial Number: ");
           sprintf(tmpbuf,"%08X%08X",result[0], result[1]);
-        // printf(tmpbuf);
           sprintf(tmpbuf,"%08X%08X", result[2], result[3]);
-        // printf(tmpbuf);
         boardData["id"] = tmpbuf;
         /*
         std::string temp = "";
@@ -425,7 +397,7 @@ int main() {
     offset = energySensor.calibrate();
     setDeviceId();
     refreshMyStatus();
-    // touchUNO.attach(&switchTouched);
+
     touchPad1Interrupt.fall(&keyPad1Touched);
     touchPad1Interrupt.mode(PullUp);
 

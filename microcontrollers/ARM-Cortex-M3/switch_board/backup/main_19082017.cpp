@@ -32,28 +32,26 @@ Ticker sensorDataTicker;
     // Connect Arduino(10, 11) LPC1768(9, 10)
     // Serial touchUNO(P0_15, P0_16); // (TouchUNO TX, RX) (LPC1768 p14, p13)
 
-    InterruptIn interrupt(P2_0);
+    InterruptIn touchPad1Interrupt(P2_0);
+    InterruptIn touchPad2Interrupt(P2_1);
     I2C i2c(P0_0, P0_1);
-    Mpr121 touchPad1(&i2c, Mpr121::ADD_VSS);
+    Mpr121 touchPad1(&i2c, Mpr121::ADD_VDD);
+    Mpr121 touchPad2(&i2c, Mpr121::ADD_VSS);
 
-
-    Serial pc(P0_2, P0_3); // (USBTX, USBRX) Opens up serial communication through the USB port via the computer
     Serial xbeeSerial(P0_15, P0_16); // (XBEE TX, RX) (LPC1768 p9, p10)
     Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
 
 // LED LIGHTS ON EXPLORE EMBEDDED BOARD LPC1768
+/*
     DigitalOut heartbeatLED(P1_18); // LED1
     DigitalOut xbeeLED(P1_20); // LED2
     DigitalOut sensorLED(P1_21); // LED3
     DigitalOut led4(P1_23); // LED4
-
-/*
-    UNCOMENT FOR LPC1768 MBED BOARD.  MODIFY THE PINS
-    DigitalOut heartbeatLED(P2_0); // LED1
-    DigitalOut xbeeLED(P2_1); // LED2
-    DigitalOut sensorLED(P2_2); // LED3
-    DigitalOut led4(P2_3); // LED4
 */
+
+//    UNCOMENT FOR LPC1768 MBED BOARD.  MODIFY THE PINS
+    DigitalOut heartbeatLED(P2_2); // LED3
+    DigitalOut xbeeLED(P2_3); // LED4
 
 // DIGITAL SWITCHES
 DigitalOut DSw1(P2_4);
@@ -61,11 +59,11 @@ DigitalOut DSw2(P2_5);
 DigitalOut DSw3(P2_6);
 DigitalOut DSw4(P2_7);
 DigitalOut DSw5(P2_8);
-DigitalOut DSw6(P2_9);
-DigitalOut DSw7(P0_10);
-DigitalOut ASw1(P0_11);
-DigitalOut ASw2(P0_27);
-DigitalOut ASw3(P0_28);
+DigitalOut DSw6(P0_21);
+DigitalOut DSw7(P0_22);
+DigitalOut ASw1(P0_24);
+DigitalOut ASw2(P0_25);
+DigitalOut ASw3(P0_27);
 
 // RGB LED PINS THAT CAN BE USED
 DigitalOut RGB1(P0_4);
@@ -79,7 +77,7 @@ DigitalOut RGB8(P0_18);
 DigitalOut RGB9(P0_19);
 DigitalOut RGB10(P0_20);
 
-DHT tempHumSensor(P0_23, DHT11);
+DHT tempHumSensor(P0_23, DHT22);
 ACS712 energySensor(ACS712_30A); // Connect to PIN P0_26
 
 // ------------     MAIN PROGRAM -----------------------
@@ -91,7 +89,6 @@ void readEnergyConsumption(){
   // printf("Energy Consumption: %3.7f and Current usage: %3.7f\n\n", P, I);
   boardData["energy"] = P;
   boardData["offset"] = offset;
-  sensorLED = 1;
 }
 
 void broadcastChange(std::string command){
@@ -146,8 +143,6 @@ void readTempHumidityData(){
     boardData["hum"] = humidity;
     boardData["dewpoint"] = dewpoint;
 
-    sensorLED = 1;
-
 }
 
 void sendSensorData(){
@@ -184,8 +179,23 @@ void keyPad1Touched(){
     for (i=0; i<12; i++) {
     if (((value>>i)&0x01)==1) key_code=i+1;
     }
-    printf("value: %d, key_code: %d \n", value, key_code);
-    xbeeSerial.printf("value: %d, key_code: %d \n", value, key_code );
+    // pc.printf("value: %d, key_code: %d \n", value, key_code);
+    xbeeSerial.printf("TouchPad1 >> Value: %d, Key_code: %d \n", value, key_code);
+}
+
+void keyPad2Touched(){
+    int key_code=0;
+    int i=0;
+    int value=touchPad2.read(0x00);
+    value +=touchPad2.read(0x01)<<8;
+    // LED demo mod
+    i=0;
+    // puts key number out to LEDs for demo
+    for (i=0; i<12; i++) {
+    if (((value>>i)&0x01)==1) key_code=i+1;
+    }
+    // pc.printf("value: %d, key_code: %d \n", value, key_code);
+    xbeeSerial.printf("TouchPad2 >> Value: %d, Key_code: %d \n", value, key_code);
 }
 
 /*
@@ -378,16 +388,16 @@ void setDeviceId(){
     unsigned long comm[5] = {0,0,0,0,0};
     unsigned long result[5] = {0,0,0,0,0};
     comm[0] = 58;  // read device serial number
-    printf("\r\nSerial number:\r\n");
+    // printf("\r\nSerial number:\r\n");
     iap_entry(comm, result);
     boardData["id"] = "";
     char tmpbuf[256];
     if (result[0] == 0) {
-        printf("\nSerial Number: ");
-        sprintf(tmpbuf,"%08X%08X",result[0], result[1]);
-        printf(tmpbuf);
-        sprintf(tmpbuf,"%08X%08X", result[2], result[3]);
-        printf(tmpbuf);
+        // printf("\nSerial Number: ");
+          sprintf(tmpbuf,"%08X%08X",result[0], result[1]);
+        // printf(tmpbuf);
+          sprintf(tmpbuf,"%08X%08X", result[2], result[3]);
+        // printf(tmpbuf);
         boardData["id"] = tmpbuf;
         /*
         std::string temp = "";
@@ -401,12 +411,12 @@ void setDeviceId(){
         command["id"] = temp;
         */
     } else {
-        printf("Status error!\r\n");
+        // printf("Status error!\r\n");
     }
 }
 
 void handleDataReceived(char data[128]){
-    pc.puts(data);
+    // pc.puts(data);
 }
 
 // main() runs in its own thread in the OS
@@ -416,8 +426,12 @@ int main() {
     setDeviceId();
     refreshMyStatus();
     // touchUNO.attach(&switchTouched);
-    interrupt.fall(&keyPad1Touched);
-    interrupt.mode(PullUp);
+    touchPad1Interrupt.fall(&keyPad1Touched);
+    touchPad1Interrupt.mode(PullUp);
+
+    touchPad2Interrupt.fall(&keyPad2Touched);
+    touchPad2Interrupt.mode(PullUp);
+
     readNSaveSensorsData();
 
     while (true) {
@@ -425,11 +439,6 @@ int main() {
          wait(0.5);
          heartbeatLED = 0;
          wait(0.5);
-         sensorLED = 0;
-
-        if (pc.readable()) {//Checking for serial comminication
-            xbeeSerial.putc(pc.getc()); //XBee write whatever the PC is sending
-        }
 
         char value[128];
         int index=0;
