@@ -11,7 +11,6 @@
 #include "MbedJSONValue.h"
 #include "DHT.h"
 #include "ACS712.h"
-#include <mpr121.h>
 #include <string>
 
 using namespace std;
@@ -29,44 +28,49 @@ Ticker tempTicker;
 Ticker energyTicker;
 Ticker sensorDataTicker;
 
-    InterruptIn touchPad1Interrupt(P2_0);
-    InterruptIn touchPad2Interrupt(P2_1);
-    I2C i2c(P0_0, P0_1);
-    Mpr121 touchPad1(&i2c, Mpr121::ADD_VDD);
-    Mpr121 touchPad2(&i2c, Mpr121::ADD_VSS);
+Ticker tickTouch1;
+Ticker tickTouch2;
+Ticker tickTouch3;
+Ticker tickTouch4;
+Ticker tickTouch5;
+// Ticker tickTouch6;
+// Ticker tickTouch7;
+// Ticker tickTouch8;
+// Ticker tickTouch9;
+// Ticker tickTouch10;
 
     Serial usbSerial(P0_2, P0_3);
     Serial xbeeSerial(P0_15, P0_16); // (XBEE TX, RX) (LPC1768 p9, p10)
     Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
 
-    DigitalOut heartbeatLED(P0_6);
-    DigitalOut xbeeLED(P1_1, 1);
+    DigitalOut heartbeatLED(P1_20);
+    DigitalOut xbeeLED(P1_18, 0);
 
 // DIGITAL SWITCHES
-DigitalOut DSw1(P2_4);
-DigitalOut DSw2(P2_5);
-DigitalOut DSw3(P2_6);
+DigitalOut DSw1(P0_4);
+DigitalOut DSw2(P0_5);
+DigitalOut DSw3(P0_6);
 DigitalOut DSw4(P2_7);
 DigitalOut DSw5(P2_8);
 DigitalOut DSw6(P0_21);
 DigitalOut DSw7(P0_22);
+DigitalOut DSw8(P1_0);
 DigitalOut ASw1(P0_24);
 DigitalOut ASw2(P0_25);
-DigitalOut ASw3(P0_27);
 
 // RGB LED PINS THAT CAN BE USED
-DigitalOut RGB1(P0_4);
-DigitalOut RGB2(P0_5);
-DigitalOut RGB3(P2_2);
-DigitalOut RGB4(P0_7);
-DigitalOut RGB5(P0_8);
-DigitalOut RGB6(P0_9);
-DigitalOut RGB7(P0_17);
-DigitalOut RGB8(P0_18);
-DigitalOut RGB9(P0_19);
-DigitalOut RGB10(P0_20);
+DigitalInOut touch1(P2_0);
+DigitalInOut touch2(P2_1);
+DigitalInOut touch3(P2_2);
+DigitalInOut touch4(P2_3);
+DigitalInOut touch5(P2_4);
+DigitalInOut touch6(P2_5);
+// DigitalInOut touch7(P0_17);
+// DigitalInOut touch8(P0_18);
+// DigitalInOut touch9(P0_19);
+// DigitalInOut touch10(P0_20);
 
-DHT tempHumSensor(P0_23, DHT22);
+DHT tempHumSensor(P0_23, DHT11);
 ACS712 energySensor(ACS712_30A); // Connect to PIN P0_26
 
 // ------------     MAIN PROGRAM -----------------------
@@ -81,7 +85,7 @@ void readEnergyConsumption(){
 void broadcastChange(std::string command){
     xbeeLED = 1;
     command = command + "\n";
-    usbSerial.printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
+    usbSerial.printf("\nBroadcast Command: %s\r\n" ,  command.c_str());
     xbeeSerial.puts(command.c_str());
     xbeeLED = 0;
     wait(0.2);
@@ -100,8 +104,6 @@ void refreshMyStatus(){
   boardData["ASw1_aval"] = 0;
   boardData["ASw2_dval"] = 0;
   boardData["ASw2_aval"] = 0;
-  boardData["ASw3_dval"] = 0;
-  boardData["ASw3_aval"] = 0;
 
   boardData["temp"] = 0;
   boardData["hum"] = 0;
@@ -133,6 +135,7 @@ void readTempHumidityData(){
 void sendSensorData(){
     MbedJSONValue command;
     command["id"] = boardData["id"];
+    command["type"] = "SB";
     command["energy"] = boardData["energy"];
     command["offset"] = boardData["offset"];
     command["temp"] = boardData["temp"];
@@ -143,221 +146,13 @@ void sendSensorData(){
 
 void readNSaveSensorsData(){
     tempTicker.attach(&readTempHumidityData, 5.0);
-    energyTicker.attach(&readEnergyConsumption, 2.0);
-    sensorDataTicker.attach(&sendSensorData, 10.0);
+    energyTicker.attach(&readEnergyConsumption, 10.0);
+    sensorDataTicker.attach(&sendSensorData, 5.0);
 }
 
 /*
 string to_string(const bitset<16>& bs){
     return bs.to_string<char, std::char_traits<char>, std::allocator<char> >();
-}
-*/
-
-void keyPad1Touched(){
-    int key_code=0;
-    int i=0;
-    int value=touchPad1.read(0x00);
-    value +=touchPad1.read(0x01)<<8;
-    for (i=0; i<12; i++) {
-      if (((value>>i)&0x01)==1) key_code=i+1;
-    }
-    xbeeSerial.printf("TouchPad1 >> Value: %d, Key_code: %d \n", value, key_code);
-}
-
-void keyPad2Touched(){
-    int key_code=0;
-    int i=0;
-    int value=touchPad2.read(0x00);
-    value +=touchPad2.read(0x01)<<8;
-    for (i=0; i<12; i++) {
-      if (((value>>i)&0x01)==1) key_code=i+1;
-    }
-    xbeeSerial.printf("TouchPad2 >> Value: %d, Key_code: %d \n", value, key_code);
-}
-
-/*
-void switchTouched(){
-    // printf("%16s\r\n",to_string(touchUNO).c_str());
-    // int8_t key = touchUNO.onkey();
-    int key = 0;
-    char value[2];
-    int index=0;
-    char ch;
-    do{
-       if (touchUNO.readable()){      // if there is an character to read from the device
-          ch = touchUNO.getc();   // read it
-          if (index<2)               // just to avoid buffer overflow
-             value[index++]=ch;  // put it into the value array and increment the index
-      }
-    } while (ch!='\n');    // loop until the '\n' character
-    value[index]='\x0';
-    key = atoi(value);
-
-    if(key == 0){
-      printf("Do Nothing as Key is %d\r\n", key);
-      return;
-    }
-    int dv;
-    int av;
-    printf("KEY: %d\r\n", key);
-    //int sw=touchUNO.getsingle();
-    //if(sw!=0) myleds=sw%16;
-    MbedJSONValue command;
-    command["id"] = boardData["id"];
-    command["type"] = "sb";
-
-    switch(key){
-        case 1:
-            DSw1 = !DSw1;
-            command["index"] = key;
-            command["dv"] = DSw1;
-            break;
-        case 2:
-            DSw2 = !DSw2;
-            command["index"] = key;
-            command["dv"] = DSw2;
-            break;
-        case 3:
-            DSw3 = !DSw3;
-            command["index"] = key;
-            command["dv"] = DSw3;
-            break;
-        case 4:
-            DSw4 = !DSw4;
-            command["index"] = key;
-            command["dv"] = DSw4;
-            break;
-        case 5:
-            DSw5 = !DSw5;
-            command["index"] = key;
-            command["dv"] = DSw5;
-            break;
-        case 6:
-            DSw6 = !DSw6;
-            command["index"] = key;
-            command["dv"] = DSw6;
-            break;
-        case 7:
-            DSw7 = !DSw7;
-            command["index"] = key;
-            command["dv"] = DSw7;
-            break;
-        case 8:
-            command["index"] = 8;
-            av = boardData["ASw1_aval"].get<int>();
-            if(av < 10){
-              av = av + 1;
-              command["av"] = av;
-              boardData["ASw1_aval"] = av;
-              ASw1.write(av);
-            }else{
-              key = 0; // DO NOTHING
-            }
-            break;
-        case 9:
-            command["index"] = 8;
-            dv = boardData["ASw1_dval"].get<int>();
-            if(dv > 0){
-              dv = 0;
-            }else{
-              dv = 1;
-            }
-            ASw1 = dv;
-            command["dv"] = dv;
-            boardData["ASw1_dval"] = command["dv"];
-            break;
-        case 10:
-            command["index"] = 8;
-            av = boardData["ASw1_aval"].get<int>();
-            if(av > 0){
-              av = av - 1;
-              command["av"] = av;
-              boardData["ASw1_aval"] = av;
-              ASw1.write(av);
-            }else{
-              key = 0; // DO NOTHING
-            }
-            break;
-        case 11:
-            command["index"] = 9;
-            av = boardData["ASw2_aval"].get<int>();
-            if(av < 10){
-              av = av + 1;
-              command["av"] = av;
-              boardData["ASw2_aval"] = av;
-              ASw2.write(av);
-            }else{
-              key = 0; // DO NOTHING
-            }
-            break;
-        case 12:
-            command["index"] = 9;
-            dv = boardData["ASw2_dval"].get<int>();
-            if(dv > 0){
-              dv = 0;
-            }else{
-              dv = 1;
-            }
-            ASw2.write(dv);
-            command["dv"] = dv;
-            boardData["ASw2_dval"] = command["dv"];
-            break;
-        case 13:
-            command["index"] = 9;
-            av = boardData["ASw2_aval"].get<int>();
-            if(av > 0){
-              av = av - 1;
-              command["av"] = av;
-              boardData["ASw2_aval"] = av;
-              ASw2.write(av);
-            }else{
-              key = 0; // DO NOTHING
-            }
-            break;
-        case 14:
-            command["index"] = 10;
-            av = boardData["ASw3_aval"].get<int>();
-            if(av < 10){
-              av = av + 1;
-              command["av"] = av;
-              boardData["ASw3_aval"] = av;
-              ASw3.write(av);
-            }else{
-              key = 0; // DO NOTHING
-            }
-            break;
-        case 15:
-            command["index"] = 10;
-            dv = boardData["ASw3_dval"].get<int>();
-            if(dv > 0){
-              dv = 0;
-            }else{
-              dv = 1;
-            }
-            ASw3 = dv;
-            command["dv"] = dv;
-            boardData["ASw3_dval"] = command["dv"];
-            break;
-        case 16:
-            command["index"] = 10;
-            av = boardData["ASw3_aval"].get<int>();
-            if(av > 0){
-              av = av - 1;
-              command["av"] = av;
-              boardData["ASw3_aval"] = av;
-              ASw3.write(av);
-            }else{
-              key = 0; // DO NOTHING
-            }
-            break;
-    }
-
-    if(key > 0){
-        std::string str = command.serialize();
-        broadcastChange(str);
-    }
-
-    wait(0.5);
 }
 */
 
@@ -373,64 +168,287 @@ void setDeviceId(){
           sprintf(tmpbuf,"%08X%08X",result[0], result[1]);
           sprintf(tmpbuf,"%08X%08X", result[2], result[3]);
         boardData["id"] = tmpbuf;
-        /*
-        std::string temp = "";
-        for(int i = 1; i < 5; i++) {
-           // printf( "0x%x\r\n", result[i] );
-            unsigned char *s=(unsigned char *)&result[i];
-            char buffer [10];
-            sprintf (buffer, "%lu" , result[i] );
-            temp = temp + buffer;
-        }
-        command["id"] = temp;
-        */
     } else {
         // printf("Status error!\r\n");
     }
 }
 
 void handleDataReceived(char data[128]){
-    // pc.puts(data);
-    usbSerial.puts(data);
-    // broadcastChange(data);
+  usbSerial.printf("\nIN handleDataReceived = %s\r\n" ,  data);
+   // pc.puts(data);
+   // usbSerial.printf("\n");
+   // usbSerial.puts(data);
+   // broadcastChange(data);
+}
+
+void xbee_rx_callback() {
+  char value[26];
+  if(xbeeSerial.readable()){
+      xbeeSerial.scanf("%sZ\n",&value);
+      handleDataReceived(value);
+      wait_ms(3);
+      // xbeeSerial.printf("ACK_%s\n",&value);
+  }
+}
+
+void detectTouch1(void){
+    uint8_t count = 0;
+    uint8_t touch_data1 = 0;
+    MbedJSONValue command;
+    command["id"] = boardData["id"];
+    command["type"] = "sb";
+    command["index"] = 1;
+    touch1.input();              // discharge the capacitor
+    while (touch1.read()) {
+        count++;
+        if (count > 4) {
+            break;
+        }
+    }
+    touch1.output();
+    touch1.write(1);             // charge the capacitor
+
+    if (count > 3) {
+        touch_data1 = (touch_data1 << 1) + 1;
+    } else {
+        touch_data1 = (touch_data1 << 1);
+    }
+    if (touch_data1 == 0x01) {
+        int val = boardData["DSw1"].get<int>();
+        if(val == 0){
+            boardData["DSw1"] = 1;
+            DSw1 = 1;
+            command["dv"] = 1;
+        }else{
+            boardData["DSw1"] = 0;
+            DSw1 = 0;
+            command["dv"] = 0;
+        }
+        heartbeatLED = 1;                // touch
+        wait(0.1);
+        heartbeatLED = 0;
+
+        std::string str = command.serialize();
+        // usbSerial.printf("\nCommand = %s\r\n" ,  str.c_str());
+        broadcastChange(str);
+    }
+
+}
+
+void detectTouch2(void){
+    uint8_t count = 0;
+    uint8_t touch_data2 = 0;
+    MbedJSONValue command;
+    command["id"] = boardData["id"];
+    command["type"] = "sb";
+    command["index"] = 2;
+    touch2.input();              // discharge the capacitor
+    while (touch2.read()) {
+        count++;
+        if (count > 4) {
+            break;
+        }
+    }
+    touch2.output();
+    touch2.write(1);             // charge the capacitor
+
+    if (count > 3) {
+        touch_data2 = (touch_data2 << 1) + 1;
+    } else {
+        touch_data2 = (touch_data2 << 1);
+    }
+
+    if (touch_data2 == 0x01) {
+      int val = boardData["DSw2"].get<int>();
+      if(val == 0){
+          boardData["DSw2"] = 1;
+          DSw2 = 1;
+          command["dv"] = 1;
+      }else{
+          boardData["DSw2"] = 0;
+          DSw2 = 0;
+          command["dv"] = 0;
+      }
+      heartbeatLED = 1;                // touch
+      wait(0.1);
+      heartbeatLED = 0;
+
+      std::string str = command.serialize();
+      // usbSerial.printf("\nCommand = %s\r\n" ,  str.c_str());
+      broadcastChange(str);
+    }
+}
+
+void detectTouch3(void){
+    uint8_t count = 0;
+    uint8_t touch_data3 = 0;
+    MbedJSONValue command;
+    command["id"] = boardData["id"];
+    command["type"] = "sb";
+    command["index"] = 3;
+    touch3.input();              // discharge the capacitor
+    while (touch3.read()) {
+        count++;
+        if (count > 4) {
+            break;
+        }
+    }
+    touch3.output();
+    touch3.write(1);             // charge the capacitor
+
+    if (count > 3) {
+        touch_data3 = (touch_data3 << 1) + 1;
+    } else {
+        touch_data3 = (touch_data3 << 1);
+    }
+    if (touch_data3 == 0x01) {
+        int val = boardData["DSw3"].get<int>();
+        if(val == 0){
+            boardData["DSw3"] = 1;
+            DSw3 = 1;
+            command["dv"] = 1;
+        }else{
+            boardData["DSw3"] = 0;
+            DSw3 = 0;
+            command["dv"] = 0;
+        }
+        heartbeatLED = 1;                // touch
+        wait(0.1);
+        heartbeatLED = 0;
+
+        std::string str = command.serialize();
+        // usbSerial.printf("\nCommand = %s\r\n" ,  str.c_str());
+        broadcastChange(str);
+    }
+}
+
+void detectTouch4(void){
+    uint8_t count = 0;
+    uint8_t touch_data4 = 0;
+    MbedJSONValue command;
+    command["id"] = boardData["id"];
+    command["type"] = "sb";
+    command["index"] = 4;
+    touch4.input();              // discharge the capacitor
+    while (touch4.read()) {
+        count++;
+        if (count > 4) {
+            break;
+        }
+    }
+    touch4.output();
+    touch4.write(1);             // charge the capacitor
+
+    if (count > 3) {
+        touch_data4 = (touch_data4 << 1) + 1;
+    } else {
+        touch_data4 = (touch_data4 << 1);
+    }
+    if (touch_data4 == 0x01) {
+        int val = boardData["DSw4"].get<int>();
+        if(val == 0){
+            boardData["DSw4"] = 1;
+            DSw4 = 1;
+            command["dv"] = 1;
+        }else{
+            boardData["DSw4"] = 0;
+            DSw4 = 0;
+            command["dv"] = 0;
+        }
+        heartbeatLED = 1;                // touch
+        wait(0.1);
+        heartbeatLED = 0;
+
+        std::string str = command.serialize();
+        // usbSerial.printf("\nCommand = %s\r\n" ,  str.c_str());
+        broadcastChange(str);
+    }
+}
+
+void detectTouch5(void){
+    uint8_t count = 0;
+    uint8_t touch_data5 = 0;
+    MbedJSONValue command;
+    command["id"] = boardData["id"];
+    command["type"] = "sb";
+    command["index"] = 5;
+    touch5.input();              // discharge the capacitor
+    while (touch5.read()) {
+        count++;
+        if (count > 4) {
+            break;
+        }
+    }
+    touch5.output();
+    touch5.write(1);             // charge the capacitor
+
+    if (count > 3) {
+        touch_data5 = (touch_data5 << 1) + 1;
+    } else {
+        touch_data5 = (touch_data5 << 1);
+    }
+    if (touch_data5 == 0x01) {
+        int val = boardData["DSw5"].get<int>();
+        if(val == 0){
+            boardData["DSw5"] = 1;
+            DSw5 = 1;
+            command["dv"] = 1;
+        }else{
+            boardData["DSw5"] = 0;
+            DSw5 = 0;
+            command["dv"] = 0;
+        }
+        heartbeatLED = 1;                // touch
+        wait(0.1);
+        heartbeatLED = 0;
+
+        std::string str = command.serialize();
+        // usbSerial.printf("\nCommand = %s\r\n" ,  str.c_str());
+        broadcastChange(str);
+    }
 }
 
 // main() runs in its own thread in the OS
 int main() {
+
+    usbSerial.baud(19200);
+    xbeeSerial.baud(9600);
+    xbeeSerial.format(8, SerialBase::None, 1);
+    xbeeSerial.attach(&xbee_rx_callback);
+
     wait(5);
-    offset = energySensor.calibrate();
-    setDeviceId();
-    refreshMyStatus();
+    // offset = energySensor.calibrate();
+     setDeviceId();
+     refreshMyStatus();
 
-    touchPad1Interrupt.fall(&keyPad1Touched);
-    touchPad1Interrupt.mode(PullUp);
+     readNSaveSensorsData();
 
-    touchPad2Interrupt.fall(&keyPad2Touched);
-    touchPad2Interrupt.mode(PullUp);
+    touch1.mode(PullDown);
+    touch1.output();
+    touch1.write(1);
+    tickTouch1.attach(detectTouch1, 1.0 / 5.0);
 
-    readNSaveSensorsData();
+    touch2.mode(PullDown);
+    touch2.output();
+    touch2.write(1);
+    tickTouch2.attach(detectTouch2, 1.0 / 5.0);
 
-    while (true) {
-         heartbeatLED = 1;
-         wait(0.5);
-         heartbeatLED = 0;
-         wait(0.5);
+    touch3.mode(PullDown);
+    touch3.output();
+    touch3.write(1);
+    tickTouch3.attach(detectTouch3, 1.0 / 5.0);
 
-        char value[128];
-        int index=0;
-        char ch;
+    touch4.mode(PullDown);
+    touch4.output();
+    touch4.write(1);
+    tickTouch4.attach(detectTouch4, 1.0 / 5.0);
 
-        do
-        {
-           if (xbeeSerial.readable()){      // if there is an character to read from the device
-              ch = xbeeSerial.getc();   // read it
-              if (index<128)               // just to avoid buffer overflow
-                 value[index++]=ch;  // put it into the value array and increment the index
-          }
-        } while (ch!='\n');    // loop until the '\n' character
+    touch5.mode(PullDown);
+    touch5.output();
+    touch5.write(1);
+    tickTouch5.attach(detectTouch5, 1.0 / 5.0);
 
-        value[index]='\x0';  // add un 0 to end the c string
-        handleDataReceived(value);
 
-    }
+    while(1){}
+
 }

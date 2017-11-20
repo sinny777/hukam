@@ -11,6 +11,7 @@
 #include "MbedJSONValue.h"
 #include "DHT.h"
 #include "ACS712.h"
+#include <mpr121.h>
 #include <string>
 
 using namespace std;
@@ -28,27 +29,18 @@ Ticker tempTicker;
 Ticker energyTicker;
 Ticker sensorDataTicker;
 
-Ticker tickTouch1;
-Ticker tickTouch2;
-Ticker tickTouch3;
-// Ticker tickTouch4;
-// Ticker tickTouch5;
-// Ticker tickTouch6;
-// Ticker tickTouch7;
-// Ticker tickTouch8;
-// Ticker tickTouch9;
-// Ticker tickTouch10;
-
-uint8_t touch_data1 = 0;
-uint8_t touch_data2 = 0;
-uint8_t touch_data3 = 0;
+    InterruptIn touchPad1Interrupt(P2_0);
+    InterruptIn touchPad2Interrupt(P2_1);
+    I2C i2c(P0_0, P0_1);
+    Mpr121 touchPad1(&i2c, Mpr121::ADD_VSS);
+    Mpr121 touchPad2(&i2c, Mpr121::ADD_VDD);
 
     Serial usbSerial(P0_2, P0_3);
     Serial xbeeSerial(P0_15, P0_16); // (XBEE TX, RX) (LPC1768 p9, p10)
     Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
 
     DigitalOut heartbeatLED(P1_20);
-    DigitalOut xbeeLED(P1_18, 0);
+    DigitalOut xbeeLED(P1_18, 1);
 
 // DIGITAL SWITCHES
 DigitalOut DSw1(P2_4);
@@ -63,16 +55,16 @@ DigitalOut ASw1(P0_24);
 DigitalOut ASw2(P0_25);
 
 // RGB LED PINS THAT CAN BE USED
-DigitalInOut touch1(P0_7);
+DigitalInOut touch1(P0_4);
 DigitalInOut touch2(P0_5);
-DigitalInOut touch3(P0_4);
-// DigitalInOut touch4(P2_2);
-// DigitalInOut touch5(P0_8);
-// DigitalInOut touch6(P0_9);
-// DigitalInOut touch7(P0_17);
-// DigitalInOut touch8(P0_18);
-// DigitalInOut touch9(P0_19);
-// DigitalInOut touch10(P0_20);
+DigitalInOut touch3(P2_2);
+DigitalInOut touch4(P0_7);
+DigitalInOut touch5(P0_8);
+DigitalInOut touch6(P0_9);
+DigitalInOut touch7(P0_17);
+DigitalInOut touch8(P0_18);
+DigitalInOut touch9(P0_19);
+DigitalInOut touch10(P0_20);
 
 DHT tempHumSensor(P0_23, DHT11);
 ACS712 energySensor(ACS712_30A); // Connect to PIN P0_26
@@ -149,8 +141,8 @@ void sendSensorData(){
 }
 
 void readNSaveSensorsData(){
-    tempTicker.attach(&readTempHumidityData, 5.0);
-    energyTicker.attach(&readEnergyConsumption, 10.0);
+    tempTicker.attach(&readTempHumidityData, 2.0);
+    // energyTicker.attach(&readEnergyConsumption, 10.0);
     sensorDataTicker.attach(&sendSensorData, 5.0);
 }
 
@@ -159,6 +151,36 @@ string to_string(const bitset<16>& bs){
     return bs.to_string<char, std::char_traits<char>, std::allocator<char> >();
 }
 */
+
+void keyPad1Touched(){
+    int key_code=0;
+    int i=0;
+    volatile int buttonValue=touchPad1.read(0x00);
+    buttonValue +=touchPad1.read(0x01)<<8;
+    // volatile int buttonValue = touchPad1.readTouchData();
+    usbSerial.printf("TouchPad1 >> buttonValue: %d\n", buttonValue);
+    i = 0;
+    for (i=0; i<12; i++) {
+      if (((buttonValue>>i)&0x01)==1) key_code=i+1;
+    }
+    usbSerial.printf("TouchPad1 >> buttonValue: %d, Key_code: %d \n", buttonValue, key_code);
+    xbeeSerial.printf("TouchPad1 >> buttonValue: %d, Key_code: %d \n", buttonValue, key_code);
+}
+
+void keyPad2Touched(){
+    int key_code=0;
+    int i=0;
+    int buttonValue=touchPad2.read(0x00);
+    buttonValue +=touchPad2.read(0x01)<<8;
+    // volatile int buttonValue = touchPad2.readTouchData();
+    usbSerial.printf("TouchPad2 >> buttonValue: %d\n", buttonValue);
+    for (i=0; i<12; i++) {
+      if (((buttonValue>>i)&0x01)==1) key_code=i+1;
+    }
+    usbSerial.printf("TouchPad2 >> buttonValue: %d, Key_code: %d \n", buttonValue, key_code);
+    xbeeSerial.printf("TouchPad2 >> Value: %d, Key_code: %d \n", buttonValue, key_code);
+}
+
 
 void setDeviceId(){
     unsigned long comm[5] = {0,0,0,0,0};
@@ -183,6 +205,28 @@ void handleDataReceived(char data[128]){
    // usbSerial.printf("\n");
    // usbSerial.puts(data);
    // broadcastChange(data);
+   DSw1 = 1;
+   DSw2 = 1;
+   DSw3 = 1;
+   DSw4 = 1;
+   DSw5 = 1;
+   DSw6 = 1;
+   DSw7 = 1;
+   DSw8 = 1;
+   wait(0.5);
+   DSw1 = 0;
+   DSw2 = 0;
+   DSw3 = 0;
+   DSw4 = 0;
+   DSw5 = 0;
+   DSw6 = 0;
+   DSw7 = 0;
+   DSw8 = 0;
+   wait(0.5);
+   xbeeLED = 1;
+   wait(0.5);
+   xbeeLED = 0;
+   wait(0.5);
 }
 
 void xbee_rx_callback() {
@@ -195,163 +239,31 @@ void xbee_rx_callback() {
   }
 }
 
-void detectTouch1(void){
-    uint8_t count = 0;
-    MbedJSONValue command;
-    command["id"] = boardData["id"];
-    command["type"] = "sb";
-    command["index"] = 1;
-    touch1.input();              // discharge the capacitor
-    while (touch1.read()) {
-        count++;
-        if (count > 4) {
-            break;
-        }
-    }
-    touch1.output();
-    touch1.write(1);             // charge the capacitor
-
-    if (count > 3) {
-        touch_data1 = (touch_data1 << 1) + 1;
-    } else {
-        touch_data1 = (touch_data1 << 1);
-    }
-    if (touch_data1 == 0x01) {
-        int val = boardData["DSw1"].get<int>();
-        if(val == 0){
-            boardData["DSw1"] = 1;
-            DSw1 = 1;
-            command["dv"] = 1;
-        }else{
-            boardData["DSw1"] = 0;
-            DSw1 = 0;
-            command["dv"] = 0;
-        }
-        heartbeatLED = 1;                // touch
-        wait(0.1);
-        heartbeatLED = 0;
-
-        std::string str = command.serialize();
-        // usbSerial.printf("\nCommand = %s\r\n" ,  str.c_str());
-        broadcastChange(str);
-    }
-
-}
-
-void detectTouch2(void){
-    uint8_t count = 0;
-    MbedJSONValue command;
-    command["id"] = boardData["id"];
-    command["type"] = "sb";
-    command["index"] = 2;
-    touch2.input();              // discharge the capacitor
-    while (touch2.read()) {
-        count++;
-        if (count > 4) {
-            break;
-        }
-    }
-    touch2.output();
-    touch2.write(1);             // charge the capacitor
-
-    if (count > 3) {
-        touch_data2 = (touch_data2 << 1) + 1;
-    } else {
-        touch_data2 = (touch_data2 << 1);
-    }
-
-    if (touch_data2 == 0x01) {
-      int val = boardData["DSw2"].get<int>();
-      if(val == 0){
-          boardData["DSw2"] = 1;
-          DSw1 = 1;
-          command["dv"] = 1;
-      }else{
-          boardData["DSw2"] = 0;
-          DSw1 = 0;
-          command["dv"] = 0;
-      }
-      heartbeatLED = 1;                // touch
-      wait(0.1);
-      heartbeatLED = 0;
-
-      std::string str = command.serialize();
-      // usbSerial.printf("\nCommand = %s\r\n" ,  str.c_str());
-      broadcastChange(str);
-    }
-}
-
-void detectTouch3(void){
-    uint8_t count = 0;
-    MbedJSONValue command;
-    command["id"] = boardData["id"];
-    command["type"] = "sb";
-    command["index"] = 3;
-    touch3.input();              // discharge the capacitor
-    while (touch3.read()) {
-        count++;
-        if (count > 4) {
-            break;
-        }
-    }
-    touch3.output();
-    touch3.write(1);             // charge the capacitor
-
-    if (count > 3) {
-        touch_data3 = (touch_data3 << 1) + 1;
-    } else {
-        touch_data3 = (touch_data3 << 1);
-    }
-    if (touch_data3 == 0x01) {
-        int val = boardData["DSw3"].get<int>();
-        if(val == 0){
-            boardData["DSw3"] = 1;
-            DSw1 = 1;
-            command["dv"] = 1;
-        }else{
-            boardData["DSw3"] = 0;
-            DSw1 = 0;
-            command["dv"] = 0;
-        }
-        heartbeatLED = 1;                // touch
-        wait(0.1);
-        heartbeatLED = 0;
-
-        std::string str = command.serialize();
-        // usbSerial.printf("\nCommand = %s\r\n" ,  str.c_str());
-        broadcastChange(str);
-    }
-}
-
 // main() runs in its own thread in the OS
 int main() {
 
-    usbSerial.baud(19200);
+    usbSerial.baud(9600);
     xbeeSerial.baud(9600);
     xbeeSerial.format(8, SerialBase::None, 1);
     xbeeSerial.attach(&xbee_rx_callback);
 
     wait(5);
-    offset = energySensor.calibrate();
-     setDeviceId();
-     refreshMyStatus();
+    // offset = energySensor.calibrate();
+    setDeviceId();
+    refreshMyStatus();
+    int i;
+    for (i=0; i<12; i++) {                           // Set up for sensitivity of Electrodes.
+          touchPad1.setElectrodeThreshold(i, 65, 65);
+    }
+    touchPad1Interrupt.mode(PullUp);
+    touchPad1Interrupt.fall(&keyPad1Touched);
+    wait(1);
+    touchPad2Interrupt.mode(PullUp);
+    touchPad2Interrupt.fall(&keyPad2Touched);
 
-    readNSaveSensorsData();
+    touchPad1.setProximityMode(true);
 
-    touch1.mode(PullDown);
-    touch1.output();
-    touch1.write(1);
-    tickTouch1.attach(detectTouch1, 1.0 / 55.0);
-
-    touch2.mode(PullDown);
-    touch2.output();
-    touch2.write(1);
-    tickTouch2.attach(detectTouch2, 1.0 / 55.0);
-
-    touch3.mode(PullDown);
-    touch3.output();
-    touch3.write(1);
-    tickTouch3.attach(detectTouch3, 1.0 / 55.0);
+    // readNSaveSensorsData();
 
     while(1){}
 
