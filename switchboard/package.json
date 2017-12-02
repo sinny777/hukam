@@ -1,0 +1,20 @@
+{
+  "name": "switchboard",
+  "version": "1.0.0",
+  "description": "Hukam SwitchBoard",
+  "main": "sender.js",
+  "scripts": {
+    "start": "node sender.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Hukam",
+    "Switch",
+    "Board"
+  ],
+  "author": "Hukam Team",
+  "license": "ISC",
+  "dependencies": {
+    "sx127x": "latest"
+  }
+}
