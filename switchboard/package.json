@@ -15,6 +15,9 @@
   "author": "Hukam Team",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.1.2",
+    "onoff": "^1.1.1",
+    "spi-device": "^0.2.4",
     "sx127x": "latest"
   }
 }
