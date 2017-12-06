@@ -1,4 +1,4 @@
-var SX127x = require('./lib/sx127x');
+var SX127x = require('sx127x');
 
 var sx127x = new SX127x({
   frequency: 433e6
@@ -17,12 +17,28 @@ sx127x.open(function(err) {
   // add a event listener for data events
   sx127x.on('data', function(data, rssi) {
     console.log('data:', '\'' + data.toString() + '\'', rssi);
+    sx127x.write(new Buffer('hello ' + count++), function(err) {
+      console.log('\t', err ? err : 'success');
+    });
   });
 
   // enable receive mode
+  /*
   sx127x.receive(function(err) {
     console.log('receive', err ? err : 'success');
   });
+  */
+
+  if(count == 0){
+    sx127x.write(new Buffer('Init Message >>>> ' + count++), function(err) {
+      console.log('\tWrite ', err ? err : 'success');
+      sx127x.receive(function(err) {
+        console.log('receive', err ? err : 'success');
+      });
+    });
+
+  }
+
 });
 
 process.on('SIGINT', function() {

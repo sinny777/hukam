@@ -1,4 +1,4 @@
-var SX127x = require('./lib/sx127x');
+var SX127x = require('sx127x');
 
 var sx127x = new SX127x({
   frequency: 433e6
