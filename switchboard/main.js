@@ -5,16 +5,18 @@ var mpr121;
 var SX127x = require('sx127x');
 var sx127x;
 
-module.exports = function() {
+// module.exports = function() {
 
   var methods = {};
 
   methods.initAll = function(){
-    mpr121  = new MPR121(0x5A, 1);
-    mpr121.on('touch', (pin) => console.log(`pin ${pin} touched`));
+    console.log("IN initAll: >> ");
+    methods.initCapacitiveTouch();
+    methods.initRadio();
   };
 
   methods.initCapacitiveTouch = function(){
+    console.log("IN initCapacitiveTouch: >> ");
     if(!mpr121){
       mpr121  = new MPR121(0x5A, 1);
       mpr121.on('touch', (pin) => console.log(`pin ${pin} touched`));
@@ -87,6 +89,8 @@ module.exports = function() {
   		}
   	};
 
-  return methods;
+      methods.initAll();
 
-}
+  // return methods;
+
+// }
