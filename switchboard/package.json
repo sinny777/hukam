@@ -19,6 +19,7 @@
     "async": "^2.1.2",
     "onoff": "^1.1.1",
     "spi-device": "^0.2.4",
-    "sx127x": "latest"
+    "sx127x": "latest",
+    "serialport": "^5.0.0"
   }
 }

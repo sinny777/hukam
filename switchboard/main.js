@@ -1,4 +1,8 @@
 
+var SerialPort = require("serialport");
+var usbPort = "/dev/ttyUSB0";
+var serialPort;
+
 const MPR121 = require('adafruit-mpr121');
 var mpr121;
 
@@ -13,6 +17,7 @@ var sx127x;
     console.log("IN initAll: >> ");
     methods.initCapacitiveTouch();
     methods.initRadio();
+    methods.initSerialport();
   };
 
   methods.initCapacitiveTouch = function(){
@@ -24,6 +29,39 @@ var sx127x;
       console.log("<<<<< initCapacitiveTouch ALREADY DONE: >>>>>> ");
     }
   };
+
+  methods.initSerialport = function(){
+    console.log("IN initSerialPort: >> ");
+      try{
+        var Readline = SerialPort.parsers.Readline;
+        serialPort = new SerialPort(usbPort, {
+          options: {
+                baudrate:9600
+              }
+          });
+          var parser = serialPort.pipe(new Readline());
+          parser.on('data', function(data) {
+              console.log('\n\ndata received: ' + data);
+            });
+
+          serialPort.on('error', function(err) {
+            console.log('ERROR In SERIAL PORT COMMUNICATION: >>> ', err);
+          });
+      }catch(err){
+        console.log(err);
+      }
+  }
+
+  methods.writeToSerialPort = function(command){
+		if(serialPort){
+			serialPort.write(command, function(){
+				console.log('Command Wrote to Serialport Successfully: >>> ', command);
+			});
+		}else{
+			console.log("SerialPort not Initialized yet !");
+			methods.initSerialPort();
+		}
+	};
 
   methods.initRadio = function(){
       try{
@@ -44,11 +82,6 @@ var sx127x;
             sx127x.on('data', function(data, rssi) {
       //				    console.log('data:', '\'' + data.toString() + '\'', rssi);
               console.log('\n\nRadio data received: ' + data.toString());
-                if(!data.toString() || data.toString().trim() == ""){
-                  console.log("Empty Data Received: >>>> ", data);
-                }else{
-                  methods.handleDataOnRadio(data.toString());
-                }
             });
 
             // enable receive mode
