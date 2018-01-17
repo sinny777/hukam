@@ -26,7 +26,7 @@
 14 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:226:5)
 15 verbose pkgid switchboard@1.0.0
 16 verbose cwd /Users/gurvindersingh/Documents/development/personal/hukam/repository/hukam/switchboard
-17 error Darwin 17.2.0
+17 error Darwin 17.3.0
 18 error argv "/Users/gurvindersingh/.nvm/versions/node/v6.9.0/bin/node" "/Users/gurvindersingh/.nvm/versions/node/v6.9.0/bin/npm" "start"
 19 error node v6.9.0
 20 error npm  v3.10.8

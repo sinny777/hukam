@@ -1,7 +1,8 @@
 
 var SerialPort = require("serialport");
-var usbPort = "/dev/ttyUSB0";
+var unoPort = "/dev/ttyS0";
 var serialPort;
+var serialportOptions = {baudRate: 9600};
 
 const MPR121 = require('adafruit-mpr121');
 var mpr121;
@@ -24,6 +25,7 @@ var sx127x;
     console.log("IN initCapacitiveTouch: >> ");
     if(!mpr121){
       mpr121  = new MPR121(0x5A, 1);
+      mpr121.setThresholds(6, 2);
       mpr121.on('touch', (pin) => console.log(`pin ${pin} touched`));
     }else{
       console.log("<<<<< initCapacitiveTouch ALREADY DONE: >>>>>> ");
@@ -34,15 +36,23 @@ var sx127x;
     console.log("IN initSerialPort: >> ");
       try{
         var Readline = SerialPort.parsers.Readline;
-        serialPort = new SerialPort(usbPort, {
-          options: {
-                baudrate:9600
-              }
-          });
-          var parser = serialPort.pipe(new Readline());
-          parser.on('data', function(data) {
+        serialPort = new SerialPort(unoPort, serialportOptions);
+        var parser = serialPort.pipe(new Readline({ delimiter: '\n' }));
+        parser.on('data', function(data) {
               console.log('\n\ndata received: ' + data);
-            });
+              serialPort.flush();
+          });
+
+          /*
+          serialPort.on('data', function (data) {
+            console.log('Data:', data);
+          });
+
+          // Read data that is available but keep the stream from entering "flowing mode"
+          serialPort.on('readable', function () {
+            console.log('Readable Data:', serialPort.read());
+          });
+          */
 
           serialPort.on('error', function(err) {
             console.log('ERROR In SERIAL PORT COMMUNICATION: >>> ', err);
@@ -82,6 +92,7 @@ var sx127x;
             sx127x.on('data', function(data, rssi) {
       //				    console.log('data:', '\'' + data.toString() + '\'', rssi);
               console.log('\n\nRadio data received: ' + data.toString());
+              methods.writeToSerialPort(data.toString());
             });
 
             // enable receive mode
