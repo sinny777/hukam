@@ -31,17 +31,13 @@ Ticker sensorDataTicker;
 Ticker tickTouch1;
 Ticker tickTouch2;
 Ticker tickTouch3;
-// Ticker tickTouch4;
-// Ticker tickTouch5;
+Ticker tickTouch4;
+Ticker tickTouch5;
 // Ticker tickTouch6;
 // Ticker tickTouch7;
 // Ticker tickTouch8;
 // Ticker tickTouch9;
 // Ticker tickTouch10;
-
-uint8_t touch_data1 = 0;
-uint8_t touch_data2 = 0;
-uint8_t touch_data3 = 0;
 
     Serial usbSerial(P0_2, P0_3);
     Serial xbeeSerial(P0_15, P0_16); // (XBEE TX, RX) (LPC1768 p9, p10)
@@ -51,9 +47,9 @@ uint8_t touch_data3 = 0;
     DigitalOut xbeeLED(P1_18, 0);
 
 // DIGITAL SWITCHES
-DigitalOut DSw1(P2_4);
-DigitalOut DSw2(P2_5);
-DigitalOut DSw3(P2_6);
+DigitalOut DSw1(P0_4);
+DigitalOut DSw2(P0_5);
+DigitalOut DSw3(P0_6);
 DigitalOut DSw4(P2_7);
 DigitalOut DSw5(P2_8);
 DigitalOut DSw6(P0_21);
@@ -63,12 +59,12 @@ DigitalOut ASw1(P0_24);
 DigitalOut ASw2(P0_25);
 
 // RGB LED PINS THAT CAN BE USED
-DigitalInOut touch1(P0_7);
-DigitalInOut touch2(P0_5);
-DigitalInOut touch3(P0_4);
-// DigitalInOut touch4(P2_2);
-// DigitalInOut touch5(P0_8);
-// DigitalInOut touch6(P0_9);
+DigitalInOut touch1(P2_0);
+DigitalInOut touch2(P2_1);
+DigitalInOut touch3(P2_2);
+DigitalInOut touch4(P2_3);
+DigitalInOut touch5(P2_4);
+DigitalInOut touch6(P2_5);
 // DigitalInOut touch7(P0_17);
 // DigitalInOut touch8(P0_18);
 // DigitalInOut touch9(P0_19);
@@ -89,7 +85,7 @@ void readEnergyConsumption(){
 void broadcastChange(std::string command){
     xbeeLED = 1;
     command = command + "\n";
-    usbSerial.printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
+    usbSerial.printf("\nBroadcast Command: %s\r\n" ,  command.c_str());
     xbeeSerial.puts(command.c_str());
     xbeeLED = 0;
     wait(0.2);
@@ -197,6 +193,7 @@ void xbee_rx_callback() {
 
 void detectTouch1(void){
     uint8_t count = 0;
+    uint8_t touch_data1 = 0;
     MbedJSONValue command;
     command["id"] = boardData["id"];
     command["type"] = "sb";
@@ -240,6 +237,7 @@ void detectTouch1(void){
 
 void detectTouch2(void){
     uint8_t count = 0;
+    uint8_t touch_data2 = 0;
     MbedJSONValue command;
     command["id"] = boardData["id"];
     command["type"] = "sb";
@@ -264,11 +262,11 @@ void detectTouch2(void){
       int val = boardData["DSw2"].get<int>();
       if(val == 0){
           boardData["DSw2"] = 1;
-          DSw1 = 1;
+          DSw2 = 1;
           command["dv"] = 1;
       }else{
           boardData["DSw2"] = 0;
-          DSw1 = 0;
+          DSw2 = 0;
           command["dv"] = 0;
       }
       heartbeatLED = 1;                // touch
@@ -283,6 +281,7 @@ void detectTouch2(void){
 
 void detectTouch3(void){
     uint8_t count = 0;
+    uint8_t touch_data3 = 0;
     MbedJSONValue command;
     command["id"] = boardData["id"];
     command["type"] = "sb";
@@ -306,11 +305,97 @@ void detectTouch3(void){
         int val = boardData["DSw3"].get<int>();
         if(val == 0){
             boardData["DSw3"] = 1;
-            DSw1 = 1;
+            DSw3 = 1;
             command["dv"] = 1;
         }else{
             boardData["DSw3"] = 0;
-            DSw1 = 0;
+            DSw3 = 0;
+            command["dv"] = 0;
+        }
+        heartbeatLED = 1;                // touch
+        wait(0.1);
+        heartbeatLED = 0;
+
+        std::string str = command.serialize();
+        // usbSerial.printf("\nCommand = %s\r\n" ,  str.c_str());
+        broadcastChange(str);
+    }
+}
+
+void detectTouch4(void){
+    uint8_t count = 0;
+    uint8_t touch_data4 = 0;
+    MbedJSONValue command;
+    command["id"] = boardData["id"];
+    command["type"] = "sb";
+    command["index"] = 4;
+    touch4.input();              // discharge the capacitor
+    while (touch4.read()) {
+        count++;
+        if (count > 4) {
+            break;
+        }
+    }
+    touch4.output();
+    touch4.write(1);             // charge the capacitor
+
+    if (count > 3) {
+        touch_data4 = (touch_data4 << 1) + 1;
+    } else {
+        touch_data4 = (touch_data4 << 1);
+    }
+    if (touch_data4 == 0x01) {
+        int val = boardData["DSw4"].get<int>();
+        if(val == 0){
+            boardData["DSw4"] = 1;
+            DSw4 = 1;
+            command["dv"] = 1;
+        }else{
+            boardData["DSw4"] = 0;
+            DSw4 = 0;
+            command["dv"] = 0;
+        }
+        heartbeatLED = 1;                // touch
+        wait(0.1);
+        heartbeatLED = 0;
+
+        std::string str = command.serialize();
+        // usbSerial.printf("\nCommand = %s\r\n" ,  str.c_str());
+        broadcastChange(str);
+    }
+}
+
+void detectTouch5(void){
+    uint8_t count = 0;
+    uint8_t touch_data5 = 0;
+    MbedJSONValue command;
+    command["id"] = boardData["id"];
+    command["type"] = "sb";
+    command["index"] = 5;
+    touch5.input();              // discharge the capacitor
+    while (touch5.read()) {
+        count++;
+        if (count > 4) {
+            break;
+        }
+    }
+    touch5.output();
+    touch5.write(1);             // charge the capacitor
+
+    if (count > 3) {
+        touch_data5 = (touch_data5 << 1) + 1;
+    } else {
+        touch_data5 = (touch_data5 << 1);
+    }
+    if (touch_data5 == 0x01) {
+        int val = boardData["DSw5"].get<int>();
+        if(val == 0){
+            boardData["DSw5"] = 1;
+            DSw5 = 1;
+            command["dv"] = 1;
+        }else{
+            boardData["DSw5"] = 0;
+            DSw5 = 0;
             command["dv"] = 0;
         }
         heartbeatLED = 1;                // touch
@@ -332,26 +417,37 @@ int main() {
     xbeeSerial.attach(&xbee_rx_callback);
 
     wait(5);
-    offset = energySensor.calibrate();
+    // offset = energySensor.calibrate();
      setDeviceId();
      refreshMyStatus();
 
-    readNSaveSensorsData();
+     readNSaveSensorsData();
 
     touch1.mode(PullDown);
     touch1.output();
     touch1.write(1);
-    tickTouch1.attach(detectTouch1, 1.0 / 55.0);
+    tickTouch1.attach(detectTouch1, 1.0 / 5.0);
 
     touch2.mode(PullDown);
     touch2.output();
     touch2.write(1);
-    tickTouch2.attach(detectTouch2, 1.0 / 55.0);
+    tickTouch2.attach(detectTouch2, 1.0 / 5.0);
 
     touch3.mode(PullDown);
     touch3.output();
     touch3.write(1);
-    tickTouch3.attach(detectTouch3, 1.0 / 55.0);
+    tickTouch3.attach(detectTouch3, 1.0 / 5.0);
+
+    touch4.mode(PullDown);
+    touch4.output();
+    touch4.write(1);
+    tickTouch4.attach(detectTouch4, 1.0 / 5.0);
+
+    touch5.mode(PullDown);
+    touch5.output();
+    touch5.write(1);
+    tickTouch5.attach(detectTouch5, 1.0 / 5.0);
+
 
     while(1){}
 
