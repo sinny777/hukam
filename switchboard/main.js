@@ -26,7 +26,10 @@ var sx127x;
     if(!mpr121){
       mpr121  = new MPR121(0x5A, 1);
       mpr121.setThresholds(6, 2);
-      mpr121.on('touch', (pin) => console.log(`pin ${pin} touched`));
+      mpr121.on('touch', (pin) => {
+            console.log(`pin ${pin} touched`);
+            methods.writeToSerialPort(`pin ${pin} touched\n`);
+          });
     }else{
       console.log("<<<<< initCapacitiveTouch ALREADY DONE: >>>>>> ");
     }
