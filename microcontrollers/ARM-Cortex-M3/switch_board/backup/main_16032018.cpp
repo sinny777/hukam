@@ -9,6 +9,7 @@
 
 #include "mbed.h"
 #include "MbedJSONValue.h"
+#include <mpr121.h>
 #include "DHT.h"
 #include "ACS712.h"
 #include <string>
@@ -32,9 +33,12 @@ DigitalOut powerLED(P1_18, 0);
 DigitalOut heartbeatLED(P1_19, 0);
 DigitalOut radioLED(P1_20, 0);
 
-Serial usbSerial(P0_2, P0_3);
+// Serial usbSerial(P0_2, P0_3);
 // Serial ESPSerial(P0_11, P0_10);
-Serial ESPSerial(P0_0, P0_1); // (TX, RX)
+Serial ESPSerial(P0_2, P0_3); // (TX, RX)
+SPI radio(P0_18, P0_17, P0_15); // mosi, miso, sclk, ssel
+DigitalOut cs(P0_16);
+DigitalOut reset(P0_0);
 
 // DIGITAL SWITCHES
 DigitalOut DSw1(P1_21, 0);
@@ -80,7 +84,17 @@ void readEnergyConsumption(){
 void broadcastChange(std::string command){
     radioLED = 0;
     command = command + "\n";
-    ESPSerial.puts(command.c_str());
+
+    for (unsigned i=0; i<command.length(); ++i){
+      int reply = command.at(i);
+      // cs = 0;
+      // radio.write(reply);
+      // Deselect the device
+      // cs = 1;
+      ESPSerial.putc(reply);
+    }
+
+    // ESPSerial.puts(command.c_str());
     // usbSerial.printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
     radioLED = 1;
     wait(0.5);
@@ -215,7 +229,6 @@ void handleDataReceived(char data[128]){
   std::string commandStr;
   commandStr = command.serialize();
   ESPSerial.printf("ACK_%s\n", commandStr.c_str());
-  printf("ACK_%s\n", commandStr.c_str());
 }
 
 void btn1Pressed(){
@@ -395,6 +408,7 @@ void btn14Pressed(){
 
 void esp_rx_callback() {
   char value[128];
+  /*
   if(ESPSerial.readable()){
       // ESPSerial.scanf("%s\n",&value);
       ESPSerial.gets(value, 106);
@@ -402,32 +416,23 @@ void esp_rx_callback() {
       // wait_ms(3);
       // ESPSerial.printf("ACK_%s\n", value);
   }
-}
-
-void usb_rx_callback() {
-  char value[128];
-  if(usbSerial.readable()){
-      usbSerial.gets(value, 106);
-     usbSerial.printf("ACK_%s\n", value);
-  }
+  */
 }
 
 // main() runs in its own thread in the OS
 int main() {
+    // usbSerial.baud(115200);
     wait(2);
     powerLED = 1;
     ESPSerial.baud(115200);
     ESPSerial.format(8, SerialBase::None, 1);
     ESPSerial.attach(&esp_rx_callback);
-    wait(1);
-    usbSerial.baud(115200);
-    usbSerial.attach(&usb_rx_callback);
 
     wait(2);
     // offset = energySensor.calibrate();
     setDeviceId();
     refreshMyStatus();
-    readNSaveSensorsData();
+    // readNSaveSensorsData();
     wait(1);
     btn1.mode(PullUp);
     btn2.mode(PullUp);
@@ -459,8 +464,44 @@ int main() {
     btn13.fall(&btn13Pressed);
     btn14.fall(&btn14Pressed);
 
-    while(1){
+    // Chip must be deselected
+    cs = 1;
+    radio.format(8,3);
+    radio.frequency(2000000);
+    reset = 0;
+    reset = 1;
+    wait_ms(3);
+    reset = 0;
+    wait_ms(3);
+    // radio.reply(0x00);
+    // radio.reply(0x00);
 
+    // Select the device by seting chip select low
+    cs = 0;
+    // Send 0x8f, the command to read the WHOAMI register
+    radio.write(0x8F);
+    // Send a dummy byte to receive the contents of the WHOAMI register
+    int whoami = radio.write(0x00);
+    ESPSerial.printf("WHOAMI register = 0x%X\n", whoami);
+    // Deselect the device
+    cs = 1;
+    char packet[9];
+    while(1){
+          // reset = 1;
+          // reset = 0;
+          // wait_ms(5);
+          cs = 0;
+          radio.write(0x0c00);//command byte
+          wait_ms(500);
+          // uint8_t reply = radio.write(0x00); // itl send 0x00 before packet
+          // cs = 1;
+          // wait(1);
+          for(uint8_t i = 0; i < 9; ++i) {
+            packet[i] = radio.write(0x00);
+            wait(1);
+          }
+          cs = 1;
+          ESPSerial.printf("%s\n", packet);
       }
 
 }

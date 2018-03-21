@@ -32,7 +32,7 @@ DigitalOut powerLED(P1_18, 0);
 DigitalOut heartbeatLED(P1_19, 0);
 DigitalOut radioLED(P1_20, 0);
 
-Serial usbSerial(P0_2, P0_3);
+// Serial usbSerial(P0_2, P0_3);
 // Serial ESPSerial(P0_11, P0_10);
 Serial ESPSerial(P0_0, P0_1); // (TX, RX)
 
@@ -404,24 +404,14 @@ void esp_rx_callback() {
   }
 }
 
-void usb_rx_callback() {
-  char value[128];
-  if(usbSerial.readable()){
-      usbSerial.gets(value, 106);
-     usbSerial.printf("ACK_%s\n", value);
-  }
-}
-
 // main() runs in its own thread in the OS
 int main() {
+    // usbSerial.baud(115200);
     wait(2);
     powerLED = 1;
     ESPSerial.baud(115200);
     ESPSerial.format(8, SerialBase::None, 1);
     ESPSerial.attach(&esp_rx_callback);
-    wait(1);
-    usbSerial.baud(115200);
-    usbSerial.attach(&usb_rx_callback);
 
     wait(2);
     // offset = energySensor.calibrate();

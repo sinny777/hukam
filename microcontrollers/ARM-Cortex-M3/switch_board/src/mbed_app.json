@@ -1,10 +1,10 @@
 {
-    "macros": [ 
+    "macros": [
         "NDEBUG=1"
     ],
     "target_overrides": {
         "*": {
             "platform.stdio-flush-at-exit": false
         }
-    }
+    }    
 }

@@ -9,6 +9,7 @@
 
 #include "mbed.h"
 #include "MbedJSONValue.h"
+#include <mpr121.h>
 #include "DHT.h"
 #include "ACS712.h"
 #include <string>
@@ -28,44 +29,44 @@ Ticker tempTicker;
 Ticker energyTicker;
 Ticker sensorDataTicker;
 
-DigitalOut powerLED(P1_18, 0);
-DigitalOut heartbeatLED(P1_19, 0);
-DigitalOut radioLED(P1_20, 0);
+    Serial usbSerial(P0_2, P0_3);
+    Serial xbeeSerial(P0_15, P0_16); // (XBEE TX, RX) (LPC1768 p9, p10)
 
-Serial usbSerial(P0_2, P0_3);
-// Serial ESPSerial(P0_11, P0_10);
-Serial ESPSerial(P0_0, P0_1); // (TX, RX)
+    DigitalOut heartbeatLED(P1_16);
+    DigitalOut xbeeLED(P1_17, 1);
 
 // DIGITAL SWITCHES
-DigitalOut DSw1(P1_21, 0);
-DigitalOut DSw2(P1_22, 0);
-DigitalOut DSw3(P1_23, 0);
-DigitalOut DSw4(P1_24, 0);
-DigitalOut DSw5(P1_25, 0);
-DigitalOut DSw6(P1_26, 0);
-DigitalOut DSw7(P1_27, 0);
-DigitalOut DSw8(P1_28, 0);
-DigitalOut ASw1(P2_0, 0);
-DigitalOut ASw2(P2_1, 0);
+DigitalOut DSw1(P2_4, 0);
+DigitalOut DSw2(P2_5, 0);
+DigitalOut DSw3(P2_6, 0);
+DigitalOut DSw4(P2_7, 0);
+DigitalOut DSw5(P2_8, 0);
+DigitalOut DSw6(P0_21, 0);
+DigitalOut DSw7(P0_22, 0);
+DigitalOut DSw8(P1_0, 0);
+DigitalOut ASw1(P1_28, 0);
+DigitalOut ASw2(P1_29, 0);
 
 // Push Button PINS THAT CAN BE USED
-InterruptIn btn1(P2_6);
-InterruptIn btn2(P2_7);
-InterruptIn btn3(P2_8);
-InterruptIn btn4(P2_12);
-InterruptIn btn5(P0_4);
-InterruptIn btn6(P0_5);
-InterruptIn btn7(P0_6);
-InterruptIn btn8(P0_7);
-InterruptIn btn9(P0_8);
-InterruptIn btn10(P0_9);
-InterruptIn btn11(P0_19);  // Analog Switch 1 Plus Button
-InterruptIn btn12(P0_20);  // Analog Switch 1 Minus Button
-InterruptIn btn13(P0_21);  // Analog Switch 2 Plus Button
-InterruptIn btn14(P0_22);  // Analog Switch 2 Minus Button
+InterruptIn btn1(P0_4);
+InterruptIn btn2(P0_5);
+InterruptIn btn3(P0_6);
+InterruptIn btn4(P0_7);
+InterruptIn btn5(P0_8);
+InterruptIn btn6(P0_9);
+InterruptIn btn7(P0_17);
+InterruptIn btn8(P0_18);
+InterruptIn btn9(P0_19);
+InterruptIn btn10(P0_20);
+InterruptIn aBtn1P(P0_0);
+InterruptIn aBtn1M(P0_1);
+InterruptIn aBtn2P(P2_1);
+InterruptIn aBtn2M(P2_0);
 
-DHT tempHumSensor(P0_24, DHT11);
+
+
 AnalogIn lightSensor(P0_25);
+DHT tempHumSensor(P0_24, DHT11);
 ACS712 energySensor(ACS712_30A); // Connect to PIN P0_26
 
 // ------------     MAIN PROGRAM -----------------------
@@ -78,13 +79,13 @@ void readEnergyConsumption(){
 }
 
 void broadcastChange(std::string command){
-    radioLED = 0;
+    xbeeLED = 1;
     command = command + "\n";
-    ESPSerial.puts(command.c_str());
+    xbeeSerial.puts(command.c_str());
     // usbSerial.printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
-    radioLED = 1;
-    wait(0.5);
-    radioLED = 0;
+    xbeeLED = 0;
+    wait(0.2);
+    xbeeLED = 1;
 }
 
 void refreshMyStatus(){
@@ -214,8 +215,18 @@ void handleDataReceived(char data[128]){
   }
   std::string commandStr;
   commandStr = command.serialize();
-  ESPSerial.printf("ACK_%s\n", commandStr.c_str());
-  printf("ACK_%s\n", commandStr.c_str());
+  xbeeSerial.printf("ACK_%s\n", commandStr.c_str());
+}
+
+void xbee_rx_callback() {
+  char value[128];
+  if(xbeeSerial.readable()){
+      // xbeeSerial.scanf("%s\n",&value);
+      xbeeSerial.gets(value, 106);
+      handleDataReceived(value);
+      // wait_ms(3);
+      // xbeeSerial.printf("ACK_%s\n", value);
+  }
 }
 
 void btn1Pressed(){
@@ -337,96 +348,86 @@ void btn10Pressed(){
   // wait_ms(3);
 }
 
-void btn11Pressed(){
+void aBtn1PPressed(){
   int asw1_aval = boardData["ASw1_aval"].get<int>();
   if(asw1_aval < 10){
-      boardData["ASw1_aval"] = asw1_aval + 1;
+      int val = asw1_aval + 1;
+      boardData["ASw1_aval"] = val;
       MbedJSONValue command;
       command["id"] = boardData["id"];
       command["type"] = "ASWP";
       command["index"] = 1;
-      command["value"] = asw1_aval;
+      command["value"] = val;
+      usbSerial.printf("%c", (val+96));
       std::string str = command.serialize();
       broadcastChange(str);
   }
 }
 
-void btn12Pressed(){
+void aBtn1MPressed(){
   int asw1_aval = boardData["ASw1_aval"].get<int>();
   if(asw1_aval <= 10 || asw1_aval > 0){
-      boardData["ASw1_aval"] = asw1_aval - 1;
-      MbedJSONValue command;
-      command["id"] = boardData["id"];
-      command["type"] = "ASWP";
-      command["index"] = 1;
-      command["value"] = asw1_aval;
-      std::string str = command.serialize();
-      broadcastChange(str);
+    int val = asw1_aval - 1;
+    boardData["ASw1_aval"] = val;
+    MbedJSONValue command;
+    command["id"] = boardData["id"];
+    command["type"] = "ASWM";
+    command["index"] = 1;
+    command["value"] = val;
+    usbSerial.printf("%c", (val+96));
+    std::string str = command.serialize();
+    broadcastChange(str);
   }
 }
 
-void btn13Pressed(){
+void aBtn2PPressed(){
   int asw2_aval = boardData["ASw2_aval"].get<int>();
   if(asw2_aval < 10){
-      boardData["ASw2_aval"] = asw2_aval + 1;
-      MbedJSONValue command;
-      command["id"] = boardData["id"];
-      command["type"] = "ASWP";
-      command["index"] = 2;
-      command["value"] = asw2_aval;
-      std::string str = command.serialize();
-      broadcastChange(str);
+    int val = asw2_aval + 1;
+    boardData["ASw2_aval"] = val;
+    MbedJSONValue command;
+    command["id"] = boardData["id"];
+    command["type"] = "ASWP";
+    command["index"] = 2;
+    command["value"] = val;
+    usbSerial.printf("%c", (val+96));
+    std::string str = command.serialize();
+    broadcastChange(str);
   }
 }
 
-void btn14Pressed(){
+void aBtn2MPressed(){
   int asw2_aval = boardData["ASw2_aval"].get<int>();
   if(asw2_aval <= 10 || asw2_aval > 0){
-      boardData["ASw2_aval"] = asw2_aval - 1;
-      MbedJSONValue command;
-      command["id"] = boardData["id"];
-      command["type"] = "ASWP";
-      command["index"] = 2;
-      command["value"] = asw2_aval;
-      std::string str = command.serialize();
-      broadcastChange(str);
-  }
-}
-
-void esp_rx_callback() {
-  char value[128];
-  if(ESPSerial.readable()){
-      // ESPSerial.scanf("%s\n",&value);
-      ESPSerial.gets(value, 106);
-      handleDataReceived(value);
-      // wait_ms(3);
-      // ESPSerial.printf("ACK_%s\n", value);
-  }
-}
-
-void usb_rx_callback() {
-  char value[128];
-  if(usbSerial.readable()){
-      usbSerial.gets(value, 106);
-     usbSerial.printf("ACK_%s\n", value);
+    int val = asw2_aval - 1;
+    boardData["ASw2_aval"] = val;
+    MbedJSONValue command;
+    command["id"] = boardData["id"];
+    command["type"] = "ASWM";
+    command["index"] = 2;
+    command["value"] = val;
+    usbSerial.printf("%c", (val+96));
+    std::string str = command.serialize();
+    broadcastChange(str);
   }
 }
 
 // main() runs in its own thread in the OS
 int main() {
-    wait(2);
-    powerLED = 1;
-    ESPSerial.baud(115200);
-    ESPSerial.format(8, SerialBase::None, 1);
-    ESPSerial.attach(&esp_rx_callback);
-    wait(1);
-    usbSerial.baud(115200);
-    usbSerial.attach(&usb_rx_callback);
+    // usbSerial.baud(115200);
+    xbeeSerial.baud(9600);
+    xbeeSerial.format(8, SerialBase::None, 1);
+    xbeeSerial.attach(&xbee_rx_callback);
 
     wait(2);
+    usbSerial.baud(9600);
+    usbSerial.format(8, SerialBase::None, 1);
+
+    wait(3);
     // offset = energySensor.calibrate();
     setDeviceId();
     refreshMyStatus();
+
     readNSaveSensorsData();
     wait(1);
     btn1.mode(PullUp);
@@ -439,10 +440,10 @@ int main() {
     btn8.mode(PullUp);
     btn9.mode(PullUp);
     btn10.mode(PullUp);
-    btn11.mode(PullUp);
-    btn12.mode(PullUp);
-    btn13.mode(PullUp);
-    btn14.mode(PullUp);
+    aBtn1P.mode(PullUp);
+    aBtn1M.mode(PullUp);
+    aBtn2P.mode(PullUp);
+    aBtn2M.mode(PullUp);
 
     btn1.fall(&btn1Pressed);
     btn2.fall(&btn2Pressed);
@@ -454,13 +455,13 @@ int main() {
     btn8.fall(&btn8Pressed);
     btn9.fall(&btn9Pressed);
     btn10.fall(&btn10Pressed);
-    btn11.fall(&btn11Pressed);
-    btn12.fall(&btn12Pressed);
-    btn13.fall(&btn13Pressed);
-    btn14.fall(&btn14Pressed);
+    aBtn1P.fall(&aBtn1PPressed);
+    aBtn1M.fall(&aBtn1MPressed);
+    aBtn2P.fall(&aBtn2PPressed);
+    aBtn2M.fall(&aBtn2MPressed);
 
     while(1){
 
-      }
+    }
 
 }
