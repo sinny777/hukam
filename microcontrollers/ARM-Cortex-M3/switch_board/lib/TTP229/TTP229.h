@@ -24,7 +24,7 @@ public:
     /// public:
     ///     void func();
     /// };
-    /// Foo foo;   
+    /// Foo foo;
     /// ttp229.attach(FunctionPointer(&foo, &Foo::func));
     /// @endcode
     void attach(const FunctionPointer& fp) {callback=fp;}

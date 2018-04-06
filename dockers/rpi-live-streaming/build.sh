@@ -9,6 +9,7 @@ function install_build_tools {
 	sudo apt-get install autoconf
 	sudo apt-get install libtool
 	sudo apt-get install nginx
+	sudo apt-get install -qy libomxil-bellagio-dev
 }
 
 function build_yasm {
@@ -73,9 +74,9 @@ function build_ffmpeg {
 	echo "Building ffmpeg"
 
     cd /usr/src/app/
-    git clone git://source.ffmpeg.org/ffmpeg.git
-    cd ffmpeg
-    ./configure --enable-shared --enable-gpl --prefix=/usr --enable-nonfree --enable-libmp3lame --enable-libfaac --enable-libx264 --enable-version3 --disable-mmx
+    git clone https://github.com/FFmpeg/FFmpeg.git
+    cd FFmpeg
+    ./configure --enable-shared --enable-gpl --prefix=/usr --enable-nonfree --enable-libmp3lame --enable-libx264 --enable-version3 --disable-mmx
     make
     make install
 }
@@ -101,4 +102,4 @@ build_lame
 build_faac
 build_ffmpeg
 configure_ldconfig
-# build_psips
+build_psips

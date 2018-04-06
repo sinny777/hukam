@@ -23,6 +23,7 @@ RUN chmod +x /usr/src/app/build.sh
 
 RUN /usr/src/app/build.sh
 
-CMD /usr/src/app/entrypoint.sh
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+CMD []
 
 EXPOSE 5000
