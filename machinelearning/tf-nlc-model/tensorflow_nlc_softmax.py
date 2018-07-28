@@ -156,7 +156,7 @@ def main(_):
     print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
     model.save(MODEL_PATH)
     print("<<<<<<<< ML MODEL CREATED AND SAVED >>>>>>>>>>>\n\n")
-    classify()
+    # classify()
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
