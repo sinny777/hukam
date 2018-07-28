@@ -52,7 +52,6 @@ DigitalOut ASw2(P2_1, 1);
 
 ACS712 energySensor(ACS712_30A); // Connect to PIN P0_26
 BME280 bme280(P0_10, P0_11);
-AnalogIn LDR(P0_25);
 
 // ------------     MAIN PROGRAM -----------------------
 
@@ -69,13 +68,9 @@ void broadcastChange(std::string command){
 }
 
 void readEnergyConsumption(){
-  float Irms = energySensor.getCurrentAC();
-
-  float currentAc = (Irms / 1023) * (5.0 / 0.66);
-
-  float P = U * currentAc;
-  boardData["current"] = Irms;
-  boardData["power"] = P;
+  float I = energySensor.getCurrentAC();
+  float P = U * I;
+  boardData["energy"] = P;
   boardData["offset"] = offset;
 }
 
@@ -196,7 +191,7 @@ void ttp229int(){
     // xbeeSerial.printf("%d\r\n",touchpad.onkey());
     int sw = touchpad.onkey();
     if(sw != 0){
-        // xbeeSerial.printf("{KEY: %d}", sw);
+        xbeeSerial.printf("{KEY: %d}", sw);
         btnPressed(sw);
     }
     //if(sw!=0) myleds=sw%16;
@@ -216,14 +211,12 @@ void refreshMyStatus(){
   boardData["ASw2_dval"] = 0;
   boardData["ASw2_aval"] = 0;
 
-  boardData["power"] = 0.0f;
+  boardData["energy"] = 0.0f;
   boardData["offset"] = 0.0f;
 
   boardData["temp"] = 0.0f;
   boardData["hum"] = 0.0f;
   boardData["press"] = 0.0f;
-
-  boardData["light"] = 0.0f;
 
   MbedJSONValue command;
   command["id"] = boardData["id"];
@@ -237,16 +230,12 @@ void sendSensorData(){
     MbedJSONValue command;
     command["id"] = boardData["id"];
     command["type"] = "SB";
-    command["power"] = boardData["power"];
-    command["current"] = boardData["current"];
+    command["energy"] = boardData["energy"];
     command["offset"] = boardData["offset"];
     command["temp"] = bme280.getTemperature();
     command["hum"] = bme280.getHumidity();
     command["press"] = bme280.getPressure();
     // pc.printf("%2.2f degC, %04.2f hPa, %2.2f %%\n", sensor.getTemperature(), sensor.getPressure(), sensor.getHumidity());
-    command["light"] = LDR.read();
-    // pc.printf("\r%u %f\n",(LDR.read_u16()/64), LDR.read());
-
     std::string str = command.serialize();
     broadcastChange(str);
 }

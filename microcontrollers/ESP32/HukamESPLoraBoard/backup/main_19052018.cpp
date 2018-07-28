@@ -45,11 +45,11 @@ int boardTemp = 0;
  * Get all sensors data and save it in a variable
  */
 static void getSensorsData(){
-    hallData = hallRead();
-    boardTemp = (temprature_sens_read() - 32) / 1.8;
+    // hallData = hallRead();
+    // boardTemp = (temprature_sens_read() - 32) / 1.8;
 
-  sensorsData = "{\"type\":\"ESP_BOARD\", \"BOARD_ID:\""+BOARD_ID+"}";
-  // sensorsData = "{\"type\":\"ESP_BOARD\"}";
+  // sensorsData = "{\"type\":\"ESP_BOARD\", \"BOARD_ID:\""+BOARD_ID+"}";
+  sensorsData = "{\"type\":\"ESP_BOARD\"}";
 
 }
 
@@ -64,10 +64,9 @@ void publishData(String data){
 //        LoRa.receive();
         delay(1);
         LoRa.flush();
-        Serial.println(data);
     }else{
-      Serial.print("Lora Not Working: >> ");
-      Serial.println(data);
+      // Serial.print("Lora Not Working: >> ");
+      // Serial.println(data);
     }
 }
 
@@ -99,9 +98,9 @@ void setup() {
   while (!Serial);
   delay(1000);
 
-  char chipid[20];
-  sprintf(chipid, "%" PRIu64, ESP.getEfuseMac());
-  BOARD_ID = "HB_"+String(chipid);
+  // char chipid[20];
+  // sprintf(chipid, "%" PRIu64, ESP.getEfuseMac());
+  // BOARD_ID = "HB_"+String(chipid);
   // Serial.println(BOARD_ID);
   // delay(100);
 
@@ -111,10 +110,10 @@ void setup() {
     loraAvailable = LoRa.begin(BAND);
     loraTryCount++;
     if(!loraAvailable){
-      Serial.printf("Starting LoRa failed!, Try Count: %d\n", loraTryCount);
+      // Serial.printf("Starting LoRa failed!, Try Count: %d\n", loraTryCount);
       delay(3000);
     }else{
-      Serial.println("LoRa Initialized Successfully...");
+      // Serial.println("LoRa Initialized Successfully...");
     }
   }while(!loraAvailable && loraTryCount < 3);
 
@@ -133,6 +132,5 @@ void setup() {
            getSensorsData();
            publishData(sensorsData);
            previousMillis =  millis();
-           
       }
   }

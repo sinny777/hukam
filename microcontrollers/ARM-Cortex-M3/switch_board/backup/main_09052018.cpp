@@ -9,10 +9,9 @@
 
 #include "mbed.h"
 #include "MbedJSONValue.h"
-#include "ACS712.h"
+// #include "ACS712.h"
 #include <string>
 #include "TTP229.h"
-#include "BME280.h"
 
 using namespace std;
 
@@ -25,7 +24,7 @@ float offset = 0.0f;
 
 MbedJSONValue boardData;
 
-Ticker energyTicker;
+// Ticker energyTicker;
 Ticker sensorDataTicker;
 
 DigitalOut powerLED(P1_18, 0);
@@ -33,173 +32,54 @@ DigitalOut heartbeatLED(P1_19, 0);
 DigitalOut radioLED(P1_20, 0);
 
 Serial usbSerial(P0_2, P0_3);
-Serial xbeeSerial(P0_15, P0_16); // (XBEE TX, RX) (LPC1768 p9, p10)
-Serial analogUNO(P0_10, P0_11); // (p28, p27) (Serial TX, RX)
+// Serial ESPSerial(P0_11, P0_10);
+// Serial ESPSerial(P0_0, P0_1); // (TX, RX)
 
-TTP229 touchpad(P2_4, P2_5);
+TTP229 touchpad(P0_27,P0_28);
 
 // DIGITAL SWITCHES
-DigitalOut DSw1(P1_21, 1);
-DigitalOut DSw2(P1_22, 1);
-DigitalOut DSw3(P1_23, 1);
-DigitalOut DSw4(P1_24, 1);
-DigitalOut DSw5(P1_25, 1);
-DigitalOut DSw6(P1_26, 1);
-DigitalOut DSw7(P1_27, 1);
-DigitalOut DSw8(P1_28, 1);
-DigitalOut ASw1(P2_0, 1);
-DigitalOut ASw2(P2_1, 1);
+DigitalOut DSw1(P1_21, 0);
+DigitalOut DSw2(P1_22, 0);
+DigitalOut DSw3(P1_23, 0);
+DigitalOut DSw4(P1_24, 0);
+DigitalOut DSw5(P1_25, 0);
+DigitalOut DSw6(P1_26, 0);
+DigitalOut DSw7(P1_27, 0);
+DigitalOut DSw8(P1_28, 0);
+// DigitalOut ASw1(P2_0, 0);
+// DigitalOut ASw2(P2_1, 0);
 
-ACS712 energySensor(ACS712_30A); // Connect to PIN P0_26
-BME280 bme280(P0_10, P0_11);
-AnalogIn LDR(P0_25);
+// ACS712 energySensor(ACS712_30A); // Connect to PIN P0_26
 
 // ------------     MAIN PROGRAM -----------------------
+
+/*
+void readEnergyConsumption(){
+  float I = energySensor.getCurrentAC();
+  float P = U * I;
+  boardData["energy"] = P;
+  boardData["offset"] = offset;
+}
+*/
+
+void ttp229int(){
+    // printf("%16s\r\n",to_string(touchpad).c_str());
+    printf("%d\r\n",touchpad.onkey());
+    int sw = touchpad.onkey();
+    if(sw != 0){
+        printf("KEY: %d\r\n", sw);
+    }
+    //if(sw!=0) myleds=sw%16;
+}
 
 void broadcastChange(std::string command){
     radioLED = 0;
     command = command + "\n";
     // ESPSerial.puts(command.c_str());
-    // xbeeSerial.printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
-    printf(command.c_str());
-    xbeeSerial.printf(command.c_str());
+    usbSerial.printf("\nBroadcast Command = %s\r\n" ,  command.c_str());
     radioLED = 1;
     wait(0.5);
     radioLED = 0;
-}
-
-void readEnergyConsumption(){
-  float Irms = energySensor.getCurrentAC();
-
-  float currentAc = (Irms / 1023) * (5.0 / 0.66);
-
-  float P = U * currentAc;
-  boardData["current"] = Irms;
-  boardData["power"] = P;
-  boardData["offset"] = offset;
-}
-
-void btnPressed(int key){
-  MbedJSONValue command;
-  command["id"] = boardData["id"];
-  switch(key){
-    case 1:
-      if(boardData["DSw1"].get<int>() == 1){
-        DSw1 = 0;
-        boardData["DSw1"] = 0;
-      }else{
-        DSw1 = 1;
-        boardData["DSw1"] = 1;
-      }
-      command["index"] = key;
-      command["type"] = "DSW";
-      command["value"] = DSw1.read();
-      break;
-    case 2:
-      if(boardData["DSw2"].get<int>() == 1){
-        DSw2 = 0;
-        boardData["DSw2"] = 0;
-      }else{
-        DSw2 = 1;
-        boardData["DSw2"] = 1;
-      }
-      command["index"] = key;
-      command["type"] = "DSW";
-      command["value"] = DSw2.read();
-      break;
-    case 3:
-      if(boardData["DSw3"].get<int>() == 1){
-        DSw3 = 0;
-        boardData["DSw3"] = 0;
-      }else{
-        DSw3 = 1;
-        boardData["DSw3"] = 1;
-      }
-      command["index"] = key;
-      command["type"] = "DSW";
-      command["value"] = DSw3.read();
-      break;
-    case 4:
-      if(boardData["DSw4"].get<int>() == 1){
-        DSw4 = 0;
-        boardData["DSw4"] = 0;
-      }else{
-        DSw4 = 1;
-        boardData["DSw4"] = 1;
-      }
-      command["index"] = key;
-      command["type"] = "DSW";
-      command["value"] = DSw4.read();
-      break;
-    case 5:
-      if(boardData["DSw5"].get<int>() == 1){
-        DSw5 = 0;
-        boardData["DSw5"] = 0;
-      }else{
-        DSw5 = 1;
-        boardData["DSw5"] = 1;
-      }
-      command["index"] = key;
-      command["type"] = "DSW";
-      command["value"] = DSw5.read();
-      break;
-    case 6:
-      if(boardData["DSw6"].get<int>() == 1){
-        DSw6 = 0;
-        boardData["DSw6"] = 0;
-      }else{
-        DSw6 = 1;
-        boardData["DSw6"] = 1;
-      }
-      command["index"] = key;
-      command["type"] = "DSW";
-      command["value"] = DSw6.read();
-      break;
-    case 7:
-      if(boardData["DSw7"].get<int>() == 1){
-        DSw7 = 0;
-        boardData["DSw7"] = 0;
-      }else{
-        DSw7 = 1;
-        boardData["DSw7"] = 1;
-      }
-      command["index"] = key;
-      command["type"] = "DSW";
-      command["value"] = DSw7.read();;
-      break;
-    case 8:
-      if(boardData["DSw8"].get<int>() == 1){
-        DSw8 = 0;
-        boardData["DSw8"] = 0;
-      }else{
-        DSw8 = 1;
-        boardData["DSw8"] = 1;
-      }
-      command["index"] = key;
-      command["type"] = "DSW";
-      command["value"] = DSw8.read();
-      break;
-    case 9:
-      ASw1 = !ASw1;
-      command["index"] = key;
-      command["type"] = "ASW";
-      command["value"] = ASw1.read();
-  }
-
-  std::string str = command.serialize();
-  broadcastChange(str);
-
-}
-
-void ttp229int(){
-    // printf("%16s\r\n",to_string(touchpad).c_str());
-    // xbeeSerial.printf("%d\r\n",touchpad.onkey());
-    int sw = touchpad.onkey();
-    if(sw != 0){
-        // xbeeSerial.printf("{KEY: %d}", sw);
-        btnPressed(sw);
-    }
-    //if(sw!=0) myleds=sw%16;
 }
 
 void refreshMyStatus(){
@@ -216,14 +96,8 @@ void refreshMyStatus(){
   boardData["ASw2_dval"] = 0;
   boardData["ASw2_aval"] = 0;
 
-  boardData["power"] = 0.0f;
+  boardData["energy"] = 0.0f;
   boardData["offset"] = 0.0f;
-
-  boardData["temp"] = 0.0f;
-  boardData["hum"] = 0.0f;
-  boardData["press"] = 0.0f;
-
-  boardData["light"] = 0.0f;
 
   MbedJSONValue command;
   command["id"] = boardData["id"];
@@ -237,22 +111,14 @@ void sendSensorData(){
     MbedJSONValue command;
     command["id"] = boardData["id"];
     command["type"] = "SB";
-    command["power"] = boardData["power"];
-    command["current"] = boardData["current"];
+    command["energy"] = boardData["energy"];
     command["offset"] = boardData["offset"];
-    command["temp"] = bme280.getTemperature();
-    command["hum"] = bme280.getHumidity();
-    command["press"] = bme280.getPressure();
-    // pc.printf("%2.2f degC, %04.2f hPa, %2.2f %%\n", sensor.getTemperature(), sensor.getPressure(), sensor.getHumidity());
-    command["light"] = LDR.read();
-    // pc.printf("\r%u %f\n",(LDR.read_u16()/64), LDR.read());
-
     std::string str = command.serialize();
     broadcastChange(str);
 }
 
 void readNSaveSensorsData(){
-    energyTicker.attach(&readEnergyConsumption, 10.0);
+    // energyTicker.attach(&readEnergyConsumption, 10.0);
     sensorDataTicker.attach(&sendSensorData, 5.0);
 }
 
@@ -280,7 +146,7 @@ void setDeviceId(){
 }
 
 void handleDataReceived(char data[128]){
-  // xbeeSerial.printf("\nIN handleDataReceived = %s\r\n" ,  data);
+  // usbSerial.printf("\nIN handleDataReceived = %s\r\n" ,  data);
   MbedJSONValue command;
   const char *str(data);
   parse(command, str);
@@ -315,7 +181,102 @@ void handleDataReceived(char data[128]){
   std::string commandStr;
   commandStr = command.serialize();
   // ESPSerial.printf("ACK_%s\n", commandStr.c_str());
-  xbeeSerial.printf("ACK_%s\n", commandStr.c_str());
+  usbSerial.printf("ACK_%s\n", commandStr.c_str());
+}
+
+void btn1Pressed(){
+  DSw1 = !DSw1;
+  MbedJSONValue command;
+  command["id"] = boardData["id"];
+  command["type"] = "DSW";
+  command["index"] = 1;
+  command["value"] = DSw1.read();
+  std::string str = command.serialize();
+  broadcastChange(str);
+}
+
+void btn2Pressed(){
+  DSw2 = !DSw2;
+  MbedJSONValue command;
+  command["id"] = boardData["id"];
+  command["type"] = "DSW";
+  command["index"] = 2;
+  command["value"] = DSw2.read();
+  std::string str = command.serialize();
+  broadcastChange(str);
+  // wait_ms(3);
+}
+
+void btn3Pressed(){
+  DSw3 = !DSw3;
+  MbedJSONValue command;
+  command["id"] = boardData["id"];
+  command["type"] = "DSW";
+  command["index"] = 3;
+  command["value"] = DSw3.read();
+  std::string str = command.serialize();
+  broadcastChange(str);
+  // wait_ms(3);
+}
+
+void btn4Pressed(){
+  DSw4 = !DSw4;
+  MbedJSONValue command;
+  command["id"] = boardData["id"];
+  command["type"] = "DSW";
+  command["index"] = 4;
+  command["value"] = DSw4.read();
+  std::string str = command.serialize();
+  broadcastChange(str);
+  // wait_ms(3);
+}
+
+void btn5Pressed(){
+  DSw5 = !DSw5;
+  MbedJSONValue command;
+  command["id"] = boardData["id"];
+  command["type"] = "DSW";
+  command["index"] = 5;
+  command["value"] = DSw5.read();
+  std::string str = command.serialize();
+  broadcastChange(str);
+  // wait_ms(3);
+}
+
+void btn6Pressed(){
+  DSw6 = !DSw6;
+  MbedJSONValue command;
+  command["id"] = boardData["id"];
+  command["type"] = "DSW";
+  command["index"] = 6;
+  command["value"] = DSw6.read();
+  std::string str = command.serialize();
+  broadcastChange(str);
+  // wait_ms(3);
+}
+
+void btn7Pressed(){
+  DSw7 = !DSw7;
+  MbedJSONValue command;
+  command["id"] = boardData["id"];
+  command["type"] = "DSW";
+  command["index"] = 7;
+  command["value"] = DSw7.read();
+  std::string str = command.serialize();
+  broadcastChange(str);
+  // wait_ms(3);
+}
+
+void btn8Pressed(){
+  DSw8 = !DSw8;
+  MbedJSONValue command;
+  command["id"] = boardData["id"];
+  command["type"] = "DSW";
+  command["index"] = 8;
+  command["value"] = DSw8.read();
+  std::string str = command.serialize();
+  broadcastChange(str);
+  // wait_ms(3);
 }
 
 void btn9Pressed(){
@@ -409,16 +370,15 @@ void esp_rx_callback() {
       // ESPSerial.printf("ACK_%s\n", value);
   }
 }
-
+*/
 
 void usb_rx_callback() {
   char value[128];
   if(usbSerial.readable()){
-     usbSerial.gets(value, 106);
-     xbeeSerial.printf("ACK_%s\n", value);
+      usbSerial.gets(value, 106);
+     usbSerial.printf("ACK_%s\n", value);
   }
 }
-*/
 
 // main() runs in its own thread in the OS
 int main() {
@@ -428,18 +388,16 @@ int main() {
     // ESPSerial.format(8, SerialBase::None, 1);
     // ESPSerial.attach(&esp_rx_callback);
     wait(1);
-    usbSerial.baud(115200);
-    // usbSerial.attach(&usb_rx_callback);
+    usbSerial.baud(9600);
+    usbSerial.attach(&usb_rx_callback);
 
     wait(2);
     touchpad.attach(&ttp229int);
-    offset = energySensor.calibrate();
+    // offset = energySensor.calibrate();
     setDeviceId();
     refreshMyStatus();
     readNSaveSensorsData();
     wait(1);
-    printf("Hukam Board Started....");
-    xbeeSerial.printf("Hukam Board Started....");
 
     while(1){
 

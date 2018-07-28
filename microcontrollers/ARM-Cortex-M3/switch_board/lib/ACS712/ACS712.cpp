@@ -33,11 +33,12 @@ float readSensor(){
 
 int ACS712::calibrate() {
 	int _zero = 0;
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 50; i++) {
     _zero += readSensor();
 		wait_ms(10);
 	}
-	_zero = _zero / 10;
+	_zero = _zero / 50;
+  _zero = _zero * 10;
 	zero = _zero;
 	return _zero;
 }
@@ -80,10 +81,11 @@ float ACS712::getCurrentAC(unsigned int frequency) {
 	}
 	t.stop();
 
-  float meanVolt = float(Isum / measurements_count);
-  float volts = pow(meanVolt, 0.5);
-	float Irms = (volts / ADC_SCALE) * (VREF / sensitivity);
-  float P = 230.0 * Irms;
+  float Imean = float(Isum / measurements_count);
+  float Irms = pow(Imean, 0.5);
+	// float currentAc = (Irms / ADC_SCALE) * (VREF / sensitivity);
+  // float P = 230.0 * currentAc;
   // printf("Zero: %3.5f, Isum: %d, Count: %d, meanVolt: %3.5f, Volts: %3.7f, P: %3.5f \n", zero, Isum, measurements_count, meanVolt, volts, P);
-	return Irms;
+	// return currentAc;
+	   return Irms;
 }
