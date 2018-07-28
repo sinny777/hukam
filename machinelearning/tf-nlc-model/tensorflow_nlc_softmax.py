@@ -28,19 +28,7 @@ import sys
 import os
 import tarfile
 
-import nltk
-nltk.download('stopwords')
-# nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
-nltk.download('maxent_ne_chunker')
-nltk.download('words')
-from nltk.cluster.util import cosine_distance
-from nltk import word_tokenize,sent_tokenize,ne_chunk
-from nltk.corpus import stopwords
-from nltk.stem.lancaster import LancasterStemmer
-stemmer = LancasterStemmer()
-
-from input_data_softmax import read_data_sets, get_words
+from input_data_softmax import read_data_sets, convert_to_predict
 
 import tensorflow as tf
 from tensorflow import keras
@@ -65,6 +53,7 @@ def set_flags():
     global DATA_FILE_PATH
     global MODEL_PATH
     global MODEL_WEIGHTS_PATH
+    global TENSORBOARD_LOGS_PATH
     if (FLAGS.data_dir[0] == '$'):
       DATA_DIR = os.environ[FLAGS.data_dir[1:]]
     else:
@@ -77,37 +66,15 @@ def set_flags():
     DATA_FILE_PATH = os.path.join(DATA_DIR, FLAGS.data_file)
     MODEL_PATH = os.path.join(RESULT_DIR, FLAGS.model_name)
     MODEL_WEIGHTS_PATH = os.path.join(RESULT_DIR, "model_weights.hdf5")
+    TENSORBOARD_LOGS_PATH = os.path.join(RESULT_DIR, "tensorboard_logs")
     ensure_dir(DATA_FILE_PATH)
     ensure_dir(MODEL_PATH)
-
-def clean_up_sentence(sentence):
-    # tokenize the pattern
-    sentence_words = nltk.word_tokenize(sentence)
-    # stem each word
-    sentence_words = [stemmer.stem(word.lower()) for word in sentence_words]
-    return sentence_words
-
-# return bag of words array: 0 or 1 for each word in the bag that exists in the sentence
-def bow(sentence, words, show_details=False):
-    # tokenize the pattern
-    sentence_words = clean_up_sentence(sentence)
-    # bag of words
-    bag = [0]*len(words)
-    for s in sentence_words:
-        for i,w in enumerate(words):
-            if w == s:
-                bag[i] = 1
-                if show_details:
-                    print ("found in bag: %s" % w)
-
-    return(np.array(bag))
 
 def get_results(sentence):
     ERROR_THRESHOLD = 0.25
     set_flags()
     model = load_model(MODEL_PATH)
-    words, classes = get_words(DATA_FILE_PATH)
-    to_predict = bow(sentence, words)
+    to_predict, classes = convert_to_predict(DATA_FILE_PATH, sentence)
     if (to_predict.ndim == 1):
         to_predict = np.array([to_predict])
 
@@ -145,7 +112,7 @@ def main(_):
     model.add(Dense(np.asarray(nlc_data.train.classes[0]).shape[0], activation='softmax'))
     model.summary()
 
-    tbCallBack = tf.keras.callbacks.TensorBoard(log_dir='keras_logs', write_graph=True)
+    tbCallBack = tf.keras.callbacks.TensorBoard(log_dir=TENSORBOARD_LOGS_PATH, write_graph=True)
 
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['acc'])
     monitor = EarlyStopping(monitor='val_loss', min_delta=1e-3, patience=10, verbose=0, mode='auto')
@@ -166,7 +133,7 @@ if __name__ == '__main__':
   parser.add_argument('--data_file', type=str, default='data.csv', help='File name for Intents and Classes')
   parser.add_argument('--training_iters', type=int, default=200, help='Number of training iterations')
   parser.add_argument('--batch_size', type=int, default=8, help='Training batch size')
-  parser.add_argument('--model_name', type=str, default='nlc_car_model.h5', help='Name of the model')
+  parser.add_argument('--model_name', type=str, default='my_nlc_model.h5', help='Name of the model')
 
   FLAGS, unparsed = parser.parse_known_args()
   print("Start model training")
