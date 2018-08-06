@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <stdlib.h>
 #include <SPI.h>
 #include <Wire.h>
