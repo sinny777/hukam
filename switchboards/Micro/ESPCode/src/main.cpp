@@ -32,16 +32,6 @@ bool enableSensors = false;
 unsigned long interval = 1000; // the time we need to wait
 unsigned long previousMillis = 0;
 
-// WIFI_LoRa_32 ports
-// GPIO5  -- SX1278's SCK
-// GPIO19 -- SX1278's MISO
-// GPIO27 -- SX1278's MOSI
-// GPIO18 -- SX1278's CS
-// GPIO14 -- SX1278's RESET
-// GPIO26 -- SX1278's IRQ(Interrupt Request)
-//
-// ---- LORA Pins ----
-
 byte localAddress = 0xBB;     // address of this device
 byte destination = 0xFF;      // destination to send to
 int sw1Address = 0;
