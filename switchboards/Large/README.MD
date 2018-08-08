@@ -4,4 +4,4 @@ This switch board has 10 touch switches and is compatible with WiFi, Bluetooth a
 
 This has 2 main modules:
   * LPC1768 (Mbed platform)
-  * ESP32 (Arduino platform)
+  * ESP32 (Arduino platform) 
