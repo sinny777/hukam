@@ -1,17 +1,53 @@
 #include <Arduino.h>
 #include <stdlib.h>
-#include <SPI.h>
-#include <Wire.h>
-#include "Adafruit_BME280.h"
-#include <LoRa.h>
+#include <RFM69.h>
+#include <RFM69_ATC.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "EEPROM.h"
+#include <SPI.h>
 
-//#include "soc/soc.h"
-//#include "soc/rtc_cntl_reg.h"
-//void setup(){
-//WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detecto
+#define RFM69_CS      18
+#define RFM69_IRQ     26
+#define RFM69_IRQN    digitalPinToInterrupt(RFM69_IRQ)
+#define RFM69_RST     14
+
+//*********************************************************************************************
+//************ IMPORTANT SETTINGS - YOU MUST CHANGE/CONFIGURE TO FIT YOUR HARDWARE *************
+//*********************************************************************************************
+#define NODEID        2    //unique for each node on same network
+#define NETWORKID     200  //the same on all nodes that talk to each other
+#define GATEWAYID     1
+//Match frequency to the hardware version of the radio on your Moteino (uncomment one):
+#define FREQUENCY     RF69_433MHZ
+//#define FREQUENCY     RF69_868MHZ
+//#define FREQUENCY     RF69_915MHZ
+#define IS_RFM69HW    //uncomment only for RFM69HW! Leave out if you have RFM69W!
+//*********************************************************************************************
+//Auto Transmission Control - dials down transmit power to save battery
+//Usually you do not need to always transmit at max output power
+//By reducing TX power even a little you save a significant amount of battery power
+//This setting enables this gateway to work with remote nodes that have ATC enabled to
+//dial their power down to only the required level
+//#define ENABLE_ATC    //comment out this line to disable AUTO TRANSMISSION CONTROL
+//*********************************************************************************************
+
+// AES encryption (or not):
+
+#define ENCRYPT       true // Set to "true" to use encryption
+#define ENCRYPTKEY    "TOPSECRETPASSWRD" // Use the same 16-byte key on all nodes
+
+// Use ACKnowledge when sending messages (or not):
+
+#define USEACK        true // Request ACKs or not
+
+#ifdef ENABLE_ATC
+  RFM69_ATC radio;
+#else
+  RFM69 radio;
+#endif
+
+bool promiscuousMode = false; //set to 'true' to sniff all packets on the same network
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,33 +63,18 @@ String sensorsData = "";
 bool enableLora = true;
 bool enableWiFi = false;
 bool enableEEPROM = true;
-bool enableSensors = false;
 
 unsigned long interval = 1000; // the time we need to wait
 unsigned long previousMillis = 0;
 
-byte localAddress = 0xBB;     // address of this device
-byte destination = 0xFF;      // destination to send to
 int sw1Address = 0;
 int sw2Address = 1;
 int sw3Address = 2;
 int sw4Address = 3;
 int EEPROM_SIZE = 64;
 
-#define BAND    433E6
-#define SCK  5
-#define MISO  19
-#define MOSI  27
-#define CS  18
-
-#define SS  18
-#define RST     14
-#define DI0     26
-// -----------------
-
 String receivedText;
 bool loraAvailable = false;
-bool bmeAvailable = false;
 bool eepromAvailable = false;
 int wifiTryCount = 0;
 int mqttTryCount = 0;
@@ -63,35 +84,31 @@ int wifiStatus = WL_IDLE_STATUS;
 #define BOARD_TYPE "HB_ESP32"
 #define TOKEN "1SatnamW"
 
-//#define HEARTBEAT_LED  32
-bool hbLedState = false;
+#define HEARTBEAT_LED  32
+bool hbLedState = LOW;
 
-// #define DHTPin 35
-#define ldrSensorPin 25
-
-#define I2C_SCL 21
-#define I2C_SDA 22
-#define SEALEVELPRESSURE_HPA (1005)
-#define BME280_ADD 0x76
-
-#define TOUCH1PIN   4
-#define TOUCH2PIN   2
-#define TOUCH3PIN   13
-#define TOUCH4PIN   15
 unsigned long previousTouchMillis = 0;
 
-int touchThreshold = 40;
-int touchIndex = 0;
+#define touch1 4 // Pin for capactitive touch sensor
+#define touch2 2 // Pin for capactitive touch sensor
+#define touch3 13 // Pin for capactitive touch sensor
+#define touch4 15 // Pin for capactitive touch sensor
 
-#define SW1  17
-#define SW2  16
-#define SW3  12
-#define SW4  23
+int SW1 = 16;
+int SW2 = 17;
+int SW3 = 23;
+int SW4 = 12;
 
 int sw1Val = 0;
 int sw2Val = 0;
 int sw3Val = 0;
 int sw4Val = 0;
+
+boolean lastState1 = LOW;
+boolean lastState2 = LOW;
+boolean lastState3 = LOW;
+boolean lastState4 = LOW;
+
 
 char server[] = ORG ".messaging.internetofthings.ibmcloud.com";
 char topic[] = "iot-2/evt/espboard/fmt/json";
@@ -109,13 +126,6 @@ const char* password =  "1SatnamW";
 
 int hallData = 0;
 int boardTemp = 0;
-float temperature = 0.0f;
-float humidity = 0.0f;
-float pressure = 0.0f;
-float altitude = 0.0f;
-float lightVal = 0.0f;
-
-Adafruit_BME280 bme(I2C_SDA, I2C_SCL);
 
 // --------------------
 
@@ -185,57 +195,7 @@ static void connectMQTT() {
  Serial.print("MQTT Connected...");
 }
 
-/**
- * Get all sensors data and save it in a variable
- */
-static void getSensorsData(){
-    hallData = hallRead();
-    boardTemp = (temprature_sens_read() - 32) / 1.8;
-    lightVal = analogRead(ldrSensorPin);
-
-    if(enableSensors){
-        temperature = bme.readTemperature();
-        humidity = bme.readHumidity();
-        pressure = (bme.readPressure() / 100.0F);
-        altitude = bme.readAltitude(SEALEVELPRESSURE_HPA); // Approx Altitude in meters
-    }
-
-/*
-  if (isnan(temperature) || isnan(humidity)) {
-    // Serial.println("Failed to read from BME280 sensor!");
-    strcpy(celsiusTemp,"-0");
-    strcpy(humidityTemp, "-0");
-  } else{
-    // Computes temperature values in Celsius + Fahrenheit and Humidity
-    float hic = dht.computeHeatIndex(temperature, humidity, false);
-    dtostrf(hic, 6, 2, celsiusTemp);
-    dtostrf(humidity, 6, 2, humidityTemp);
-  }
-*/
-//  sensorsData = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+ "\", \"BOARD_TEMP\":" +String(boardTemp)+", \"HALL_DATA\":" +String(hallData)+", \"TEMP\":" +String(temperature)+", \"HUM\":" +String(humidity)+", \"PRESSURE\":" +String(pressure)+", \"ALT\":" +String(altitude)+", \"LIGHT\":" +String(lightVal)+"}";
-  sensorsData = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+ "\", \"d\": {\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+ "\", \"BOARD_TEMP\":" +String(boardTemp)+", \"HALL_DATA\":" +String(hallData)+", \"TEMP\":" +String(temperature)+", \"HUM\":" +String(humidity)+", \"PRESSURE\":" +String(pressure)+", \"ALT\":" +String(altitude)+", \"LIGHT\":" +String(lightVal)+"}}";
-
-}
-
-void gotTouch1(){
-  touchIndex = 1;
-}
-
-void gotTouch2(){
-  touchIndex = 2;
-}
-
-void gotTouch3(){
-  touchIndex = 3;
-}
-
-void gotTouch4(){
-  touchIndex = 4;
-}
-
 void publishData(String data){
-
-
   Serial.print("Publish data:>> ");
   Serial.println(data);
      /*
@@ -248,131 +208,37 @@ void publishData(String data){
      }
   */
 
+  char copy[data.length()];
+  data.toCharArray(copy, data.length());
+
   if(loraAvailable){
-        LoRa.beginPacket();
-//        LoRa.write(destination);              // add destination address
-//        LoRa.write(localAddress);
-        LoRa.print(data);
-        LoRa.print("\n");
-        LoRa.endPacket();
-//        LoRa.receive();
-        delay(1);
-        LoRa.flush();
+//        rf69.send((uint8_t *)copy, strlen(copy));
+//        rf69.waitPacketSent();
+        if (radio.sendWithRetry(GATEWAYID, (const void*)(&copy), sizeof(copy)))
+              Serial.print(" ok!");
+        else Serial.print(" nothing...");
     }else{
        Serial.print("Lora Not Working: >> ");
        Serial.println(data);
     }
 }
 
-// tocuhValue > threshold = Release Event
-// touchValue < threshold = Touch Event
-void checkTouchDetected(){
-  if(touchIndex > 0){
-    unsigned long currentTouchMillis = millis();
-    if ((unsigned long)(currentTouchMillis - previousTouchMillis) >= 600) {
-          previousTouchMillis = millis();
-//          printf(touchIndex);
-          switch (touchIndex){
-            case 1: {
-                int touchVal = touchRead(TOUCH1PIN);
-                if(touchVal > 1 && touchVal <= touchThreshold){
-                      if(sw1Val == 1){
-                        sw1Val = 0;
-                      }else{
-                        sw1Val = 1;
-                      }
-                      digitalWrite(SW1, sw1Val);
-                      String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":1, \"deviceValue\": " +String(sw1Val)+"}";
-                      publishData(payload);
-                      if(eepromAvailable){
-                          EEPROM.writeInt(sw1Address, sw1Val);
-                          // Serial.printf("sw1Val: %d \n", EEPROM.readInt(sw1Address));
-                      }
-                }
-                break;
-            }
-           case 2: {
-              int touchVal = touchRead(TOUCH2PIN);
-              if(touchVal > 1 && touchVal <= touchThreshold){
-                    if(sw2Val == 1){
-                      sw2Val = 0;
-                    }else{
-                      sw2Val = 1;
-                    }
-                    digitalWrite(SW2, sw2Val);
-                    String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":2, \"deviceValue\": " +String(sw2Val)+"}";
-                    publishData(payload);
-                    if(eepromAvailable){
-                      EEPROM.writeInt(sw2Address, sw2Val);
-                      // Serial.printf("sw2Val: %d \n", EEPROM.readInt(sw2Address));
-                    }
-              }
-              break;
-           }
-           case 3: {
-              int touchVal = touchRead(TOUCH3PIN);
-              if(touchVal > 1 && touchVal <= touchThreshold){
-                    if(sw3Val == 1){
-                      sw3Val = 0;
-                    }else{
-                      sw3Val = 1;
-                    }
-                    digitalWrite(SW3, HIGH);
-                    String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":3, \"deviceValue\": " +String(sw3Val)+"}";
-                    publishData(payload);
-                    if(eepromAvailable){
-                      EEPROM.writeInt(sw3Address, sw3Val);
-                      // Serial.printf("sw3Val: %d \n", EEPROM.readInt(sw3Address));
-                    }
-              }
-              break;
-           }
-           case 4: {
-              int touchVal = touchRead(TOUCH4PIN);
-              if(touchVal > 1 && touchVal <= touchThreshold){
-                    if(sw4Val == 1){
-                      sw4Val = 0;
-                    }else{
-                      sw4Val = 1;
-                    }
-                    digitalWrite(SW4, sw4Val);
-                    String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":4, \"deviceValue\": " +String(sw4Val)+"}";
-                    publishData(payload);
-                    if(eepromAvailable){
-                      EEPROM.writeInt(sw4Address, sw4Val);
-                      // Serial.printf("sw4Val: %d \n", EEPROM.readInt(sw4Address));
-                    }
-              }
-              break;
-           }
-          }
-          // delay(1);
-          if(eepromAvailable){
-            // EEPROM.commit();
-          }
-          touchIndex = 0;
-//          delay(1);
-     }
-  }
-
-}
-
+uint32_t packetCount = 0;
 void checkDataOnLora(){
-    // try to parse packet
-  int packetSize = LoRa.parsePacket();
-  if (packetSize) {
-    // received a packet
-    // Serial.print("Received packet '");
-    // read packet
-    while (LoRa.available()) {
-      receivedText = (char)LoRa.read();
-      Serial.print(receivedText);
-    }
-
-    // print RSSI of packet
-    // Serial.print("' with RSSI ");
-    // Serial.println(LoRa.packetRssi());
-  }
+  // Should be a message for us now
+   if (radio.receiveDone()){
+        Serial.print("#[");
+        Serial.print(++packetCount);
+        Serial.print(']');
+        Serial.print('[');Serial.print(radio.SENDERID, DEC);Serial.print("] ");
+        if (promiscuousMode)
+        {
+          Serial.print("to [");Serial.print(radio.TARGETID, DEC);Serial.print("] ");
+        }
+        for (byte i = 0; i < radio.DATALEN; i++)
+          Serial.print((char)radio.DATA[i]);
+        Serial.print("   [RX_RSSI:");Serial.print(radio.RSSI);Serial.print("]");
+   }
 }
 
 void initSwitches(){
@@ -417,38 +283,137 @@ void initSwitches(){
 
 }
 
+void checkSW1(){
+  boolean currentState = digitalRead(touch1);
+  if (currentState == HIGH && lastState1 == LOW){
+    Serial.println("1 pressed");
+    delay(1);
+    if (sw1Val == 0){
+      digitalWrite(SW1, 1);
+      sw1Val = 1;
+    } else {
+      digitalWrite(SW1, 0);
+      sw1Val = 0;
+    }
+
+    String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":1, \"deviceValue\": " +String(sw1Val)+"}";
+    publishData(payload);
+    if(eepromAvailable){
+      EEPROM.writeInt(sw1Address, sw1Val);
+      // Serial.printf("sw1Val: %d \n", EEPROM.readInt(sw1Address));
+    }
+
+  }
+  lastState1 = currentState;
+}
+
+void checkSW2(){
+  boolean currentState = digitalRead(touch2);
+  if (currentState == HIGH && lastState2 == LOW){
+    Serial.println("2 pressed");
+    delay(1);
+    if (sw2Val == 0){
+      digitalWrite(SW2, 1);
+      sw2Val = 1;
+    } else {
+      digitalWrite(SW2, 0);
+      sw2Val = 0;
+    }
+
+    String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":2, \"deviceValue\": " +String(sw2Val)+"}";
+    publishData(payload);
+    if(eepromAvailable){
+      EEPROM.writeInt(sw2Address, sw2Val);
+      // Serial.printf("sw3Val: %d \n", EEPROM.readInt(sw3Address));
+    }
+
+  }
+  lastState2 = currentState;
+}
+
+void checkSW3(){
+  boolean currentState = digitalRead(touch3);
+  if (currentState == HIGH && lastState3 == LOW){
+    Serial.println("3 pressed");
+    delay(1);
+    if (sw3Val == 0){
+      digitalWrite(SW3, 1);
+      sw3Val = 1;
+    } else {
+      digitalWrite(SW3, 0);
+      sw3Val = 0;
+    }
+
+    String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":3, \"deviceValue\": " +String(sw3Val)+"}";
+    publishData(payload);
+    if(eepromAvailable){
+      EEPROM.writeInt(sw3Address, sw3Val);
+      // Serial.printf("sw4Val: %d \n", EEPROM.readInt(sw3Address));
+    }
+
+  }
+  lastState3 = currentState;
+}
+
+void checkSW4(){
+  boolean currentState = digitalRead(touch4);
+  if (currentState == HIGH && lastState4 == LOW){
+    Serial.println("4 pressed");
+    delay(1);
+    if (sw4Val == 0){
+      digitalWrite(SW4, 1);
+      sw4Val = 1;
+    } else {
+      digitalWrite(SW4, 0);
+      sw4Val = 0;
+    }
+
+    String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":4, \"deviceValue\": " +String(sw4Val)+"}";
+    publishData(payload);
+    if(eepromAvailable){
+      EEPROM.writeInt(sw4Address, sw4Val);
+      // Serial.printf("sw4Val: %d \n", EEPROM.readInt(sw4Address));
+    }
+
+  }
+  lastState4 = currentState;
+}
+
+void checkTouchDetected(){
+  checkSW1();
+  checkSW2();
+  checkSW3();
+  checkSW4();
+}
+
 // the setup function runs once when you press reset or power the board
 void setup() {
-  delay(1000);
+  delay(500);
 
-//  pinMode(HEARTBEAT_LED, OUTPUT);
+  pinMode(HEARTBEAT_LED, OUTPUT);
   pinMode(SW1, OUTPUT);
   pinMode(SW2, OUTPUT);
   pinMode(SW3, OUTPUT);
   pinMode(SW4, OUTPUT);
 
-  if(enableSensors){
-        // Init BME280 Sensor
-        int bmeTryCount = 0;
-        do{
-          bmeAvailable = bme.begin(BME280_ADD);
-          bmeTryCount++;
-          if(!bmeAvailable){
-            // Serial.printf("Could not find a valid BME280 sensor, check wiring!, Try Count: %d\n", bmeTryCount);
-            delay(2000);
-          }
-        } while(!bmeAvailable && bmeTryCount < 2);
-  }
+  pinMode(touch1, INPUT);
+  pinMode(touch2, INPUT);
+  pinMode(touch3, INPUT);
+  pinMode(touch4, INPUT);
 
-  // Init Lora
-  if(enableLora){
-      SPI.begin(SCK, MISO, MOSI, CS);
-      LoRa.setPins(SS, RST, DI0);
-      delay(1000);
-  }
   Serial.begin(115200);
   while (!Serial);
   delay(1000);
+
+  // Init Lora
+  if(enableLora){
+      radio = RFM69(RFM69_CS, RFM69_IRQ, true, RFM69_IRQN);
+      pinMode(RFM69_RST, OUTPUT);
+      digitalWrite(RFM69_RST, HIGH);
+      delay(100);
+      digitalWrite(RFM69_RST, LOW);
+      delay(100);
+  }
 
   char chipid[20];
   sprintf(chipid, "%" PRIu64, ESP.getEfuseMac());
@@ -456,74 +421,88 @@ void setup() {
   // Serial.println(BOARD_ID);
   delay(100);
 
-if(enableEEPROM){
-    int eepromTryCount = 0;
-    do{
-      eepromAvailable = EEPROM.begin(EEPROM_SIZE);
-      eepromTryCount++;
-      if(!eepromAvailable){
-        Serial.printf("Failed to initialise EEPROM, Try Count: %d\n", eepromTryCount);
-        delay(2000);
-      }else{
-        Serial.println("EEPROM Initialized Successfully...");
-      }
-    }while(!eepromAvailable && eepromTryCount > 3);
-}
+  if(enableEEPROM){
+      int eepromTryCount = 0;
+      do{
+        eepromAvailable = EEPROM.begin(EEPROM_SIZE);
+        eepromTryCount++;
+        if(!eepromAvailable){
+          Serial.printf("Failed to initialise EEPROM, Try Count: %d\n", eepromTryCount);
+          delay(2000);
+        }else{
+          Serial.println("EEPROM Initialized Successfully...");
+        }
+      }while(!eepromAvailable && eepromTryCount > 3);
+  }
+
+  initSwitches();
 
   // Serial.println("LoRa Initializing...");
   if(enableLora){
       int loraTryCount = 0;
       do{
-        loraAvailable = LoRa.begin(BAND);
+        loraAvailable = radio.initialize(FREQUENCY,NODEID,NETWORKID);
         loraTryCount++;
         if(!loraAvailable){
-          Serial.printf("Starting LoRa failed!, Try Count: %d\n", loraTryCount);
+          Serial.printf("Starting Radio failed!, Try Count: %d\n", loraTryCount);
           delay(3000);
         }else{
-          Serial.println("LoRa Initialized Successfully...");
+          Serial.println("Radio Initialized Successfully...");
         }
       }while(!loraAvailable && loraTryCount < 3);
+
+      #ifdef IS_RFM69HW
+        radio.setHighPower(); //only for RFM69HW!
+      #endif
+
+      radio.setPowerLevel(31);
+      radio.encrypt(ENCRYPTKEY);
+
+      //radio.promiscuous(promiscuousMode);
+      char buff[50];
+      sprintf(buff, "\nListening at %d Mhz...", FREQUENCY==RF69_433MHZ ? 433 : FREQUENCY==RF69_868MHZ ? 868 : 915);
+      Serial.println(buff);
+      Serial.print("Network "); Serial.println(NETWORKID);
+      Serial.print("Node "); Serial.println(NODEID);
+      Serial.print("Encryptkey "); Serial.println(ENCRYPTKEY);
+
+      Serial.println();
+
+      #ifdef ENABLE_ATC
+        Serial.println("RFM69_ATC Enabled (Auto Transmission Control)");
+      #endif
+
   }
 
 
-if(enableWiFi){
-      // Set WiFi to station mode and disconnect from an AP if it was previously connected
-//      WiFi.mode(WIFI_STA);
-//      WiFi.disconnect();
-      delay(100);
+  if(enableWiFi){
+        // Set WiFi to station mode and disconnect from an AP if it was previously connected
+  //      WiFi.mode(WIFI_STA);
+  //      WiFi.disconnect();
+        delay(100);
 
-//      scanWiFi();
-      connectWiFi();
-       if(wifiStatus == WL_CONNECTED){
-          connectMQTT();
-       }
-}
-
-    touchAttachInterrupt(TOUCH1PIN, gotTouch1, touchThreshold);
-    touchAttachInterrupt(TOUCH2PIN, gotTouch2, touchThreshold);
-    touchAttachInterrupt(TOUCH3PIN, gotTouch3, touchThreshold);
-    touchAttachInterrupt(TOUCH4PIN, gotTouch4, touchThreshold);
-
-    initSwitches();
+  //      scanWiFi();
+        connectWiFi();
+         if(wifiStatus == WL_CONNECTED){
+//            connectMQTT();
+         }
+  }
 
 }
 
   // the loop function runs over and over again forever
   void loop() {
     unsigned long currentMillis = millis();
-      checkDataOnLora();
+//      checkDataOnLora();
       checkTouchDetected();
-      if ((unsigned long)(currentMillis - previousMillis) >= (interval * 15)) {
-           hbLedState = !hbLedState;
-           if(hbLedState){
-//             digitalWrite(HEARTBEAT_LED, 1);
-               Serial.println("...");
+      if ((unsigned long)(currentMillis - previousMillis) >= (interval * 5)) {
+           if(hbLedState == LOW){
+               digitalWrite(HEARTBEAT_LED, 1);
+               hbLedState = HIGH;
            }else{
-//             digitalWrite(HEARTBEAT_LED, 0);
-               Serial.println(BOARD_ID);
+               digitalWrite(HEARTBEAT_LED, 0);
+               hbLedState = LOW;
            }
-           getSensorsData();
-           publishData(sensorsData);
            previousMillis =  millis();
       }
 
