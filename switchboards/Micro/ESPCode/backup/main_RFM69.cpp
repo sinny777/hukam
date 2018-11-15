@@ -1,20 +1,53 @@
 #include <Arduino.h>
 #include <stdlib.h>
-#include <SPI.h>
-#include <LoRa.h>
+#include <RFM69.h>
+#include <RFM69_ATC.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "EEPROM.h"
+#include <SPI.h>
 
-#define BAND    433E6
-#define SCK  5
-#define MISO  19
-#define MOSI  27
-#define CS  18
+#define RFM69_CS      18
+#define RFM69_IRQ     26
+#define RFM69_IRQN    digitalPinToInterrupt(RFM69_IRQ)
+#define RFM69_RST     14
 
-#define SS  18
-#define RST     14
-#define DI0     26
+//*********************************************************************************************
+//************ IMPORTANT SETTINGS - YOU MUST CHANGE/CONFIGURE TO FIT YOUR HARDWARE *************
+//*********************************************************************************************
+#define NODEID        2    //unique for each node on same network
+#define NETWORKID     200  //the same on all nodes that talk to each other
+#define GATEWAYID     1
+//Match frequency to the hardware version of the radio on your Moteino (uncomment one):
+#define FREQUENCY     RF69_433MHZ
+//#define FREQUENCY     RF69_868MHZ
+//#define FREQUENCY     RF69_915MHZ
+#define IS_RFM69HW    //uncomment only for RFM69HW! Leave out if you have RFM69W!
+//*********************************************************************************************
+//Auto Transmission Control - dials down transmit power to save battery
+//Usually you do not need to always transmit at max output power
+//By reducing TX power even a little you save a significant amount of battery power
+//This setting enables this gateway to work with remote nodes that have ATC enabled to
+//dial their power down to only the required level
+//#define ENABLE_ATC    //comment out this line to disable AUTO TRANSMISSION CONTROL
+//*********************************************************************************************
+
+// AES encryption (or not):
+
+#define ENCRYPT       true // Set to "true" to use encryption
+#define ENCRYPTKEY    "TOPSECRETPASSWRD" // Use the same 16-byte key on all nodes
+
+// Use ACKnowledge when sending messages (or not):
+
+#define USEACK        true // Request ACKs or not
+
+#ifdef ENABLE_ATC
+  RFM69_ATC radio;
+#else
+  RFM69 radio;
+#endif
+
+bool promiscuousMode = false; //set to 'true' to sniff all packets on the same network
 
 #ifdef __cplusplus
 extern "C" {
@@ -175,38 +208,37 @@ void publishData(String data){
      }
   */
 
-    if(loraAvailable){
-        LoRa.beginPacket();
-//        LoRa.write(destination);              // add destination address
-//        LoRa.write(localAddress);
-        LoRa.print(data);
-        LoRa.print("\n");
-        LoRa.endPacket();
-//        LoRa.receive();
-        delay(1);
-        LoRa.flush();
+  char copy[data.length()];
+  data.toCharArray(copy, data.length());
+
+  if(loraAvailable){
+//        rf69.send((uint8_t *)copy, strlen(copy));
+//        rf69.waitPacketSent();
+        if (radio.sendWithRetry(GATEWAYID, (const void*)(&copy), sizeof(copy)))
+              Serial.print(" ok!");
+        else Serial.print(" nothing...");
     }else{
        Serial.print("Lora Not Working: >> ");
        Serial.println(data);
     }
 }
 
+uint32_t packetCount = 0;
 void checkDataOnLora(){
-  // try to parse packet
-    int packetSize = LoRa.parsePacket();
-    if (packetSize) {
-      // received a packet
-      // Serial.print("Received packet '");
-      // read packet
-      while (LoRa.available()) {
-        receivedText = (char)LoRa.read();
-        Serial.print(receivedText);
-      }
-
-      // print RSSI of packet
-      // Serial.print("' with RSSI ");
-      // Serial.println(LoRa.packetRssi());
-    }
+  // Should be a message for us now
+   if (radio.receiveDone()){
+        Serial.print("#[");
+        Serial.print(++packetCount);
+        Serial.print(']');
+        Serial.print('[');Serial.print(radio.SENDERID, DEC);Serial.print("] ");
+        if (promiscuousMode)
+        {
+          Serial.print("to [");Serial.print(radio.TARGETID, DEC);Serial.print("] ");
+        }
+        for (byte i = 0; i < radio.DATALEN; i++)
+          Serial.print((char)radio.DATA[i]);
+        Serial.print("   [RX_RSSI:");Serial.print(radio.RSSI);Serial.print("]");
+   }
 }
 
 void initSwitches(){
@@ -369,16 +401,20 @@ void setup() {
   pinMode(touch3, INPUT);
   pinMode(touch4, INPUT);
 
-  // Init Lora
-  if(enableLora){
-      SPI.begin(SCK, MISO, MOSI, CS);
-      LoRa.setPins(SS, RST, DI0);
-      delay(1000);
-  }
-
   Serial.begin(115200);
   while (!Serial);
   delay(1000);
+
+  // Init Lora
+  if(enableLora){
+      radio = RFM69(RFM69_CS, RFM69_IRQ, false, RFM69_IRQN);
+      pinMode(RFM69_RST, OUTPUT);
+      digitalWrite(RFM69_RST, HIGH);
+      // delay(100);
+      delayMicroseconds(100);
+      digitalWrite(RFM69_RST, LOW);
+      delay(100);
+  }
 
   char chipid[20];
   sprintf(chipid, "%" PRIu64, ESP.getEfuseMac());
@@ -406,16 +442,39 @@ void setup() {
   if(enableLora){
       int loraTryCount = 0;
       do{
-        loraAvailable = LoRa.begin(BAND);
+        loraAvailable = radio.initialize(FREQUENCY,NODEID,NETWORKID);
         loraTryCount++;
         if(!loraAvailable){
-          Serial.printf("Starting LoRa failed!, Try Count: %d\n", loraTryCount);
+          Serial.printf("Starting Radio failed!, Try Count: %d\n", loraTryCount);
           delay(3000);
         }else{
-          Serial.println("LoRa Initialized Successfully...");
+          Serial.println("Radio Initialized Successfully...");
         }
       }while(!loraAvailable && loraTryCount < 3);
+
+      #ifdef IS_RFM69HW
+        radio.setHighPower(); //only for RFM69HW!
+      #endif
+
+      radio.setPowerLevel(31);
+      radio.encrypt(ENCRYPTKEY);
+
+      //radio.promiscuous(promiscuousMode);
+      char buff[50];
+      sprintf(buff, "\nListening at %d Mhz...", FREQUENCY==RF69_433MHZ ? 433 : FREQUENCY==RF69_868MHZ ? 868 : 915);
+      Serial.println(buff);
+      Serial.print("Network "); Serial.println(NETWORKID);
+      Serial.print("Node "); Serial.println(NODEID);
+      Serial.print("Encryptkey "); Serial.println(ENCRYPTKEY);
+
+      Serial.println();
+
+      #ifdef ENABLE_ATC
+        Serial.println("RFM69_ATC Enabled (Auto Transmission Control)");
+      #endif
+
   }
+
 
   if(enableWiFi){
         // Set WiFi to station mode and disconnect from an AP if it was previously connected
