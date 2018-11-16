@@ -336,16 +336,7 @@ void connectWiFi() {
 	}
 }
 
-void setup() {
-	// Create unique device name
-	createName();
-
-	// Initialize Serial port
-	Serial.begin(115200);
-	// Send some device info
-	Serial.print("Build: ");
-	Serial.println(compileDate);
-
+void setupConfiguration(){
 	Preferences preferences;
 	preferences.begin("WiFiCred", false);
 	bool hasPref = preferences.getBool("valid", false);
@@ -370,10 +361,14 @@ void setup() {
 		Serial.println("Could not find preferences, need send data over BLE");
 	}
 	preferences.end();
+}
 
+void initDevice(){
+	// Create unique device name
+	createName();
+	setupConfiguration();
 	// Start BLE server
 	initBLE();
-
 	if (hasCredentials) {
 		// Check for available AP's
 		if (!scanWiFi) {
@@ -383,6 +378,17 @@ void setup() {
 			connectWiFi();
 		}
 	}
+}
+
+void setup() {
+	// Initialize Serial port
+	Serial.begin(115200);
+	// Send some device info
+	Serial.print("Build: ");
+	Serial.println(compileDate);
+
+	initDevice();
+
 }
 
 void loop() {

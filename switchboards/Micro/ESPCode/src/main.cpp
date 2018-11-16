@@ -1,18 +1,29 @@
+// Default Arduino includes
 #include <Arduino.h>
+#include <WiFi.h>
+#include <nvs.h>
+#include <nvs_flash.h>
+#include <ArduinoJson.h>
+
 #include <stdlib.h>
 #include <SPI.h>
 #include <LoRa.h>
-#include <WiFi.h>
 #include <PubSubClient.h>
-#include "EEPROM.h"
+
+// Includes for BLE
+#include <BLEUtils.h>
+#include <BLEServer.h>
+#include <BLEDevice.h>
+#include <BLEAdvertising.h>
+#include <Preferences.h>
 
 #define BAND    433E6
-#define SCK  5
-#define MISO  19
-#define MOSI  27
-#define CS  18
+#define SCK     5
+#define MISO    19
+#define MOSI    27
+#define CS      18
 
-#define SS  18
+#define SS      18
 #define RST     14
 #define DI0     26
 
@@ -25,41 +36,31 @@ uint8_t temprature_sens_read();
 #endif
 uint8_t temprature_sens_read();
 
+int hallData = 0;
+int boardTemp = 0;
+
 static int taskCore = 0;
-String sensorsData = "";
-bool enableLora = true;
-bool enableWiFi = false;
-bool enableEEPROM = true;
+bool radioAvailable = false;
+bool enableRadio = false;
+bool enableWiFi = true;
 
 unsigned long interval = 1000; // the time we need to wait
 unsigned long previousMillis = 0;
-
-int sw1Address = 0;
-int sw2Address = 1;
-int sw3Address = 2;
-int sw4Address = 3;
-int EEPROM_SIZE = 64;
-
-String receivedText;
-bool loraAvailable = false;
-bool eepromAvailable = false;
-int wifiTryCount = 0;
-int mqttTryCount = 0;
-int wifiStatus = WL_IDLE_STATUS;
-
-#define ORG "rqeofj"
-#define BOARD_TYPE "HB_ESP32"
-#define TOKEN "1SatnamW"
-
-#define HEARTBEAT_LED  32
-bool hbLedState = LOW;
-
 unsigned long previousTouchMillis = 0;
 
+/** Build time */
+const char compileDate[] = __DATE__ " " __TIME__;
+
+/** Unique device name */
+char apName[] = "SB_MICRO-xxxxxxxxxxxx";
+
+#define HEARTBEAT_LED  32
 #define touch1 4 // Pin for capactitive touch sensor
 #define touch2 2 // Pin for capactitive touch sensor
 #define touch3 13 // Pin for capactitive touch sensor
 #define touch4 15 // Pin for capactitive touch sensor
+
+bool hbLedState = LOW;
 
 int SW1 = 16;
 int SW2 = 17;
@@ -76,106 +77,468 @@ boolean lastState2 = LOW;
 boolean lastState3 = LOW;
 boolean lastState4 = LOW;
 
+bool usePrimAP = true; // use primary or secondary WiFi network
+/** Flag if stored AP credentials are available */
+bool hasCredentials = false;
+/** Connection status */
+volatile bool isConnected = false;
+/** Connection change status */
+bool connStatusChanged = false;
+
+// IOT PLATFORM VARIABLES
+#define ORG "rqeofj"
+#define BOARD_TYPE "SB_MICRO"
+#define TOKEN "1SatnamW"
 
 char server[] = ORG ".messaging.internetofthings.ibmcloud.com";
-char topic[] = "iot-2/evt/espboard/fmt/json";
+char topic[] = "iot-2/evt/sb_micro/fmt/json";
 char authMethod[] = "use-token-auth";
-char token[] = "P@ssw0rd"; // Auth token of Device registered on Watson IoT Platform
+char token[] = "1SatnamW"; // Auth token of Device registered on Watson IoT Platform
 
 String BOARD_ID;
 WiFiClient wifiClient;
 PubSubClient client(server, 1883, NULL, wifiClient);
 
-const char* ssid = "GurvinderNet";
-const char* password =  "1SatnamW";
+// List of Service and Characteristic UUIDs
+#define SERVICE_UUID  "0000aaaa-ead2-11e7-80c1-9a214cf093ae"
+#define WIFI_UUID     "00005555-ead2-11e7-80c1-9a214cf093ae"
 
-// -----------------------------
+/** SSIDs of local WiFi networks */
+String ssidPrim;
+String ssidSec;
+/** Password for local WiFi network */
+String pwPrim;
+String pwSec;
 
-int hallData = 0;
-int boardTemp = 0;
+/** Characteristic for digital output */
+BLECharacteristic *pCharacteristicWiFi;
+/** BLE Advertiser */
+BLEAdvertising* pAdvertising;
+/** BLE Service */
+BLEService *pService;
+/** BLE Server */
+BLEServer *pServer;
 
-// --------------------
+/** Buffer for JSON string */
+// MAx size is 51 bytes for frame:
+// {"ssidPrim":"","pwPrim":"","ssidSec":"","pwSec":""}
+// + 4 x 32 bytes for 2 SSID's and 2 passwords
+StaticJsonBuffer<200> jsonBuffer;
 
-/**
- * Scan WiFi Networks
- */
-static void scanWiFi(){
-  int n = WiFi.scanNetworks();
-
-  if (n == 0) {
-    Serial.println("Searching networks.");
-  } else {
-    Serial.println("Networks found: ");
-    for (int i = 0; i < n; ++i) {
-//      Print SSID for each network found
-      char currentSSID[64];
-      WiFi.SSID(i).toCharArray(currentSSID, 64);
-      Serial.println(currentSSID);
+char* string2char(String str){
+    if(str.length()!=0){
+        char *p = const_cast<char*>(str.c_str());
+        return p;
     }
-  }
-  // Wait a bit before scanning again
-  delay(5000);
 }
 
 /**
- * Connect to a given WiFi Network
- */
-static void connectWiFi(){
-  while(wifiStatus != WL_CONNECTED && wifiTryCount < 5){
-        Serial.print("Attempting to connect to WEP network, SSID: ");
-        Serial.println(ssid);
-        wifiStatus = WiFi.begin(ssid, password);
-        wifiTryCount++;
-        delay(10000);
-  }
-
-  wifiTryCount = 0;
-
-  if(wifiStatus == WL_CONNECTED){
-    Serial.println("WiFi Connected..");
-  }else{
-    Serial.println("Failed to Connect WiFi");
-  }
+ * Create unique device name from MAC address
+ **/
+void createName() {
+	uint8_t baseMac[6];
+	// Get MAC address for WiFi station
+	esp_read_mac(baseMac, ESP_MAC_WIFI_STA);
+	// Write unique name into apName
+	sprintf(apName, "SB_MICRO-%02X%02X%02X%02X%02X%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
 }
 
 /**
  * Connect to MQTT Server
  */
 static void connectMQTT() {
-  // Serial.print("IN connecting MQTT client...");
-  if(BOARD_ID == ""){
-    char chipid[20];
-    sprintf(chipid, "%" PRIu64, ESP.getEfuseMac());
-    BOARD_ID = "HB_"+String(chipid);
+  if(isConnected){
+    Serial.print("IN connecting MQTT client...");
+    if(BOARD_ID == ""){
+      // char chipid[20];
+      // sprintf(chipid, "%" PRIu64, ESP.getEfuseMac());
+      // BOARD_ID = "HB_"+String(chipid);
+      BOARD_ID = String(apName);
+    }
+     String clientId = "d:" ORG ":" BOARD_TYPE ":" +BOARD_ID;
+     Serial.print("Connecting MQTT client to ");
+     Serial.println(server);
+     int mqttTryCount = 0;
+     bool mqttConnected = false;
+     do{
+       mqttConnected = client.connect((char*) clientId.c_str(), authMethod, token);
+       mqttTryCount++;
+       if(!mqttConnected){
+         Serial.printf("Connecting MQTT failed to clientId: %s, Try Count: %d\n", clientId, mqttTryCount);
+         delay(2000);
+       }else{
+         Serial.print("MQTT Connected Successfully...");
+       }
+     }while(!mqttConnected && mqttTryCount < 3);
+
+  }else{
+    Serial.println("Cannot connect to MQTT as WiFi is not Connected !!");
   }
- String clientId = "d:" ORG ":" BOARD_TYPE ":" +BOARD_ID;
- if (!!!client.connected()) {
-   Serial.print("Reconnecting MQTT client to ");
-   Serial.println(server);
-   while (!!!client.connect((char*) clientId.c_str(), authMethod, token)) {
-     Serial.print("Connecting: ");
-     Serial.println(BOARD_ID);
-     delay(500);
-   }
-   // Serial.println();
- }
- Serial.print("MQTT Connected...");
+}
+
+/**
+ * MyServerCallbacks
+ * Callbacks for client connection and disconnection
+ */
+class MyServerCallbacks: public BLEServerCallbacks {
+	// TODO this doesn't take into account several clients being connected
+	void onConnect(BLEServer* pServer) {
+		Serial.println("BLE client connected");
+	};
+
+	void onDisconnect(BLEServer* pServer) {
+		Serial.println("BLE client disconnected");
+		pAdvertising->start();
+	}
+};
+
+/**
+ * MyCallbackHandler
+ * Callbacks for BLE client read/write requests
+ */
+class MyCallbackHandler: public BLECharacteristicCallbacks {
+	void onWrite(BLECharacteristic *pCharacteristic) {
+		std::string value = pCharacteristic->getValue();
+		if (value.length() == 0) {
+			return;
+		}
+		String data = String((char *)&value[0]);
+    Serial.println("Received over BLE: " + data);
+    // char * data2 = const_cast<char*>((char *)&value[0]);
+    // Serial.println("Data: >> " +data2.c_str());
+		// Decode data
+		int keyIndex = 0;
+		for (int index = 0; index < value.length(); index ++) {
+			value[index] = (char) value[index] ^ (char) apName[keyIndex];
+			keyIndex++;
+			if (keyIndex >= strlen(apName)) keyIndex = 0;
+		}
+
+		/** Json object for incoming data */
+    // DynamicJsonBuffer dynamicJsonBuffer
+		JsonObject& jsonIn = jsonBuffer.parseObject(data);
+		if (jsonIn.success()) {
+			if (jsonIn.containsKey("ssidPrim") &&
+					jsonIn.containsKey("pwPrim") &&
+					jsonIn.containsKey("ssidSec") &&
+					jsonIn.containsKey("pwSec")) {
+				ssidPrim = jsonIn["ssidPrim"].as<String>();
+				pwPrim = jsonIn["pwPrim"].as<String>();
+				ssidSec = jsonIn["ssidSec"].as<String>();
+				pwSec = jsonIn["pwSec"].as<String>();
+
+				Preferences preferences;
+				preferences.begin("WiFiCred", false);
+				preferences.putString("ssidPrim", ssidPrim);
+				preferences.putString("ssidSec", ssidSec);
+				preferences.putString("pwPrim", pwPrim);
+				preferences.putString("pwSec", pwSec);
+				preferences.putBool("valid", true);
+				preferences.end();
+
+				Serial.println("Received over bluetooth:");
+				Serial.println("primary SSID: "+ssidPrim+" password: "+pwPrim);
+				Serial.println("secondary SSID: "+ssidSec+" password: "+pwSec);
+				connStatusChanged = true;
+				hasCredentials = true;
+			} else if (jsonIn.containsKey("erase")) {
+				Serial.println("Received erase command");
+				Preferences preferences;
+				preferences.begin("WiFiCred", false);
+				preferences.clear();
+				preferences.end();
+				connStatusChanged = true;
+				hasCredentials = false;
+				ssidPrim = "";
+				pwPrim = "";
+				ssidSec = "";
+				pwSec = "";
+
+				int err;
+				err=nvs_flash_init();
+				Serial.println("nvs_flash_init: " + err);
+				err=nvs_flash_erase();
+				Serial.println("nvs_flash_erase: " + err);
+			} else if (jsonIn.containsKey("reset")) {
+				WiFi.disconnect();
+				esp_restart();
+			}
+		} else {
+			Serial.println("Received invalid JSON");
+		}
+		jsonBuffer.clear();
+	};
+
+	void onRead(BLECharacteristic *pCharacteristic) {
+		Serial.println("BLE onRead request");
+		String wifiCredentials;
+
+		/** Json object for outgoing data */
+		JsonObject& jsonOut = jsonBuffer.createObject();
+		jsonOut["ssidPrim"] = ssidPrim;
+		jsonOut["pwPrim"] = pwPrim;
+		jsonOut["ssidSec"] = ssidSec;
+		jsonOut["pwSec"] = pwSec;
+		// Convert JSON object into a string
+		jsonOut.printTo(wifiCredentials);
+
+		// encode the data
+		int keyIndex = 0;
+		Serial.println("Stored settings: " + wifiCredentials);
+		for (int index = 0; index < wifiCredentials.length(); index ++) {
+			wifiCredentials[index] = (char) wifiCredentials[index] ^ (char) apName[keyIndex];
+			keyIndex++;
+			if (keyIndex >= strlen(apName)) keyIndex = 0;
+		}
+		pCharacteristicWiFi->setValue((uint8_t*)&wifiCredentials[0],wifiCredentials.length());
+		jsonBuffer.clear();
+	}
+};
+
+/**
+ * initBLE
+ * Initialize BLE service and characteristic
+ * Start BLE server and service advertising
+ */
+void initBLE() {
+	// Initialize BLE and set output power
+	BLEDevice::init(apName);
+	BLEDevice::setPower(ESP_PWR_LVL_P7);
+
+	// Create BLE Server
+	pServer = BLEDevice::createServer();
+
+	// Set server callbacks
+	pServer->setCallbacks(new MyServerCallbacks());
+
+	// Create BLE Service
+	pService = pServer->createService(BLEUUID(SERVICE_UUID),20);
+
+	// Create BLE Characteristic for WiFi settings
+	pCharacteristicWiFi = pService->createCharacteristic(
+		BLEUUID(WIFI_UUID),
+		// WIFI_UUID,
+		BLECharacteristic::PROPERTY_READ |
+		BLECharacteristic::PROPERTY_WRITE
+	);
+	pCharacteristicWiFi->setCallbacks(new MyCallbackHandler());
+
+	// Start the service
+	pService->start();
+
+	// Start advertising
+	pAdvertising = pServer->getAdvertising();
+	pAdvertising->start();
+}
+
+/** Callback for receiving IP address from AP */
+void gotIP(system_event_id_t event) {
+	isConnected = true;
+	connStatusChanged = true;
+  if (!!!client.connected()) {
+    connectMQTT();
+  }
+}
+
+/** Callback for connection loss */
+void lostCon(system_event_id_t event) {
+	isConnected = false;
+	connStatusChanged = true;
+}
+
+/**
+	 scanWiFi
+	 Scans for available networks
+	 and decides if a switch between
+	 allowed networks makes sense
+
+	 @return <code>bool</code>
+	        True if at least one allowed network was found
+*/
+bool scanWiFi() {
+	/** RSSI for primary network */
+	int8_t rssiPrim;
+	/** RSSI for secondary network */
+	int8_t rssiSec;
+	/** Result of this function */
+	bool result = false;
+
+	Serial.println("Start scanning for networks");
+
+	WiFi.disconnect(true);
+	WiFi.enableSTA(true);
+	WiFi.mode(WIFI_STA);
+
+	// Scan for AP
+	int apNum = WiFi.scanNetworks(false,true,false,1000);
+	if (apNum == 0) {
+		Serial.println("Found no networks?????");
+		return false;
+	}
+
+	byte foundAP = 0;
+	bool foundPrim = false;
+
+	for (int index=0; index<apNum; index++) {
+		String ssid = WiFi.SSID(index);
+		Serial.println("Found AP: " + ssid + " RSSI: " + WiFi.RSSI(index));
+		if (!strcmp((const char*) &ssid[0], (const char*) &ssidPrim[0])) {
+			Serial.println("Found primary AP");
+			foundAP++;
+			foundPrim = true;
+			rssiPrim = WiFi.RSSI(index);
+		}
+		if (!strcmp((const char*) &ssid[0], (const char*) &ssidSec[0])) {
+			Serial.println("Found secondary AP");
+			foundAP++;
+			rssiSec = WiFi.RSSI(index);
+		}
+	}
+
+	switch (foundAP) {
+		case 0:
+			result = false;
+			break;
+		case 1:
+			if (foundPrim) {
+				usePrimAP = true;
+			} else {
+				usePrimAP = false;
+			}
+			result = true;
+			break;
+		default:
+			Serial.printf("RSSI Prim: %d Sec: %d\n", rssiPrim, rssiSec);
+			if (rssiPrim > rssiSec) {
+				usePrimAP = true; // RSSI of primary network is better
+			} else {
+				usePrimAP = false; // RSSI of secondary network is better
+			}
+			result = true;
+			break;
+	}
+	return result;
+}
+
+/**
+ * Start connection to AP
+ */
+void connectWiFi() {
+	// Setup callback function for successful connection
+	WiFi.onEvent(gotIP, SYSTEM_EVENT_STA_GOT_IP);
+	// Setup callback function for lost connection
+	WiFi.onEvent(lostCon, SYSTEM_EVENT_STA_DISCONNECTED);
+
+	WiFi.disconnect(true);
+	WiFi.enableSTA(true);
+	WiFi.mode(WIFI_STA);
+
+	Serial.println();
+	Serial.print("Start connection to ");
+	if (usePrimAP) {
+		Serial.println(ssidPrim);
+		WiFi.begin(ssidPrim.c_str(), pwPrim.c_str());
+	} else {
+		Serial.println(ssidSec);
+		WiFi.begin(ssidSec.c_str(), pwSec.c_str());
+	}
+}
+
+void initSwitches(){
+  Preferences preferences;
+  preferences.begin("SwitchesState", false);
+  bool hasPref = preferences.getBool("valid", false);
+  if (hasPref) {
+		sw1Val = preferences.getInt("sw1Val", 0);
+    sw2Val = preferences.getInt("sw2Val", 0);
+    sw3Val = preferences.getInt("sw3Val", 0);
+    sw4Val = preferences.getInt("sw4Val", 0);
+  }else{
+    preferences.putInt("sw1Val", 0);
+    preferences.putInt("sw2Val", 0);
+    preferences.putInt("sw3Val", 0);
+    preferences.putInt("sw4Val", 0);
+    preferences.putBool("valid", true);
+  }
+  preferences.end();
+
+  digitalWrite (SW1, sw1Val);
+  digitalWrite (SW2, sw2Val);
+  digitalWrite (SW3, sw3Val);
+  digitalWrite (SW4, sw4Val);
+    // Serial.printf("Switch 1: %d, Switch 2: %d, Switch 3: %d, Switch 4: %d\n\n", sw1Val, sw2Val, sw3Val, sw4Val);
+
+}
+
+void setupConfiguration(){
+	Preferences preferences;
+	preferences.begin("WiFiCred", false);
+	bool hasPref = preferences.getBool("valid", false);
+	if (hasPref) {
+		ssidPrim = preferences.getString("ssidPrim","");
+		ssidSec = preferences.getString("ssidSec","");
+		pwPrim = preferences.getString("pwPrim","");
+		pwSec = preferences.getString("pwSec","");
+
+		if (ssidPrim.equals("")
+				|| pwPrim.equals("")
+				|| ssidSec.equals("")
+				|| pwPrim.equals("")) {
+			Serial.println("Found preferences but credentials are invalid");
+		} else {
+			Serial.println("Read from preferences:");
+			Serial.println("primary SSID: "+ssidPrim+" password: "+pwPrim);
+			Serial.println("secondary SSID: "+ssidSec+" password: "+pwSec);
+			hasCredentials = true;
+		}
+	} else {
+		Serial.println("Could not find preferences, need send data over BLE");
+	}
+	preferences.end();
+}
+
+void initWiFi(){
+    if (hasCredentials && enableWiFi) {
+      // Check for available AP's
+      if (!scanWiFi) {
+        Serial.println("Could not find any AP");
+      } else {
+        // If AP was found, start connection
+        connectWiFi();
+      }
+    }
+}
+
+void initRadio(){
+  if(enableRadio){
+      int radioTryCount = 0;
+      do{
+        radioAvailable = LoRa.begin(BAND);
+        radioTryCount++;
+        if(!radioAvailable){
+          Serial.printf("Starting Radio failed!, Try Count: %d\n", radioTryCount);
+          delay(3000);
+        }else{
+          Serial.println("Radio Initialized Successfully...");
+        }
+      }while(!radioAvailable && radioTryCount < 3);
+  }
 }
 
 void publishData(String data){
-  Serial.print("Publish data:>> ");
-  Serial.println(data);
-     /*
-   if (client.publish(topic, (char*) payload.c_str())) {
-       // Serial.print("Published payload: ");
-       // Serial.println(payload);
-     } else {
-       // Serial.println("Publish failed: ");
-       // Serial.println(payload);
+   bool published = false;
+   if (isConnected) {
+     if(client.publish(topic, (char*) data.c_str())){
+       Serial.print("Published payload: ");
+       Serial.println(data);
+       published = true;
+     }else{
+       Serial.println("Publish failed: ");
+       Serial.println(data);
      }
-  */
+  }
 
-    if(loraAvailable){
+    if(radioAvailable && !published){
         LoRa.beginPacket();
 //        LoRa.write(destination);              // add destination address
 //        LoRa.write(localAddress);
@@ -186,177 +549,155 @@ void publishData(String data){
         delay(1);
         LoRa.flush();
     }else{
-       Serial.print("Lora Not Working: >> ");
-       Serial.println(data);
+       Serial.print("Radio Not Available: >> ");
     }
 }
 
-void checkDataOnLora(){
+void checkDataOnRadio(){
+  String receivedText;
   // try to parse packet
     int packetSize = LoRa.parsePacket();
     if (packetSize) {
-      // received a packet
-      // Serial.print("Received packet '");
-      // read packet
-      while (LoRa.available()) {
-        receivedText = (char)LoRa.read();
-        Serial.print(receivedText);
-      }
+        // received a packet
+        // Serial.print("Received packet '");
+        // read packet
+        while (LoRa.available()) {
+          receivedText = (char)LoRa.read();
+          Serial.print(receivedText);
+        }
 
-      // print RSSI of packet
-      // Serial.print("' with RSSI ");
-      // Serial.println(LoRa.packetRssi());
+        // print RSSI of packet
+        // Serial.print("' with RSSI ");
+        // Serial.println(LoRa.packetRssi());
     }
 }
 
-void initSwitches(){
-  if(eepromAvailable){
-    sw1Val = EEPROM.readInt(sw1Address);
-    sw2Val = EEPROM.readInt(sw2Address);
-    sw3Val = EEPROM.readInt(sw3Address);
-    sw4Val = EEPROM.readInt(sw4Address);
-  }
-
-  if(sw1Val < 0){
-    sw1Val = 0;
-  }
-  if(sw2Val < 0){
-    sw2Val = 0;
-  }
-  if(sw3Val < 0){
-    sw3Val = 0;
-  }
-  if(sw4Val < 0){
-    sw4Val = 0;
-  }
-
-  if(sw1Val > 1){
-    sw1Val = 1;
-  }
-  if(sw2Val > 1){
-    sw2Val = 1;
-  }
-  if(sw3Val > 1){
-    sw3Val = 1;
-  }
-  if(sw4Val > 1){
-    sw4Val = 1;
-  }
-
-    digitalWrite (SW1, sw1Val);
-    digitalWrite (SW2, sw2Val);
-    digitalWrite (SW3, sw3Val);
-    digitalWrite (SW4, sw4Val);
-    // Serial.printf("Switch 1: %d, Switch 2: %d, Switch 3: %d, Switch 4: %d\n\n", sw1Val, sw2Val, sw3Val, sw4Val);
-
+void updateSwStateAndPublish(String varName, int index, int swValue){
+  Preferences preferences;
+  preferences.begin("SwitchesState", false);
+  preferences.putInt(string2char(varName), swValue);
+  preferences.end();
+  // String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":1, \"deviceValue\": " +String(sw1Val)+"}";
+  String payload;
+  JsonObject& jsonOut = jsonBuffer.createObject();
+  jsonOut["type"] = BOARD_TYPE;
+  jsonOut["uniqueId"] = BOARD_ID;
+  jsonOut["deviceIndex"] = index;
+  jsonOut["deviceValue"] = swValue;
+  // Convert JSON object into a string
+  jsonOut.printTo(payload);
+  publishData(payload);
+  jsonBuffer.clear();
 }
 
-void checkSW1(){
-  boolean currentState = digitalRead(touch1);
-  if (currentState == HIGH && lastState1 == LOW){
-    Serial.println("1 pressed");
-    delay(1);
-    if (sw1Val == 0){
-      digitalWrite(SW1, 1);
-      sw1Val = 1;
-    } else {
-      digitalWrite(SW1, 0);
-      sw1Val = 0;
-    }
-
-    String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":1, \"deviceValue\": " +String(sw1Val)+"}";
-    publishData(payload);
-    if(eepromAvailable){
-      EEPROM.writeInt(sw1Address, sw1Val);
-      // Serial.printf("sw1Val: %d \n", EEPROM.readInt(sw1Address));
-    }
-
+void checkSwitch(String varName, int index, int swValue){
+  switch (index){
+    case 1: {
+          boolean currentState = digitalRead(touch1);
+          if (currentState == HIGH && lastState1 == LOW){
+              Serial.println("1 pressed");
+              delay(1);
+              if (swValue == 0){
+                digitalWrite(SW1, 1);
+                sw1Val = 1;
+                swValue = 1;
+              } else {
+                digitalWrite(SW1, 0);
+                sw1Val = 0;
+                swValue = 0;
+              }
+              updateSwStateAndPublish(varName, index, swValue);
+          }
+            lastState1 = currentState;
+            break;
+        }
+      case 2: {
+            boolean currentState = digitalRead(touch2);
+            if (currentState == HIGH && lastState2 == LOW){
+                Serial.println("2 pressed");
+                delay(1);
+                if (swValue == 0){
+                  digitalWrite(SW2, 1);
+                  sw2Val = 1;
+                  swValue = 1;
+                } else {
+                  digitalWrite(SW2, 0);
+                  sw2Val = 0;
+                  swValue = 0;
+                }
+                updateSwStateAndPublish(varName, index, swValue);
+            }
+              lastState3 = currentState;
+              break;
+          }
+      case 3: {
+            boolean currentState = digitalRead(touch3);
+            if (currentState == HIGH && lastState3 == LOW){
+                Serial.println("3 pressed");
+                delay(1);
+                if (swValue == 0){
+                  digitalWrite(SW3, 1);
+                  sw3Val = 1;
+                  swValue = 1;
+                } else {
+                  digitalWrite(SW3, 0);
+                  sw3Val = 0;
+                  swValue = 0;
+                }
+                updateSwStateAndPublish(varName, index, swValue);
+            }
+              lastState3 = currentState;
+              break;
+          }
+      case 4: {
+            boolean currentState = digitalRead(touch4);
+            if (currentState == HIGH && lastState4 == LOW){
+                Serial.println("4 pressed");
+                delay(1);
+                if (swValue == 0){
+                  digitalWrite(SW4, 1);
+                  sw4Val = 1;
+                  swValue = 1;
+                } else {
+                  digitalWrite(SW4, 0);
+                  sw4Val = 0;
+                  swValue = 0;
+                }
+                updateSwStateAndPublish(varName, index, swValue);
+            }
+              lastState4 = currentState;
+              break;
+          }
   }
-  lastState1 = currentState;
-}
 
-void checkSW2(){
-  boolean currentState = digitalRead(touch2);
-  if (currentState == HIGH && lastState2 == LOW){
-    Serial.println("2 pressed");
-    delay(1);
-    if (sw2Val == 0){
-      digitalWrite(SW2, 1);
-      sw2Val = 1;
-    } else {
-      digitalWrite(SW2, 0);
-      sw2Val = 0;
-    }
-
-    String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":2, \"deviceValue\": " +String(sw2Val)+"}";
-    publishData(payload);
-    if(eepromAvailable){
-      EEPROM.writeInt(sw2Address, sw2Val);
-      // Serial.printf("sw3Val: %d \n", EEPROM.readInt(sw3Address));
-    }
-
-  }
-  lastState2 = currentState;
-}
-
-void checkSW3(){
-  boolean currentState = digitalRead(touch3);
-  if (currentState == HIGH && lastState3 == LOW){
-    Serial.println("3 pressed");
-    delay(1);
-    if (sw3Val == 0){
-      digitalWrite(SW3, 1);
-      sw3Val = 1;
-    } else {
-      digitalWrite(SW3, 0);
-      sw3Val = 0;
-    }
-
-    String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":3, \"deviceValue\": " +String(sw3Val)+"}";
-    publishData(payload);
-    if(eepromAvailable){
-      EEPROM.writeInt(sw3Address, sw3Val);
-      // Serial.printf("sw4Val: %d \n", EEPROM.readInt(sw3Address));
-    }
-
-  }
-  lastState3 = currentState;
-}
-
-void checkSW4(){
-  boolean currentState = digitalRead(touch4);
-  if (currentState == HIGH && lastState4 == LOW){
-    Serial.println("4 pressed");
-    delay(1);
-    if (sw4Val == 0){
-      digitalWrite(SW4, 1);
-      sw4Val = 1;
-    } else {
-      digitalWrite(SW4, 0);
-      sw4Val = 0;
-    }
-
-    String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":4, \"deviceValue\": " +String(sw4Val)+"}";
-    publishData(payload);
-    if(eepromAvailable){
-      EEPROM.writeInt(sw4Address, sw4Val);
-      // Serial.printf("sw4Val: %d \n", EEPROM.readInt(sw4Address));
-    }
-
-  }
-  lastState4 = currentState;
 }
 
 void checkTouchDetected(){
-  checkSW1();
-  checkSW2();
-  checkSW3();
-  checkSW4();
+  checkSwitch("sw1Val", 1, sw1Val);
+  checkSwitch("sw2Val", 2, sw2Val);
+  checkSwitch("sw3Val", 3, sw3Val);
+  checkSwitch("sw4Val", 4, sw4Val);
 }
 
-// the setup function runs once when you press reset or power the board
+void initDevice(){
+	// Create unique device name
+	createName();
+  initRadio();
+  initSwitches();
+	setupConfiguration();
+	initBLE();
+	initWiFi();
+}
+
+
+/**
+ * Device Setup
+ */
 void setup() {
   delay(500);
+	// Send some device info
+	Serial.print("Build: ");
+	Serial.println(compileDate);
 
   pinMode(HEARTBEAT_LED, OUTPUT);
   pinMode(SW1, OUTPUT);
@@ -370,7 +711,7 @@ void setup() {
   pinMode(touch4, INPUT);
 
   // Init Lora
-  if(enableLora){
+  if(enableRadio){
       SPI.begin(SCK, MISO, MOSI, CS);
       LoRa.setPins(SS, RST, DI0);
       delay(1000);
@@ -380,81 +721,48 @@ void setup() {
   while (!Serial);
   delay(1000);
 
-  char chipid[20];
-  sprintf(chipid, "%" PRIu64, ESP.getEfuseMac());
-  BOARD_ID = "HB_"+String(chipid);
-  // Serial.println(BOARD_ID);
-  delay(100);
-
-  if(enableEEPROM){
-      int eepromTryCount = 0;
-      do{
-        eepromAvailable = EEPROM.begin(EEPROM_SIZE);
-        eepromTryCount++;
-        if(!eepromAvailable){
-          Serial.printf("Failed to initialise EEPROM, Try Count: %d\n", eepromTryCount);
-          delay(2000);
-        }else{
-          Serial.println("EEPROM Initialized Successfully...");
-        }
-      }while(!eepromAvailable && eepromTryCount > 3);
-  }
-
-  initSwitches();
-
-  // Serial.println("LoRa Initializing...");
-  if(enableLora){
-      int loraTryCount = 0;
-      do{
-        loraAvailable = LoRa.begin(BAND);
-        loraTryCount++;
-        if(!loraAvailable){
-          Serial.printf("Starting LoRa failed!, Try Count: %d\n", loraTryCount);
-          delay(3000);
-        }else{
-          Serial.println("LoRa Initialized Successfully...");
-        }
-      }while(!loraAvailable && loraTryCount < 3);
-
-      // Change sync word (0xF3) to match the receiver
-      // The sync word assures you don't get LoRa messages from other LoRa transceivers
-      // ranges from 0-0xFF
-      LoRa.setSyncWord(0xF3);
-
-  }
-
-  if(enableWiFi){
-        // Set WiFi to station mode and disconnect from an AP if it was previously connected
-  //      WiFi.mode(WIFI_STA);
-  //      WiFi.disconnect();
-        delay(100);
-
-  //      scanWiFi();
-        connectWiFi();
-         if(wifiStatus == WL_CONNECTED){
-//            connectMQTT();
-         }
-  }
+	initDevice();
 
 }
 
-  // the loop function runs over and over again forever
-  void loop() {
-    unsigned long currentMillis = millis();
-//      checkDataOnLora();
-      checkTouchDetected();
-      if ((unsigned long)(currentMillis - previousMillis) >= (interval * 5)) {
-           if(hbLedState == LOW){
-               digitalWrite(HEARTBEAT_LED, 1);
-               hbLedState = HIGH;
-           }else{
-               digitalWrite(HEARTBEAT_LED, 0);
-               hbLedState = LOW;
-           }
-           previousMillis =  millis();
-      }
+/**
+ * Logic that runs in Loop
+ */
+void loop() {
+	if (connStatusChanged) {
+		if (isConnected) {
+			Serial.print("Connected to AP: ");
+			Serial.print(WiFi.SSID());
+			Serial.print(" with IP: ");
+			Serial.print(WiFi.localIP());
+			Serial.print(" RSSI: ");
+			Serial.println(WiFi.RSSI());
+		} else {
+			if (hasCredentials) {
+				Serial.println("Lost WiFi connection");
+				// Received WiFi credentials
+				if (!scanWiFi) { // Check for available AP's
+					Serial.println("Could not find any AP");
+				} else { // If AP was found, start connection
+					connectWiFi();
+				}
+			}
+		}
+		connStatusChanged = false;
+	}
 
-      //  scanWiFi();
-      // Serial.println(BOARD_ID);
+  unsigned long currentMillis = millis();
+    checkDataOnRadio();
+    checkTouchDetected();
+    if ((unsigned long)(currentMillis - previousMillis) >= (interval * 5)) {
+         if(hbLedState == LOW){
+             digitalWrite(HEARTBEAT_LED, 1);
+             hbLedState = HIGH;
+         }else{
+             digitalWrite(HEARTBEAT_LED, 0);
+             hbLedState = LOW;
+         }
+         previousMillis =  millis();
+    }
 
-  }
+}

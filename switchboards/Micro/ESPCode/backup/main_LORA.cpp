@@ -47,10 +47,6 @@ int wifiTryCount = 0;
 int mqttTryCount = 0;
 int wifiStatus = WL_IDLE_STATUS;
 
-#define ORG "rqeofj"
-#define BOARD_TYPE "HB_ESP32"
-#define TOKEN "1SatnamW"
-
 #define HEARTBEAT_LED  32
 bool hbLedState = LOW;
 
@@ -76,6 +72,9 @@ boolean lastState2 = LOW;
 boolean lastState3 = LOW;
 boolean lastState4 = LOW;
 
+#define ORG "rqeofj"
+#define BOARD_TYPE "HB_ESP32"
+#define TOKEN "1SatnamW"
 
 char server[] = ORG ".messaging.internetofthings.ibmcloud.com";
 char topic[] = "iot-2/evt/espboard/fmt/json";
