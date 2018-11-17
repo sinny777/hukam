@@ -41,7 +41,7 @@ int boardTemp = 0;
 
 static int taskCore = 0;
 bool radioAvailable = false;
-bool enableRadio = false;
+bool enableRadio = true;
 bool enableWiFi = true;
 
 unsigned long interval = 1000; // the time we need to wait
@@ -674,7 +674,7 @@ void checkSwitch(String varName, int index, int swValue){
 
 void checkTouchDetected(){
   checkSwitch("sw1Val", 1, sw1Val);
-  checkSwitch("sw2Val", 2, sw2Val);
+  // checkSwitch("sw2Val", 2, sw2Val);
   checkSwitch("sw3Val", 3, sw3Val);
   checkSwitch("sw4Val", 4, sw4Val);
 }
