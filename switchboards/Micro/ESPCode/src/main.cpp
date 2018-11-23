@@ -97,7 +97,8 @@ char token[] = "1SatnamW"; // Auth token of Device registered on Watson IoT Plat
 
 String BOARD_ID;
 WiFiClient wifiClient;
-PubSubClient client(server, 1883, NULL, wifiClient);
+// PubSubClient client(server, 1883, NULL, wifiClient);
+PubSubClient client(wifiClient);
 
 // List of Service and Characteristic UUIDs
 #define SERVICE_UUID  "0000aaaa-ead2-11e7-80c1-9a214cf093ae"
@@ -130,6 +131,16 @@ char* string2char(String str){
         char *p = const_cast<char*>(str.c_str());
         return p;
     }
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
 }
 
 /**
@@ -499,6 +510,8 @@ void setupConfiguration(){
 
 void initWiFi(){
     if (hasCredentials && enableWiFi) {
+      client.setServer(server, 1883);
+      client.setCallback(callback);
       // Check for available AP's
       if (!scanWiFi) {
         Serial.println("Could not find any AP");
@@ -534,7 +547,10 @@ void publishData(String data){
        published = true;
      }else{
        Serial.println("Publish failed: ");
-       Serial.println(data);
+       if (!!!client.connected()) {
+         connectMQTT();
+       }
+       // Serial.println(data);
      }
   }
 
@@ -674,8 +690,8 @@ void checkSwitch(String varName, int index, int swValue){
 
 void checkTouchDetected(){
   checkSwitch("sw1Val", 1, sw1Val);
-  // checkSwitch("sw2Val", 2, sw2Val);
-  checkSwitch("sw3Val", 3, sw3Val);
+  checkSwitch("sw2Val", 2, sw2Val);
+  // checkSwitch("sw3Val", 3, sw3Val);
   checkSwitch("sw4Val", 4, sw4Val);
 }
 
@@ -750,6 +766,11 @@ void loop() {
 		}
 		connStatusChanged = false;
 	}
+
+  if (isConnected && (!!!client.connected() || !client.loop())) {
+    Serial.println("MQTT Connection Lost, RECONNECTING AGAIN.......");
+    connectMQTT();
+  }
 
   unsigned long currentMillis = millis();
     checkDataOnRadio();
