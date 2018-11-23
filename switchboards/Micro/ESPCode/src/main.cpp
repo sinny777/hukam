@@ -101,8 +101,8 @@ WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
 // List of Service and Characteristic UUIDs
-#define SERVICE_UUID  "0000aaaa-ead2-11e7-80c1-9a214cf093ae"
-#define WIFI_UUID     "00005555-ead2-11e7-80c1-9a214cf093ae"
+#define SERVICE_UUID  "430cbe63-a0bf-4090-819a-0355f4ca2c68"
+#define WIFI_UUID     "9bdfa7ea-fa8c-4cde-94d7-66a03d984ebd"
 
 /** SSIDs of local WiFi networks */
 String ssidPrim;
