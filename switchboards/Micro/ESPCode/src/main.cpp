@@ -44,7 +44,7 @@ bool radioAvailable = false;
 bool enableRadio = true;
 bool enableWiFi = true;
 
-unsigned long interval = 1000; // the time we need to wait
+unsigned long interval = 5; // the time we need to wait
 unsigned long previousMillis = 0;
 unsigned long previousTouchMillis = 0;
 
@@ -60,7 +60,7 @@ char apName[] = "SB_MICRO-xxxxxxxxxxxx";
 #define touch3 13 // Pin for capactitive touch sensor
 #define touch4 15 // Pin for capactitive touch sensor
 
-bool hbLedState = LOW;
+bool hbLedState = LOW; // Heartbeat LED state
 
 int SW1 = 16;
 int SW2 = 17;
@@ -775,7 +775,7 @@ void loop() {
   unsigned long currentMillis = millis();
     checkDataOnRadio();
     checkTouchDetected();
-    if ((unsigned long)(currentMillis - previousMillis) >= (interval * 5)) {
+    if ((unsigned long)(currentMillis - previousMillis) >= (interval * 1000)) {
          if(hbLedState == LOW){
              digitalWrite(HEARTBEAT_LED, 1);
              hbLedState = HIGH;
