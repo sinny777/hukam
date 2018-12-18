@@ -691,7 +691,7 @@ void checkSwitch(String varName, int index, int swValue){
 void checkTouchDetected(){
   checkSwitch("sw1Val", 1, sw1Val);
   checkSwitch("sw2Val", 2, sw2Val);
-  // checkSwitch("sw3Val", 3, sw3Val);
+  checkSwitch("sw3Val", 3, sw3Val);
   checkSwitch("sw4Val", 4, sw4Val);
 }
 
