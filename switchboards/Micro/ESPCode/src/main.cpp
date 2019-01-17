@@ -57,6 +57,8 @@ char apName[] = "SB_MICRO-xxxxxxxxxxxx";
 
 // #define HEARTBEAT_LED  32
 #define HEARTBEAT_LED  25
+#define WIFI_LED  32
+#define BLE_LED  33
 #define touch1 4 // Pin for capactitive touch sensor
 #define touch2 2 // Pin for capactitive touch sensor
 #define touch3 13 // Pin for capactitive touch sensor
@@ -209,6 +211,7 @@ class MyServerCallbacks: public BLEServerCallbacks {
     bleConnected = true;
     BLEDevice::startAdvertising();
     // pAdvertising->start();
+    digitalWrite(BLE_LED, 1);
 	};
 
 	void onDisconnect(BLEServer* pServer) {
@@ -216,6 +219,7 @@ class MyServerCallbacks: public BLEServerCallbacks {
     bleConnected = false;
     BLEDevice::startAdvertising();
 		// pAdvertising->start();
+    digitalWrite(BLE_LED, 0);
 	}
 };
 
@@ -407,6 +411,7 @@ void initBLE() {
 void gotIP(system_event_id_t event) {
 	isConnected = true;
 	connStatusChanged = true;
+  digitalWrite(WIFI_LED, 1);
   if (!!!client.connected()) {
     connectMQTT();
   }
@@ -416,6 +421,7 @@ void gotIP(system_event_id_t event) {
 void lostCon(system_event_id_t event) {
 	isConnected = false;
 	connStatusChanged = true;
+  digitalWrite(WIFI_LED, 0);
 }
 
 /**
@@ -777,6 +783,8 @@ void setup() {
 	Serial.println(compileDate);
 
   pinMode(HEARTBEAT_LED, OUTPUT);
+  pinMode(WIFI_LED, OUTPUT);
+  pinMode(BLE_LED, OUTPUT);
   pinMode(SW1, OUTPUT);
   pinMode(SW2, OUTPUT);
   pinMode(SW3, OUTPUT);
