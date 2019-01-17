@@ -180,8 +180,8 @@ static void connectMQTT() {
       BOARD_ID = String(apName);
     }
      String clientId = "d:" ORG ":" BOARD_TYPE ":" +BOARD_ID;
-     Serial.print("Connecting MQTT client to ");
-     Serial.println(server);
+     Serial.print("Connecting MQTT client: ");
+     Serial.println(clientId);
      int mqttTryCount = 0;
      bool mqttConnected = false;
      do{
