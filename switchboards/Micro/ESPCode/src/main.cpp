@@ -15,6 +15,7 @@
 #include <BLEServer.h>
 #include <BLEDevice.h>
 #include <BLEAdvertising.h>
+#include <BLE2902.h>
 #include <Preferences.h>
 
 #define BAND    433E6
@@ -54,7 +55,8 @@ const char compileDate[] = __DATE__ " " __TIME__;
 /** Unique device name */
 char apName[] = "SB_MICRO-xxxxxxxxxxxx";
 
-#define HEARTBEAT_LED  32
+// #define HEARTBEAT_LED  32
+#define HEARTBEAT_LED  25
 #define touch1 4 // Pin for capactitive touch sensor
 #define touch2 2 // Pin for capactitive touch sensor
 #define touch3 13 // Pin for capactitive touch sensor
@@ -103,6 +105,8 @@ PubSubClient client(wifiClient);
 // List of Service and Characteristic UUIDs
 #define SERVICE_UUID  "430cbe63-a0bf-4090-819a-0355f4ca2c68"
 #define WIFI_UUID     "9bdfa7ea-fa8c-4cde-94d7-66a03d984ebd"
+#define NOTIFICATION_UUID   0x2A08
+#define STATUS_UUID         0x2A3D
 
 /** SSIDs of local WiFi networks */
 String ssidPrim;
@@ -111,14 +115,21 @@ String ssidSec;
 String pwPrim;
 String pwSec;
 
-/** Characteristic for digital output */
 BLECharacteristic *pCharacteristicWiFi;
+BLECharacteristic *pCharacteristicNotify;
+BLECharacteristic *pCharacteristicStatus;
+
+BLEUUID pNotifUUID;
+
 /** BLE Advertiser */
 BLEAdvertising* pAdvertising;
 /** BLE Service */
 BLEService *pService;
 /** BLE Server */
 BLEServer *pServer;
+
+bool bleConnected = false;
+String bleStatus;
 
 /** Buffer for JSON string */
 // MAx size is 51 bytes for frame:
@@ -194,12 +205,17 @@ static void connectMQTT() {
 class MyServerCallbacks: public BLEServerCallbacks {
 	// TODO this doesn't take into account several clients being connected
 	void onConnect(BLEServer* pServer) {
-		Serial.println("BLE client connected");
+		Serial.println("BLE client connected: >> ");
+    bleConnected = true;
+    BLEDevice::startAdvertising();
+    // pAdvertising->start();
 	};
 
 	void onDisconnect(BLEServer* pServer) {
 		Serial.println("BLE client disconnected");
-		pAdvertising->start();
+    bleConnected = false;
+    BLEDevice::startAdvertising();
+		// pAdvertising->start();
 	}
 };
 
@@ -282,27 +298,48 @@ class MyCallbackHandler: public BLECharacteristicCallbacks {
 
 	void onRead(BLECharacteristic *pCharacteristic) {
 		Serial.println("BLE onRead request");
-		String wifiCredentials;
+    if (pCharacteristic == pCharacteristicNotify) {
+      uint8_t notifData[8];
+      time_t now;
+      struct tm timeinfo;
+      time(&now); // get time (as epoch)
+      localtime_r(&now, &timeinfo); // update tm struct with current time
+      uint16_t year = timeinfo.tm_year+1900;
+      notifData[1] = year>>8;
+      notifData[0] = year;
+      notifData[2] = timeinfo.tm_mon+1;
+      notifData[3] = timeinfo.tm_mday;
+      notifData[4] = timeinfo.tm_hour;
+      notifData[5] = timeinfo.tm_min;
+      notifData[6] = timeinfo.tm_sec;
+      pCharacteristic->setValue(notifData, 8);
+    }else if (pCharacteristic == pCharacteristicWiFi) {
+      String wifiCredentials;
+      /** Json object for outgoing data */
+      JsonObject& jsonOut = jsonBuffer.createObject();
+      jsonOut["ssidPrim"] = ssidPrim;
+      jsonOut["pwPrim"] = pwPrim;
+      jsonOut["ssidSec"] = ssidSec;
+      jsonOut["pwSec"] = pwSec;
+      // Convert JSON object into a string
+      jsonOut.printTo(wifiCredentials);
 
-		/** Json object for outgoing data */
-		JsonObject& jsonOut = jsonBuffer.createObject();
-		jsonOut["ssidPrim"] = ssidPrim;
-		jsonOut["pwPrim"] = pwPrim;
-		jsonOut["ssidSec"] = ssidSec;
-		jsonOut["pwSec"] = pwSec;
-		// Convert JSON object into a string
-		jsonOut.printTo(wifiCredentials);
-
-		// encode the data
-		int keyIndex = 0;
-		Serial.println("Stored settings: " + wifiCredentials);
-		for (int index = 0; index < wifiCredentials.length(); index ++) {
-			wifiCredentials[index] = (char) wifiCredentials[index] ^ (char) apName[keyIndex];
-			keyIndex++;
-			if (keyIndex >= strlen(apName)) keyIndex = 0;
-		}
-		pCharacteristicWiFi->setValue((uint8_t*)&wifiCredentials[0],wifiCredentials.length());
-		jsonBuffer.clear();
+      // encode the data
+      int keyIndex = 0;
+      Serial.println("Stored settings: " + wifiCredentials);
+      for (int index = 0; index < wifiCredentials.length(); index ++) {
+        wifiCredentials[index] = (char) wifiCredentials[index] ^ (char) apName[keyIndex];
+        keyIndex++;
+        if (keyIndex >= strlen(apName)) keyIndex = 0;
+      }
+      pCharacteristicWiFi->setValue((uint8_t*)&wifiCredentials[0],wifiCredentials.length());
+      jsonBuffer.clear();
+    }else if (pCharacteristic == pCharacteristicStatus) {
+      size_t dataLen = bleStatus.length();
+      uint8_t bleData[dataLen+1];
+      bleStatus.toCharArray((char *)bleData,dataLen+1);
+      pCharacteristic->setValue(bleData, dataLen);
+    }
 	}
 };
 
@@ -325,6 +362,17 @@ void initBLE() {
 	// Create BLE Service
 	pService = pServer->createService(BLEUUID(SERVICE_UUID),20);
 
+  // Create BLE Characteristic for Alert
+  pCharacteristicNotify = pService->createCharacteristic(
+                      BLEUUID((uint16_t)NOTIFICATION_UUID),
+                      BLECharacteristic::PROPERTY_READ   |
+                      BLECharacteristic::PROPERTY_NOTIFY |
+                      BLECharacteristic::PROPERTY_INDICATE
+                    );
+
+  // Create a BLE Descriptor for Alert
+  pCharacteristicNotify->addDescriptor(new BLE2902());
+
 	// Create BLE Characteristic for WiFi settings
 	pCharacteristicWiFi = pService->createCharacteristic(
 		BLEUUID(WIFI_UUID),
@@ -332,14 +380,27 @@ void initBLE() {
 		BLECharacteristic::PROPERTY_READ |
 		BLECharacteristic::PROPERTY_WRITE
 	);
+
+  // Create BLE Characteristic for Status
+  pCharacteristicStatus = pService->createCharacteristic(
+                      BLEUUID((uint16_t)STATUS_UUID),
+                      BLECharacteristic::PROPERTY_READ
+                    );
+
+  pCharacteristicNotify->setCallbacks(new MyCallbackHandler());
 	pCharacteristicWiFi->setCallbacks(new MyCallbackHandler());
+  pCharacteristicStatus->setCallbacks(new MyCallbackHandler());
 
 	// Start the service
 	pService->start();
 
 	// Start advertising
-	pAdvertising = pServer->getAdvertising();
-	pAdvertising->start();
+  pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanResponse(false);
+  pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
+  BLEDevice::startAdvertising();
+
 }
 
 /** Callback for receiving IP address from AP */
