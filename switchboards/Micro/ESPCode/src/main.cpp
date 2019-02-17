@@ -66,10 +66,10 @@ char apName[] = "SB_MICRO-xxxxxxxxxxxx";
 
 bool hbLedState = LOW; // Heartbeat LED state
 
-int SW1 = 16;
-int SW2 = 17;
-int SW3 = 23;
-int SW4 = 12;
+int SW1 = 17;
+int SW2 = 16;
+int SW3 = 12;
+int SW4 = 23;
 
 int sw1Val = 0;
 int sw2Val = 0;
@@ -673,93 +673,55 @@ void updateSwStateAndPublish(String varName, int index, int swValue){
   jsonBuffer.clear();
 }
 
-void checkSwitch(String varName, int index, int swValue){
-  switch (index){
-    case 1: {
-          boolean currentState = digitalRead(touch1);
-          if (currentState == HIGH && lastState1 == LOW){
-              Serial.println("1 pressed");
-              delay(1);
-              if (swValue == 0){
-                digitalWrite(SW1, 1);
-                sw1Val = 1;
-                swValue = 1;
-              } else {
-                digitalWrite(SW1, 0);
-                sw1Val = 0;
-                swValue = 0;
-              }
-              updateSwStateAndPublish(varName, index, swValue);
-          }
-            lastState1 = currentState;
-            break;
-        }
-      case 2: {
-            boolean currentState = digitalRead(touch2);
-            if (currentState == HIGH && lastState2 == LOW){
-                Serial.println("2 pressed");
-                delay(1);
-                if (swValue == 0){
-                  digitalWrite(SW2, 1);
-                  sw2Val = 1;
-                  swValue = 1;
-                } else {
-                  digitalWrite(SW2, 0);
-                  sw2Val = 0;
-                  swValue = 0;
-                }
-                updateSwStateAndPublish(varName, index, swValue);
-            }
-              lastState3 = currentState;
-              break;
-          }
-      case 3: {
-            boolean currentState = digitalRead(touch3);
-            if (currentState == HIGH && lastState3 == LOW){
-                Serial.println("3 pressed");
-                delay(1);
-                if (swValue == 0){
-                  digitalWrite(SW3, 1);
-                  sw3Val = 1;
-                  swValue = 1;
-                } else {
-                  digitalWrite(SW3, 0);
-                  sw3Val = 0;
-                  swValue = 0;
-                }
-                updateSwStateAndPublish(varName, index, swValue);
-            }
-              lastState3 = currentState;
-              break;
-          }
-      case 4: {
-            boolean currentState = digitalRead(touch4);
-            if (currentState == HIGH && lastState4 == LOW){
-                Serial.println("4 pressed");
-                delay(1);
-                if (swValue == 0){
-                  digitalWrite(SW4, 1);
-                  sw4Val = 1;
-                  swValue = 1;
-                } else {
-                  digitalWrite(SW4, 0);
-                  sw4Val = 0;
-                  swValue = 0;
-                }
-                updateSwStateAndPublish(varName, index, swValue);
-            }
-              lastState4 = currentState;
-              break;
-          }
-  }
-
-}
-
 void checkTouchDetected(){
-  checkSwitch("sw1Val", 1, sw1Val);
-  checkSwitch("sw2Val", 2, sw2Val);
-  checkSwitch("sw3Val", 3, sw3Val);
-  checkSwitch("sw4Val", 4, sw4Val);
+  if(digitalRead(touch1) == HIGH){
+        Serial.println("1 pressed");
+        if (sw1Val == 0){
+          digitalWrite(SW1, 1);
+          sw1Val = 1;
+        } else {
+          digitalWrite(SW1, 0);
+          sw1Val = 0;
+        }
+        updateSwStateAndPublish("sw1Val", 1, sw1Val);
+        delay(500);
+  }
+  if(digitalRead(touch2) == HIGH){
+    Serial.println("2 pressed");
+    if (sw2Val == 0){
+      digitalWrite(SW2, 1);
+      sw2Val = 1;
+    } else {
+      digitalWrite(SW2, 0);
+      sw2Val = 0;
+    }
+    updateSwStateAndPublish("sw2Val", 2, sw2Val);
+    delay(500);
+  }
+  if(digitalRead(touch3) == HIGH){
+    Serial.println("3 pressed");
+    if (sw3Val == 0){
+      digitalWrite(SW3, 1);
+      sw3Val = 1;
+    } else {
+      digitalWrite(SW3, 0);
+      sw3Val = 0;
+    }
+    updateSwStateAndPublish("sw3Val", 3, sw3Val);
+    delay(500);
+  }
+  if(digitalRead(touch4) == HIGH){
+    Serial.println("4 pressed");
+    if (sw4Val == 0){
+      digitalWrite(SW4, 1);
+      sw4Val = 1;
+    } else {
+      digitalWrite(SW4, 0);
+      sw4Val = 0;
+    }
+    updateSwStateAndPublish("sw4Val", 4, sw4Val);
+    delay(500);
+  }
 }
 
 void initDevice(){
