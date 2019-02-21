@@ -35,7 +35,7 @@ HardwareSerial MbedSerial(2);
 static int taskCore = 0;
 String sensorsData = "";
 bool enableLora = true;
-bool enableWiFi = true;
+bool enableWiFi = false;
 bool enableEEPROM = true;
 bool enableSensors = false;
 unsigned long interval = 1000; // the time we need to wait in milliseconds
@@ -243,7 +243,7 @@ if(enableEEPROM){
   //      scanWiFi();
         connectWiFi();
          if(wifiStatus == WL_CONNECTED){
-            // connectMQTT();
+            connectMQTT();
          }
   }
 
