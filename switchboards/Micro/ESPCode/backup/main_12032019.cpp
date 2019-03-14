@@ -68,7 +68,7 @@ bool hbLedState = LOW; // Heartbeat LED state
 
 int SW1 = 17;
 int SW2 = 16;
-int SW3 = 22;
+int SW3 = 12;
 int SW4 = 23;
 
 int sw1Val = 0;
@@ -85,8 +85,7 @@ bool usePrimAP = true; // use primary or secondary WiFi network
 /** Flag if stored AP credentials are available */
 bool hasCredentials = false;
 /** Connection status */
-volatile bool wifiConnected = false;
-volatile bool mqttConnected = false;
+volatile bool isConnected = false;
 /** Connection change status */
 bool connStatusChanged = false;
 
@@ -95,17 +94,10 @@ bool connStatusChanged = false;
 #define BOARD_TYPE "SB_MICRO"
 #define TOKEN "1SatnamW"
 
-// char server[] = ORG ".messaging.internetofthings.ibmcloud.com";
-char server[] = "mqtt.flespi.io";
-// char topic[] = "iot-2/evt/sb_micro/fmt/json";
-// char pub_topic[] = "evt/sb_micro/cloud/";
-// char sub_topic[] = "evt/sb_micro/board/";
-String pub_topic = "evt/sb_micro/cloud/";
-String sub_topic = "evt/sb_micro/board/";
-// char authMethod[] = "use-token-auth";
-// char token[] = "1SatnamW"; // Auth token of Device registered on Watson IoT Platform
-char mqttUser[] = "IdawJwQIHs0LuzfZKYWvXFwUeV0bbiAJlA3TUJpp0fYkE39cPTyAmUkqD9pFfPcp";
-char mqttPassword[] = "";
+char server[] = ORG ".messaging.internetofthings.ibmcloud.com";
+char topic[] = "iot-2/evt/sb_micro/fmt/json";
+char authMethod[] = "use-token-auth";
+char token[] = "1SatnamW"; // Auth token of Device registered on Watson IoT Platform
 
 String BOARD_ID;
 WiFiClient wifiClient;
@@ -145,7 +137,7 @@ String bleStatus;
 // MAx size is 51 bytes for frame:
 // {"ssidPrim":"","pwPrim":"","ssidSec":"","pwSec":""}
 // + 4 x 32 bytes for 2 SSID's and 2 passwords
-// StaticJsonBuffer<200> jsonBuffer;
+StaticJsonBuffer<200> jsonBuffer;
 
 char* string2char(String str){
     if(str.length()!=0){
@@ -154,49 +146,14 @@ char* string2char(String str){
     }
 }
 
-void mqttCallback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived in topic [");
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
-
-  StaticJsonBuffer<200> mqttDataBuffer;
-  JsonObject& jsonData = mqttDataBuffer.parseObject(payload);
-  Serial.print(" >>> type: ");
-  Serial.print(jsonData["type"].as<String>());
-  Serial.print(", uniqueId: ");
-  Serial.print(jsonData["uniqueId"].as<String>());
-  Serial.print(", deviceIndex: ");
-  Serial.print(jsonData["deviceIndex"].as<int>());
-  Serial.print(", deviceValue: ");
-  Serial.println(jsonData["deviceValue"].as<int>());
-
-  if(jsonData["type"].as<String>() == BOARD_TYPE && jsonData["uniqueId"].as<String>() == BOARD_ID){
-    Serial.println("<<<< SWITCH ACTION ON BOARD MATCHES >>>>");
-    int deviceIndex = jsonData["deviceIndex"].as<int>();
-    int deviceValue = jsonData["deviceValue"].as<int>();
-
-    switch (deviceIndex) {
-      case 1:
-          digitalWrite(SW1, deviceValue);
-          sw1Val = deviceValue;
-        break;
-      case 2:
-          digitalWrite(SW2, deviceValue);
-          sw2Val = deviceValue;
-        break;
-      case 3:
-          digitalWrite(SW3, deviceValue);
-          sw3Val = deviceValue;
-        break;
-      case 4:
-          digitalWrite(SW4, deviceValue);
-          sw4Val = deviceValue;
-        break;
-      default:
-        Serial.println("Device index not matched .... ");
-      }
-   }
-   mqttDataBuffer.clear();
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
 }
 
 /**
@@ -208,36 +165,36 @@ void createName() {
 	esp_read_mac(baseMac, ESP_MAC_WIFI_STA);
 	// Write unique name into apName
 	sprintf(apName, "SB_MICRO-%02X%02X%02X%02X%02X%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
-
-  BOARD_ID = String(apName);
-  sub_topic = sub_topic + BOARD_ID;
-  pub_topic = pub_topic + BOARD_ID;
-  // strcat(sub_topic, BOARD_ID.c_str() );
-  // strcat(pub_topic, BOARD_ID.c_str() );
 }
 
 /**
  * Connect to MQTT Server
  */
 static void connectMQTT() {
-  if(wifiConnected && !mqttConnected){
+  if(isConnected){
+    Serial.print("IN connecting MQTT client...");
     if(BOARD_ID == ""){
+      // char chipid[20];
+      // sprintf(chipid, "%" PRIu64, ESP.getEfuseMac());
+      // BOARD_ID = "HB_"+String(chipid);
       BOARD_ID = String(apName);
     }
-     // String clientId = "d:" ORG ":" BOARD_TYPE ":" +BOARD_ID;
-     String clientId = BOARD_ID;
+     String clientId = "d:" ORG ":" BOARD_TYPE ":" +BOARD_ID;
      Serial.print("Connecting MQTT client: ");
      Serial.println(clientId);
-     // mqttConnected = client.connect((char*) clientId.c_str(), token, "");
-     mqttConnected = client.connect((char*) clientId.c_str(), mqttUser, mqttPassword);
-     if(mqttConnected){
-       client.subscribe(sub_topic.c_str());
-       Serial.print("Subscribed to : >>  ");
-       Serial.println(sub_topic);
-     }
-     Serial.print("MQTT Status: >>> ");
-     Serial.print(client.state());
-     // Serial.println(mqttConnected);
+     int mqttTryCount = 0;
+     bool mqttConnected = false;
+     do{
+       mqttConnected = client.connect((char*) clientId.c_str(), authMethod, token);
+       mqttTryCount++;
+       if(!mqttConnected){
+         Serial.printf("Connecting MQTT failed to clientId: %s, Try Count: %d\n", clientId, mqttTryCount);
+         delay(2000);
+       }else{
+         Serial.print("MQTT Connected Successfully...");
+       }
+     }while(!mqttConnected && mqttTryCount < 3);
+
   }else{
     Serial.println("Cannot connect to MQTT as WiFi is not Connected !!");
   }
@@ -290,8 +247,7 @@ class MyCallbackHandler: public BLECharacteristicCallbacks {
 
 		/** Json object for incoming data */
     // DynamicJsonBuffer dynamicJsonBuffer
-    StaticJsonBuffer<200> bleJsonBuffer;
-		JsonObject& jsonIn = bleJsonBuffer.parseObject(data);
+		JsonObject& jsonIn = jsonBuffer.parseObject(data);
 		if (jsonIn.success()) {
 			if (jsonIn.containsKey("ssidPrim") &&
 					jsonIn.containsKey("pwPrim") &&
@@ -341,7 +297,7 @@ class MyCallbackHandler: public BLECharacteristicCallbacks {
 		} else {
 			Serial.println("Received invalid JSON");
 		}
-		bleJsonBuffer.clear();
+		jsonBuffer.clear();
 	};
 
 	void onRead(BLECharacteristic *pCharacteristic) {
@@ -364,8 +320,7 @@ class MyCallbackHandler: public BLECharacteristicCallbacks {
     }else if (pCharacteristic == pCharacteristicWiFi) {
       String wifiCredentials;
       /** Json object for outgoing data */
-      StaticJsonBuffer<200> wifiJsonBuffer;
-      JsonObject& jsonOut = wifiJsonBuffer.createObject();
+      JsonObject& jsonOut = jsonBuffer.createObject();
       jsonOut["ssidPrim"] = ssidPrim;
       jsonOut["pwPrim"] = pwPrim;
       jsonOut["ssidSec"] = ssidSec;
@@ -382,7 +337,7 @@ class MyCallbackHandler: public BLECharacteristicCallbacks {
         if (keyIndex >= strlen(apName)) keyIndex = 0;
       }
       pCharacteristicWiFi->setValue((uint8_t*)&wifiCredentials[0],wifiCredentials.length());
-      wifiJsonBuffer.clear();
+      jsonBuffer.clear();
     }else if (pCharacteristic == pCharacteristicStatus) {
       size_t dataLen = bleStatus.length();
       uint8_t bleData[dataLen+1];
@@ -454,18 +409,19 @@ void initBLE() {
 
 /** Callback for receiving IP address from AP */
 void gotIP(system_event_id_t event) {
-	wifiConnected = true;
+	isConnected = true;
 	connStatusChanged = true;
   digitalWrite(WIFI_LED, 1);
-  digitalWrite(HEARTBEAT_LED, 0);
+  if (!!!client.connected()) {
+    connectMQTT();
+  }
 }
 
 /** Callback for connection loss */
 void lostCon(system_event_id_t event) {
-	wifiConnected = false;
+	isConnected = false;
 	connStatusChanged = true;
   digitalWrite(WIFI_LED, 0);
-  digitalWrite(HEARTBEAT_LED, 1);
 }
 
 /**
@@ -622,7 +578,7 @@ void setupConfiguration(){
 void initWiFi(){
     if (hasCredentials && enableWiFi) {
       client.setServer(server, 1883);
-      client.setCallback(mqttCallback);
+      client.setCallback(callback);
       // Check for available AP's
       if (!scanWiFi) {
         Serial.println("Could not find any AP");
@@ -651,11 +607,9 @@ void initRadio(){
 
 void publishData(String data){
    bool published = false;
-   if (wifiConnected) {
-     if(client.publish(pub_topic.c_str(), (char*) data.c_str())){
-       Serial.print("Published payload to Topic[");
-       Serial.print(pub_topic);
-       Serial.print("]: ");
+   if (isConnected) {
+     if(client.publish(topic, (char*) data.c_str())){
+       Serial.print("Published payload: ");
        Serial.println(data);
        published = true;
      }else{
@@ -708,8 +662,7 @@ void updateSwStateAndPublish(String varName, int index, int swValue){
   preferences.end();
   // String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":1, \"deviceValue\": " +String(sw1Val)+"}";
   String payload;
-  StaticJsonBuffer<200> dataJsonBuffer;
-  JsonObject& jsonOut = dataJsonBuffer.createObject();
+  JsonObject& jsonOut = jsonBuffer.createObject();
   jsonOut["type"] = BOARD_TYPE;
   jsonOut["uniqueId"] = BOARD_ID;
   jsonOut["deviceIndex"] = index;
@@ -717,7 +670,7 @@ void updateSwStateAndPublish(String varName, int index, int swValue){
   // Convert JSON object into a string
   jsonOut.printTo(payload);
   publishData(payload);
-  dataJsonBuffer.clear();
+  jsonBuffer.clear();
 }
 
 void checkTouchDetected(){
@@ -824,16 +777,13 @@ void setup() {
  */
 void loop() {
 	if (connStatusChanged) {
-		if (wifiConnected) {
+		if (isConnected) {
 			Serial.print("Connected to AP: ");
 			Serial.print(WiFi.SSID());
 			Serial.print(" with IP: ");
 			Serial.print(WiFi.localIP());
 			Serial.print(" RSSI: ");
 			Serial.println(WiFi.RSSI());
-      if (!!!client.connected()) {
-        connectMQTT();
-      }
 		} else {
 			if (hasCredentials) {
 				Serial.println("Lost WiFi connection");
@@ -848,28 +798,23 @@ void loop() {
 		connStatusChanged = false;
 	}
 
+  if (isConnected && (!!!client.connected() || !client.loop())) {
+    Serial.println("MQTT Connection Lost, RECONNECTING AGAIN.......");
+    connectMQTT();
+  }
+
   unsigned long currentMillis = millis();
     checkDataOnRadio();
     checkTouchDetected();
-    client.loop();
     if ((unsigned long)(currentMillis - previousMillis) >= (interval * 1000)) {
-      // if(!wifiConnected){
-      //   if(hbLedState == HIGH){
-      //     digitalWrite(HEARTBEAT_LED, 0);
-      //     hbLedState = LOW;
-      //   }
-      // }else{
-      //   if(hbLedState == LOW){
-      //     digitalWrite(HEARTBEAT_LED, 1);
-      //     hbLedState = HIGH;
-      //   }
-      // }
-      if (wifiConnected && (!!!client.connected() || !client.loop())) {
-        Serial.println("MQTT Connection Lost, RECONNECTING AGAIN.......");
-        mqttConnected = false;
-        connectMQTT();
-      }
-      previousMillis =  millis();
+         if(hbLedState == LOW){
+             digitalWrite(HEARTBEAT_LED, 1);
+             hbLedState = HIGH;
+         }else{
+             digitalWrite(HEARTBEAT_LED, 0);
+             hbLedState = LOW;
+         }
+         previousMillis =  millis();
     }
 
 }
