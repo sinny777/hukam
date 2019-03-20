@@ -43,6 +43,7 @@ int boardTemp = 0;
 static int taskCore = 0;
 bool radioAvailable = false;
 bool enableRadio = true;
+bool enableBLE = false;
 bool enableWiFi = true;
 
 unsigned long interval = 5; // the time we need to wait
@@ -82,8 +83,6 @@ boolean lastState3 = LOW;
 boolean lastState4 = LOW;
 
 bool usePrimAP = true; // use primary or secondary WiFi network
-/** Flag if stored AP credentials are available */
-bool hasCredentials = false;
 /** Connection status */
 volatile bool wifiConnected = false;
 volatile bool mqttConnected = false;
@@ -94,18 +93,19 @@ bool connStatusChanged = false;
 #define ORG "rqeofj"
 #define BOARD_TYPE "SB_MICRO"
 #define TOKEN "1SatnamW"
+#define PUBSUB_PREFIX "iot-2/type/SB_MICRO/id/"
 
-// char server[] = ORG ".messaging.internetofthings.ibmcloud.com";
-char server[] = "mqtt.flespi.io";
-// char topic[] = "iot-2/evt/sb_micro/fmt/json";
-// char pub_topic[] = "evt/sb_micro/cloud/";
-// char sub_topic[] = "evt/sb_micro/board/";
-String pub_topic = "evt/sb_micro/cloud/";
-String sub_topic = "evt/sb_micro/board/";
-// char authMethod[] = "use-token-auth";
-// char token[] = "1SatnamW"; // Auth token of Device registered on Watson IoT Platform
-char mqttUser[] = "IdawJwQIHs0LuzfZKYWvXFwUeV0bbiAJlA3TUJpp0fYkE39cPTyAmUkqD9pFfPcp";
-char mqttPassword[] = "";
+char server[] = ORG ".messaging.internetofthings.ibmcloud.com";
+// char server[] = "mqtt.flespi.io";
+// iot-2/type/device_type/id/device_id/evt/event_id/fmt/json
+String pub_topic = "iot-2/evt/cloud/fmt/json";
+String sub_topic = "iot-2/cmd/device/fmt/json";
+// String pub_topic = "evt/sb_micro/cloud/";
+// String sub_topic = "evt/sb_micro/board/";
+char mqttUser[] = "use-token-auth";
+char mqttPassword[] = "1SatnamW"; // Auth token of Device registered on Watson IoT Platform
+// char mqttUser[] = "IdawJwQIHs0LuzfZKYWvXFwUeV0bbiAJlA3TUJpp0fYkE39cPTyAmUkqD9pFfPcp";
+// char mqttPassword[] = "";
 
 String BOARD_ID;
 WiFiClient wifiClient;
@@ -210,8 +210,8 @@ void createName() {
 	sprintf(apName, "SB_MICRO-%02X%02X%02X%02X%02X%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
 
   BOARD_ID = String(apName);
-  sub_topic = sub_topic + BOARD_ID;
-  pub_topic = pub_topic + BOARD_ID;
+  // pub_topic = PUBSUB_PREFIX + BOARD_ID +"/evt/cloud/fmt/json";
+  // sub_topic = PUBSUB_PREFIX + BOARD_ID +"/cmd/device/fmt/json";
   // strcat(sub_topic, BOARD_ID.c_str() );
   // strcat(pub_topic, BOARD_ID.c_str() );
 }
@@ -224,8 +224,8 @@ static void connectMQTT() {
     if(BOARD_ID == ""){
       BOARD_ID = String(apName);
     }
-     // String clientId = "d:" ORG ":" BOARD_TYPE ":" +BOARD_ID;
-     String clientId = BOARD_ID;
+     String clientId = "d:" ORG ":" BOARD_TYPE ":" +BOARD_ID;
+     // String clientId = BOARD_ID;
      Serial.print("Connecting MQTT client: ");
      Serial.println(clientId);
      // mqttConnected = client.connect((char*) clientId.c_str(), token, "");
@@ -308,14 +308,13 @@ class MyCallbackHandler: public BLECharacteristicCallbacks {
 				preferences.putString("ssidSec", ssidSec);
 				preferences.putString("pwPrim", pwPrim);
 				preferences.putString("pwSec", pwSec);
-				preferences.putBool("valid", true);
+				preferences.putBool("hasWifi", true);
 				preferences.end();
 
 				Serial.println("Received over bluetooth:");
 				Serial.println("primary SSID: "+ssidPrim+" password: "+pwPrim);
 				Serial.println("secondary SSID: "+ssidSec+" password: "+pwSec);
 				connStatusChanged = true;
-				hasCredentials = true;
 			} else if (jsonIn.containsKey("erase")) {
 				Serial.println("Received erase command");
 				Preferences preferences;
@@ -323,7 +322,6 @@ class MyCallbackHandler: public BLECharacteristicCallbacks {
 				preferences.clear();
 				preferences.end();
 				connStatusChanged = true;
-				hasCredentials = false;
 				ssidPrim = "";
 				pwPrim = "";
 				ssidSec = "";
@@ -398,58 +396,59 @@ class MyCallbackHandler: public BLECharacteristicCallbacks {
  * Start BLE server and service advertising
  */
 void initBLE() {
-	// Initialize BLE and set output power
-	BLEDevice::init(apName);
-	BLEDevice::setPower(ESP_PWR_LVL_P7);
+  if(enableBLE){
+    // Initialize BLE and set output power
+    BLEDevice::init(apName);
+    BLEDevice::setPower(ESP_PWR_LVL_P7);
 
-	// Create BLE Server
-	pServer = BLEDevice::createServer();
+    // Create BLE Server
+    pServer = BLEDevice::createServer();
 
-	// Set server callbacks
-	pServer->setCallbacks(new MyServerCallbacks());
+    // Set server callbacks
+    pServer->setCallbacks(new MyServerCallbacks());
 
-	// Create BLE Service
-	pService = pServer->createService(BLEUUID(SERVICE_UUID),20);
+    // Create BLE Service
+    pService = pServer->createService(BLEUUID(SERVICE_UUID),20);
 
-  // Create BLE Characteristic for Alert
-  pCharacteristicNotify = pService->createCharacteristic(
-                      BLEUUID((uint16_t)NOTIFICATION_UUID),
-                      BLECharacteristic::PROPERTY_READ   |
-                      BLECharacteristic::PROPERTY_NOTIFY |
-                      BLECharacteristic::PROPERTY_INDICATE
-                    );
+    // Create BLE Characteristic for Alert
+    pCharacteristicNotify = pService->createCharacteristic(
+                        BLEUUID((uint16_t)NOTIFICATION_UUID),
+                        BLECharacteristic::PROPERTY_READ   |
+                        BLECharacteristic::PROPERTY_NOTIFY |
+                        BLECharacteristic::PROPERTY_INDICATE
+                      );
 
-  // Create a BLE Descriptor for Alert
-  pCharacteristicNotify->addDescriptor(new BLE2902());
+    // Create a BLE Descriptor for Alert
+    pCharacteristicNotify->addDescriptor(new BLE2902());
 
-	// Create BLE Characteristic for WiFi settings
-	pCharacteristicWiFi = pService->createCharacteristic(
-		BLEUUID(WIFI_UUID),
-		// WIFI_UUID,
-		BLECharacteristic::PROPERTY_READ |
-		BLECharacteristic::PROPERTY_WRITE
-	);
+    // Create BLE Characteristic for WiFi settings
+    pCharacteristicWiFi = pService->createCharacteristic(
+      BLEUUID(WIFI_UUID),
+      // WIFI_UUID,
+      BLECharacteristic::PROPERTY_READ |
+      BLECharacteristic::PROPERTY_WRITE
+    );
 
-  // Create BLE Characteristic for Status
-  pCharacteristicStatus = pService->createCharacteristic(
-                      BLEUUID((uint16_t)STATUS_UUID),
-                      BLECharacteristic::PROPERTY_READ
-                    );
+    // Create BLE Characteristic for Status
+    pCharacteristicStatus = pService->createCharacteristic(
+                        BLEUUID((uint16_t)STATUS_UUID),
+                        BLECharacteristic::PROPERTY_READ
+                      );
 
-  pCharacteristicNotify->setCallbacks(new MyCallbackHandler());
-	pCharacteristicWiFi->setCallbacks(new MyCallbackHandler());
-  pCharacteristicStatus->setCallbacks(new MyCallbackHandler());
+    pCharacteristicNotify->setCallbacks(new MyCallbackHandler());
+    pCharacteristicWiFi->setCallbacks(new MyCallbackHandler());
+    pCharacteristicStatus->setCallbacks(new MyCallbackHandler());
 
-	// Start the service
-	pService->start();
+    // Start the service
+    pService->start();
 
-	// Start advertising
-  pAdvertising = BLEDevice::getAdvertising();
-  pAdvertising->addServiceUUID(SERVICE_UUID);
-  pAdvertising->setScanResponse(false);
-  pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
-  BLEDevice::startAdvertising();
-
+    // Start advertising
+    pAdvertising = BLEDevice::getAdvertising();
+    pAdvertising->addServiceUUID(SERVICE_UUID);
+    pAdvertising->setScanResponse(false);
+    pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
+    BLEDevice::startAdvertising();
+  }
 }
 
 /** Callback for receiving IP address from AP */
@@ -557,7 +556,9 @@ void connectWiFi() {
 
 	Serial.println();
 	Serial.print("Start connection to ");
-	if (usePrimAP) {
+  ssidPrim = "GurvinderNet";
+  pwPrim = "1SatnamW";
+	if (usePrimAP && ssidPrim && !ssidPrim.equals("")) {
 		Serial.println(ssidPrim);
 		WiFi.begin(ssidPrim.c_str(), pwPrim.c_str());
 	} else {
@@ -595,8 +596,8 @@ void initSwitches(){
 void setupConfiguration(){
 	Preferences preferences;
 	preferences.begin("WiFiCred", false);
-	bool hasPref = preferences.getBool("valid", false);
-	if (hasPref) {
+	bool hasWifi = preferences.getBool("hasWifi", false);
+	if (hasWifi) {
 		ssidPrim = preferences.getString("ssidPrim","");
 		ssidSec = preferences.getString("ssidSec","");
 		pwPrim = preferences.getString("pwPrim","");
@@ -607,20 +608,23 @@ void setupConfiguration(){
 				|| ssidSec.equals("")
 				|| pwPrim.equals("")) {
 			Serial.println("Found preferences but credentials are invalid");
+      ssidSec = "hukam";
+      pwSec = "1SatnamW";
 		} else {
 			Serial.println("Read from preferences:");
 			Serial.println("primary SSID: "+ssidPrim+" password: "+pwPrim);
 			Serial.println("secondary SSID: "+ssidSec+" password: "+pwSec);
-			hasCredentials = true;
 		}
 	} else {
 		Serial.println("Could not find preferences, need send data over BLE");
+    ssidSec = "hukam";
+    pwSec = "1SatnamW";
 	}
 	preferences.end();
 }
 
 void initWiFi(){
-    if (hasCredentials && enableWiFi) {
+    if (enableWiFi) {
       client.setServer(server, 1883);
       client.setCallback(mqttCallback);
       // Check for available AP's
@@ -835,7 +839,6 @@ void loop() {
         connectMQTT();
       }
 		} else {
-			if (hasCredentials) {
 				Serial.println("Lost WiFi connection");
 				// Received WiFi credentials
 				if (!scanWiFi) { // Check for available AP's
@@ -843,7 +846,6 @@ void loop() {
 				} else { // If AP was found, start connection
 					connectWiFi();
 				}
-			}
 		}
 		connStatusChanged = false;
 	}
