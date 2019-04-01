@@ -808,6 +808,11 @@ void setup() {
   pinMode(SW3, OUTPUT);
   pinMode(SW4, OUTPUT);
 
+  digitalWrite(SW1, 1);
+  digitalWrite(SW2, 1);
+  digitalWrite(SW3, 1);
+  digitalWrite(SW4, 1);
+
   pinMode(touch1, INPUT);
   pinMode(touch2, INPUT);
   pinMode(touch3, INPUT);
