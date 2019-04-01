@@ -577,15 +577,15 @@ void initSwitches(){
   preferences.begin("SwitchesState", false);
   bool hasPref = preferences.getBool("valid", false);
   if (hasPref) {
-		sw1Val = preferences.getInt("sw1Val", 0);
-    sw2Val = preferences.getInt("sw2Val", 0);
-    sw3Val = preferences.getInt("sw3Val", 0);
-    sw4Val = preferences.getInt("sw4Val", 0);
+		sw1Val = preferences.getInt("sw1Val", 1);
+    sw2Val = preferences.getInt("sw2Val", 1);
+    sw3Val = preferences.getInt("sw3Val", 1);
+    sw4Val = preferences.getInt("sw4Val", 1);
   }else{
-    preferences.putInt("sw1Val", 0);
-    preferences.putInt("sw2Val", 0);
-    preferences.putInt("sw3Val", 0);
-    preferences.putInt("sw4Val", 0);
+    preferences.putInt("sw1Val", 1);
+    preferences.putInt("sw2Val", 1);
+    preferences.putInt("sw3Val", 1);
+    preferences.putInt("sw4Val", 1);
     preferences.putBool("valid", true);
   }
   preferences.end();
