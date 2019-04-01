@@ -43,7 +43,7 @@ int boardTemp = 0;
 static int taskCore = 0;
 bool radioAvailable = false;
 bool enableRadio = true;
-bool enableBLE = false;
+bool enableBLE = true;
 bool enableWiFi = true;
 
 unsigned long interval = 5; // the time we need to wait
@@ -72,10 +72,10 @@ int SW2 = 16;
 int SW3 = 22;
 int SW4 = 23;
 
-int sw1Val = 0;
-int sw2Val = 0;
-int sw3Val = 0;
-int sw4Val = 0;
+int sw1Val = 1;
+int sw2Val = 1;
+int sw3Val = 1;
+int sw4Val = 1;
 
 boolean lastState1 = LOW;
 boolean lastState2 = LOW;
@@ -175,22 +175,27 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     int deviceIndex = jsonData["deviceIndex"].as<int>();
     int deviceValue = jsonData["deviceValue"].as<int>();
 
+    int deviceAction = 1;
+    if(deviceValue == 1){
+      deviceAction = 0;
+    }
+
     switch (deviceIndex) {
       case 1:
-          digitalWrite(SW1, deviceValue);
-          sw1Val = deviceValue;
+          digitalWrite(SW1, deviceAction);
+          sw1Val = deviceAction;
         break;
       case 2:
-          digitalWrite(SW2, deviceValue);
-          sw2Val = deviceValue;
+          digitalWrite(SW2, deviceAction);
+          sw2Val = deviceAction;
         break;
       case 3:
-          digitalWrite(SW3, deviceValue);
-          sw3Val = deviceValue;
+          digitalWrite(SW3, deviceAction);
+          sw3Val = deviceAction;
         break;
       case 4:
-          digitalWrite(SW4, deviceValue);
-          sw4Val = deviceValue;
+          digitalWrite(SW4, deviceAction);
+          sw4Val = deviceAction;
         break;
       default:
         Serial.println("Device index not matched .... ");
@@ -556,7 +561,7 @@ void connectWiFi() {
 
 	Serial.println();
 	Serial.print("Start connection to ");
-  ssidPrim = "GurvinderNet";
+  ssidPrim = "hukam";
   pwPrim = "1SatnamW";
 	if (usePrimAP && ssidPrim && !ssidPrim.equals("")) {
 		Serial.println(ssidPrim);
