@@ -5,8 +5,8 @@
 #include <nvs_flash.h>
 #include <ArduinoJson.h>
 
-//testing..
-      
+//test2
+
 #include <stdlib.h>
 #include <SPI.h>
 #include <LoRa.h>
