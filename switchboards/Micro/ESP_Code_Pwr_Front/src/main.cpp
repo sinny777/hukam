@@ -106,7 +106,7 @@ PubSubClient client(wifiClient);
 #define SERVICE_UUID  "430cbe63-a0bf-4090-819a-0355f4ca2c68"
 #define WIFI_UUID     "9bdfa7ea-fa8c-4cde-94d7-66a03d984ebd"
 #define NOTIFICATION_UUID   0x2A08
-#define STATUS_UUID         0x2A3D
+#define STATUS_UUID        0x2A3D
 
 /** SSIDs of local WiFi networks */
 String ssidPrim;
