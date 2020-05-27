@@ -45,6 +45,7 @@ bool radioAvailable = false;
 bool enableRadio = true;
 bool enableBLE = true;
 bool enableWiFi = true;
+bool enableMQTT = false;
 
 unsigned long interval = 5; // the time we need to wait
 unsigned long previousMillis = 0;
@@ -669,7 +670,7 @@ void publishData(String data){
        published = true;
      }else{
        Serial.println("Publish failed: ");
-       if (!!!client.connected()) {
+       if (!!!client.connected() && enableMQTT) {
          connectMQTT();
        }
        // Serial.println(data);
@@ -845,7 +846,7 @@ void loop() {
 			Serial.print(WiFi.localIP());
 			Serial.print(" RSSI: ");
 			Serial.println(WiFi.RSSI());
-      if (!!!client.connected()) {
+      if (!!!client.connected() && enableMQTT) {
         connectMQTT();
       }
 		} else {
@@ -853,9 +854,9 @@ void loop() {
 				// Received WiFi credentials
 				if (!scanWiFi) { // Check for available AP's
 					Serial.println("Could not find any AP");
-				} else { // If AP was found, start connection
-					connectWiFi();
-				}
+				} else {// If AP was found, start connection
+					    connectWiFi();
+  				}
 		}
 		connStatusChanged = false;
 	}
@@ -876,7 +877,7 @@ void loop() {
       //     hbLedState = HIGH;
       //   }
       // }
-      if (wifiConnected && (!!!client.connected() || !client.loop())) {
+      if (wifiConnected && enableMQTT && (!!!client.connected() || !client.loop())) {
         Serial.println("MQTT Connection Lost, RECONNECTING AGAIN.......");
         mqttConnected = false;
         connectMQTT();
