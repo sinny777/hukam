@@ -9,7 +9,10 @@
 #include <LoRa.h>
 #include <Preferences.h>
 
-#define BOARD_TYPE "SB_MICRO"
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+
+#define BOARD_TYPE "HB_SENSOR"
 
 #define BAND    433E6
 #define SCK     5
@@ -36,10 +39,20 @@ int boardTemp = 0;
 // static int taskCore = 0;
 bool radioAvailable = false;
 bool enableRadio = true;
+bool bmeAvailable = false;
+bool enableSensors = true;
 
 unsigned long interval = 5; // the time we need to wait
 unsigned long previousMillis = 0;
 unsigned long previousTouchMillis = 0;
+
+#define SEALEVELPRESSURE_HPA (1013.25)
+
+Adafruit_BME280 bme; // I2C
+//Adafruit_BME280 bme(BME_CS); // hardware SPI
+//Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
+
+unsigned long delayTime;
 
 /** Build time */
 const char compileDate[] = __DATE__ " " __TIME__;
@@ -49,30 +62,8 @@ char apName[] = "HB_SENSOR-xxxxxxxxxxxx";
 
 // #define HEARTBEAT_LED  32
 #define HEARTBEAT_LED  25
-// #define WIFI_LED  32
-// #define BLE_LED  33
-#define touch1 4 // Pin for capactitive touch sensor
-#define touch2 2 // Pin for capactitive touch sensor
-#define touch3 13 // Pin for capactitive touch sensor
-#define touch4 15 // Pin for capactitive touch sensor
 
 bool hbLedState = LOW; // Heartbeat LED state
-
-int SW1 = 17;
-int SW2 = 16;
-int SW3 = 22;
-int SW4 = 23;
-
-int sw1Val = 1;
-int sw2Val = 1;
-int sw3Val = 1;
-int sw4Val = 1;
-
-boolean lastState1 = LOW;
-boolean lastState2 = LOW;
-boolean lastState3 = LOW;
-boolean lastState4 = LOW;
-
 
 String BOARD_ID;
 
@@ -81,52 +72,6 @@ char* string2char(String str){
         char *p = const_cast<char*>(str.c_str());
         return p;
     }
-}
-
-void handleSwitchAction(String payload){
-  StaticJsonBuffer<200> payloadBuffer;
-  JsonObject& jsonData = payloadBuffer.parseObject(payload);
-  // Serial.print(" >>> type: ");
-  // Serial.print(jsonData["type"].as<String>());
-  // Serial.print(", uniqueId: ");
-  // Serial.print(jsonData["uniqueId"].as<String>());
-  // Serial.print(", deviceIndex: ");
-  // Serial.print(jsonData["deviceIndex"].as<int>());
-  // Serial.print(", deviceValue: ");
-  // Serial.println(jsonData["deviceValue"].as<int>());
-
-  if(jsonData["type"].as<String>() == BOARD_TYPE && jsonData["uniqueId"].as<String>() == BOARD_ID){
-    Serial.println("<<<< SWITCH ACTION ON BOARD MATCHES >>>>");
-    int deviceIndex = jsonData["deviceIndex"].as<int>();
-    int deviceValue = jsonData["deviceValue"].as<int>();
-
-    int deviceAction = 1;
-    if(deviceValue == 1){
-      deviceAction = 0;
-    }
-
-    switch (deviceIndex) {
-      case 1:
-          digitalWrite(SW1, deviceAction);
-          sw1Val = deviceAction;
-        break;
-      case 2:
-          digitalWrite(SW2, deviceAction);
-          sw2Val = deviceAction;
-        break;
-      case 3:
-          digitalWrite(SW3, deviceAction);
-          sw3Val = deviceAction;
-        break;
-      case 4:
-          digitalWrite(SW4, deviceAction);
-          sw4Val = deviceAction;
-        break;
-      default:
-        Serial.println("Device index not matched .... ");
-      }
-   }
-   payloadBuffer.clear();
 }
 
 /**
@@ -144,34 +89,6 @@ void createName() {
   // sub_topic = PUBSUB_PREFIX + BOARD_ID +"/cmd/device/fmt/json";
   // strcat(sub_topic, BOARD_ID.c_str() );
   // strcat(pub_topic, BOARD_ID.c_str() );
-}
-
-
-
-void initSwitches(){
-  Preferences preferences;
-  preferences.begin("SwitchesState", false);
-  bool hasPref = preferences.getBool("valid", false);
-  if (hasPref) {
-		sw1Val = preferences.getInt("sw1Val", 1);
-    sw2Val = preferences.getInt("sw2Val", 1);
-    sw3Val = preferences.getInt("sw3Val", 1);
-    sw4Val = preferences.getInt("sw4Val", 1);
-  }else{
-    preferences.putInt("sw1Val", 1);
-    preferences.putInt("sw2Val", 1);
-    preferences.putInt("sw3Val", 1);
-    preferences.putInt("sw4Val", 1);
-    preferences.putBool("valid", true);
-  }
-  preferences.end();
-
-  digitalWrite (SW1, sw1Val);
-  digitalWrite (SW2, sw2Val);
-  digitalWrite (SW3, sw3Val);
-  digitalWrite (SW4, sw4Val);
-    // Serial.printf("Switch 1: %d, Switch 2: %d, Switch 3: %d, Switch 4: %d\n\n", sw1Val, sw2Val, sw3Val, sw4Val);
-
 }
 
 void initRadio(){
@@ -226,78 +143,48 @@ void checkDataOnRadio(){
         }
         // print RSSI of packet
         Serial.print("' with RSSI ");
-        Serial.println(LoRa.packetRssi());
-        handleSwitchAction(receivedText);
+        Serial.println(LoRa.packetRssi());        
     }
 }
 
-void updateSwStateAndPublish(String varName, int index, int swValue){
+void fetchNPublishSensorsData(){
   Preferences preferences;
-  preferences.begin("SwitchesState", false);
-  preferences.putInt(string2char(varName), swValue);
-  preferences.end();
+
+  float temperature, humidity, pressure, altitude;
+  temperature = bme.readTemperature();
+  humidity = bme.readHumidity();
+  pressure = bme.readPressure() / 100.0F;
+  altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
+
   // String payload = "{\"type\":\"" BOARD_TYPE "\", \"uniqueId\":\"" +BOARD_ID+"\", \"deviceIndex\":1, \"deviceValue\": " +String(sw1Val)+"}";
   String payload;
   StaticJsonBuffer<200> dataJsonBuffer;
   JsonObject& jsonOut = dataJsonBuffer.createObject();
   jsonOut["type"] = BOARD_TYPE;
   jsonOut["uniqueId"] = BOARD_ID;
-  jsonOut["deviceIndex"] = index;
-  jsonOut["deviceValue"] = swValue;
+  jsonOut["temp"] = temperature;
+  jsonOut["hum"] = humidity;
+  jsonOut["press"] = pressure;
+  jsonOut["alt"] = altitude;
   // Convert JSON object into a string
   jsonOut.printTo(payload);
   publishData(payload);
   dataJsonBuffer.clear();
 }
 
-void checkTouchDetected(){
-  if(digitalRead(touch1) == HIGH){
-        Serial.println("1 pressed");
-        if (sw1Val == 0){
-          digitalWrite(SW1, 1);
-          sw1Val = 1;
-        } else {
-          digitalWrite(SW1, 0);
-          sw1Val = 0;
+void initSensors(){
+  if(enableSensors){
+      int bmeTryCount = 0;
+      do{
+        bmeAvailable = bme.begin(0x76);  
+        bmeTryCount++;
+        if(!bmeAvailable){
+          Serial.printf("BME Sensor failed!, Try Count: %d\n", bmeTryCount);
+          delay(3000);
+        }else{
+          Serial.println("BME Sensor Initialized Successfully...");
         }
-        updateSwStateAndPublish("sw1Val", 1, sw1Val);
-        delay(500);
-  }
-  if(digitalRead(touch2) == HIGH){
-    Serial.println("2 pressed");
-    if (sw2Val == 0){
-      digitalWrite(SW2, 1);
-      sw2Val = 1;
-    } else {
-      digitalWrite(SW2, 0);
-      sw2Val = 0;
-    }
-    updateSwStateAndPublish("sw2Val", 2, sw2Val);
-    delay(500);
-  }
-  if(digitalRead(touch3) == HIGH){
-    Serial.println("3 pressed");
-    if (sw3Val == 0){
-      digitalWrite(SW3, 1);
-      sw3Val = 1;
-    } else {
-      digitalWrite(SW3, 0);
-      sw3Val = 0;
-    }
-    updateSwStateAndPublish("sw3Val", 3, sw3Val);
-    delay(500);
-  }
-  if(digitalRead(touch4) == HIGH){
-    Serial.println("4 pressed");
-    if (sw4Val == 0){
-      digitalWrite(SW4, 1);
-      sw4Val = 1;
-    } else {
-      digitalWrite(SW4, 0);
-      sw4Val = 0;
-    }
-    updateSwStateAndPublish("sw4Val", 4, sw4Val);
-    delay(500);
+      }while(!bmeAvailable && bmeTryCount < 3);
   }
 }
 
@@ -305,7 +192,7 @@ void initDevice(){
 	// Create unique device name
 	createName();
   initRadio();
-  initSwitches();	
+  initSensors();	
 }
 
 
@@ -319,21 +206,7 @@ void setup() {
 	Serial.println(compileDate);
 
   pinMode(HEARTBEAT_LED, OUTPUT);
-  pinMode(SW1, OUTPUT);
-  pinMode(SW2, OUTPUT);
-  pinMode(SW3, OUTPUT);
-  pinMode(SW4, OUTPUT);
-
-  digitalWrite(SW1, 1);
-  digitalWrite(SW2, 1);
-  digitalWrite(SW3, 1);
-  digitalWrite(SW4, 1);
-
-  pinMode(touch1, INPUT);
-  pinMode(touch2, INPUT);
-  pinMode(touch3, INPUT);
-  pinMode(touch4, INPUT);
-
+  
   // Init Lora
   if(enableRadio){
       SPI.begin(SCK, MISO, MOSI, CS);
@@ -355,20 +228,8 @@ void setup() {
 void loop() {
 	unsigned long currentMillis = millis();
     checkDataOnRadio();
-    checkTouchDetected();
-   
     if ((unsigned long)(currentMillis - previousMillis) >= (interval * 1000)) {
-      // if(!wifiConnected){
-      //   if(hbLedState == HIGH){
-      //     digitalWrite(HEARTBEAT_LED, 0);
-      //     hbLedState = LOW;
-      //   }
-      // }else{
-      //   if(hbLedState == LOW){
-      //     digitalWrite(HEARTBEAT_LED, 1);
-      //     hbLedState = HIGH;
-      //   }
-      // }
+      fetchNPublishSensorsData();
       previousMillis =  millis();
     }
 
