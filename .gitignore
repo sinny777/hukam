@@ -12,3 +12,10 @@
 .mbed
 **/mbed
 .cproject
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
+.elf
+.bin
+.pio
