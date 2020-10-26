@@ -9,6 +9,8 @@
 #include <LoRa_STM32.h>
 
 #define LED_BUILTIN PC13
+#define echoPin PA8 // attach pin D2 Arduino to pin Echo of HC-SR04
+#define trigPin PA9 //attach pin D3 Arduino to pin Trig of HC-SR04
 
 const int csPin = PA4;          // LoRa radio chip select
 const int resetPin = PC14;       // LoRa radio reset
@@ -21,9 +23,6 @@ byte localAddress = 0xBB;     // address of this device
 byte destination = 0xFF;      // destination to send to
 long lastSendTime = 0;        // last send time
 int interval = 1000;          // interval between sends
-
-#define echoPin PB0 // attach pin D2 Arduino to pin Echo of HC-SR04
-#define trigPin PB1 //attach pin D3 Arduino to pin Trig of HC-SR04
 
 
 void sendMessage(String outgoing) {
@@ -38,17 +37,17 @@ void sendMessage(String outgoing) {
 }
 
 // returns the distance (cm)
-int measureDistance() {
-  // digitalWrite(trigPin, LOW);
-  // delayMicroseconds(2);
+void measureDistance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
   digitalWrite(trigPin, HIGH); // We send a 10us pulse
   delayMicroseconds(10);
   // delay(1);
   digitalWrite(trigPin, LOW);
 
-  uint32_t duration = pulseIn(echoPin, HIGH, 20000); // We wait for the echo to come back, with a timeout of 20ms, which corresponds approximately to 3m
-  // long duration = pulseIn(echoPin, HIGH); // We wait for the echo to come back, with a timeout of 20ms, which corresponds approximately to 3m
-
+  uint32_t duration = pulseIn(echoPin, HIGH, 25000); // We wait for the echo to come back, with a timeout of 20ms, which corresponds approximately to 3m
+  // long duration = pulseIn(echoPin, HIGH); 
+  
   // pulseIn will only return 0 if it timed out. (or if echoPin was already to 1, but it should not happen)
   // If we timed out
   if(duration == 0) {
@@ -58,7 +57,7 @@ int measureDistance() {
     pinMode(echoPin, INPUT); // And finaly we come back to input mode
   }
 
-  // distance = (duration/2) / 29.1; // We calculate the distance (sound speed in air is aprox. 291m/s), /2 because of the pulse going and coming
+  // float distance = (duration/2) / 29.1; // We calculate the distance (sound speed in air is aprox. 291m/s), /2 because of the pulse going and coming
   float distance = duration * 0.034 / 2; 
   // float distance = duration / 58.138f; 
 
@@ -69,7 +68,7 @@ int measureDistance() {
   data["distance"] = distance;  
   String output;
   serializeJson(data, output);
-  sendMessage(output);  
+  sendMessage(output); 
 }
 
 // the setup function runs once when you press reset or power the board
