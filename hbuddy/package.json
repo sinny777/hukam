@@ -25,7 +25,7 @@
     "express-flash": "0.0.2",
     "express-session": "^1.13.0",
     "feedparser": "latest",
-    "grunt": "~0.4.1",
+    "grunt": "~1.5.2",
     "grunt-bower-installer": "latest",
     "grunt-contrib-copy": "latest",
     "grunt-contrib-requirejs": "latest",
